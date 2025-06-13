@@ -6,7 +6,7 @@ export const selectAuth = (state: AppState) => state.auth;
 
 export const getAccessToken = createSelector(
   selectAuth,
-  (state: AuthState) => state.accessToken
+  (state: AuthState) => state.access_token
 )
 
 export const getAuthError = createSelector(
