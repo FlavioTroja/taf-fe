@@ -1,0 +1,250 @@
+<!--<div class="products-view-grid pr-1" *ngIf="active() as product">-->
+<div class="grid grid-cols-1 sm:grid-cols-[25rem_1fr] pr-1 gap-2" *ngIf="active() as product">
+  <app-images-list [mainImage]="product.image!" [gallery]="product.gallery!" [productName]="product.name" class="images-list-row-bkp"></app-images-list>
+  <app-primary-info class="primary-info-row-bkp" [active]="product"></app-primary-info>
+
+  <div class="availability-rowa sm:col-span-2 flex gap-3">
+
+    <app-general-card [waveCard]="true" [waveAnimation]="'wave-animation-100'" [colorProperty]="'light-green'" [roundedProperty]="'rounded-lg'">
+      <div class="flex flex-col justify-between h-full">
+        <div>
+          DISPONIBILITÀ TOTALE
+        </div>
+        <div class="text-7xl self-end green flex gap-1">
+          {{ getTotalQuantity() }} <div class="text-2xl self-end">{{product.warehouseUm?.name}}</div>
+        </div>
+      </div>
+    </app-general-card>
+
+    <app-general-card [roundedProperty]="'rounded-lg'" class="grow">
+      <div>
+        <div class="flex-row flex gap-2 h-full">
+          <app-general-card
+              [waveCard]="true"
+              [waveAnimation]="'wave-animation-75'"
+              [colorProperty]="getColorProperty(wh!.quantity, product!.yellowThreshold, product!.redThreshold)"
+              [roundedProperty]="'rounded-md'"
+              *ngFor="let wh of product.warehouses">
+            <div class="flex flex-col grow gap-1 p-3" [ngClass]="getColorProperty(wh!.quantity, product!.yellowThreshold, product!.redThreshold, true)">
+              <div><span class="font-normal">in </span>{{wh?.warehouse?.name}}</div>
+              <div class="flex text-5xl gap-x-0.5 items-end">
+                {{ wh?.quantity }}
+                <div class="text-lg self-end">{{product.warehouseUm?.name}}</div>
+              </div>
+            </div>
+          </app-general-card>
+        </div>
+      </div>
+    </app-general-card>
+  </div>
+
+  <div class="general-info-rowa sm:col-span-2">
+    <app-general-card [roundedProperty]="'rounded-lg'" class="!h-auto">
+      <div class="flex flex-col pb-2 w-full">
+
+        <div class="flex">
+          INFORMAZIONI GENERALI
+        </div>
+
+        <div class="flex flex-wrap flex-col gap-1 h-80 xl:h-40">
+          <div class="grow">
+            <app-general-card [colorProperty]="'light-red'" [roundedProperty]="'rounded-md'" class="w-44">
+              <div class="flex grow flex-col h-full justify-between">
+                <div class="self-start red">
+                  SOGLIA ROSSA
+                </div>
+                <div class="text-7xl self-end red pt-3">
+                  {{product.redThreshold}}
+                </div>
+              </div>
+            </app-general-card>
+          </div>
+          <div class="grow">
+            <app-general-card [waveCard]="true" [colorProperty]="'light-orange'" [roundedProperty]="'rounded-md'" class="w-44">
+            <div class="flex grow flex-col h-full justify-between">
+              <div class="self-start font-orange">
+                SOGLIA GIALLA
+              </div>
+              <div class="text-7xl self-end font-orange pt-3">
+                {{product.yellowThreshold}}
+              </div>
+            </div>
+          </app-general-card>
+          </div>
+          <div class="grow">
+            <app-general-card [roundedProperty]="'rounded-md'" class="grow">
+              <div class="flex flex-col justify-between w-full">
+
+                <div class="self-start">SKU</div>
+
+                <div class="self-center">
+                  <ngx-barcode6
+                    #productSKU
+                    *ngIf="product.sku"
+                    bc-element-type="canvas"
+                    [bc-format]="'CODE128'"
+                    [bc-value]="product.sku!"
+                    [bc-font-size]="13"
+                    [bc-height]="50"
+                    [bc-width]="2"
+                    [bc-display-value]="true"
+                  >
+                  </ngx-barcode6>
+                </div>
+
+                <div class="flex flex-row self-end gap-0.5 w-auto">
+                  <button (click)="printSKU()"
+                          class="cursor-pointer justify-around border border-gray-200 rounded-md text-center shadow font-light flex px-1 light-blu">
+
+                    <div class="blue flex justify-around gap-2">
+                      <div class="flex flex-col">
+                        <mat-icon class="icon-size material-symbols-rounded">print</mat-icon>
+                      </div>
+                      <div class="flex flex-col">
+                        Stampa
+                      </div>
+                    </div>
+                  </button>
+
+                  <button (click)="downloadSKU()"
+                          class="light-blu cursor-pointer justify-around border border-gray-200 rounded-md text-center shadow font-light flex px-1">
+
+                    <div class="blue flex items-center justify-around gap-2">
+                      <div class="flex flex-col">
+                        <mat-icon class="icon-size material-symbols-rounded">download</mat-icon>
+                      </div>
+                      <div class="flex flex-col">
+                        Scarica
+                      </div>
+                    </div>
+                  </button>
+
+                </div>
+              </div>
+            </app-general-card>
+          </div>
+          <div *ngIf="product.ean" class="grow">
+            <app-general-card [roundedProperty]="'rounded-md'" class="grow">
+              <div class="flex flex-col justify-between w-full">
+
+                <div class="self-start">EAN</div>
+
+                <div class="self-center">
+                  <ngx-barcode6
+                    #productEAN
+                    bc-element-type="canvas"
+                    [bc-format]="'CODE128'"
+                    [bc-value]="product.ean!"
+                    [bc-font-size]="13"
+                    [bc-height]="50"
+                    [bc-width]="2"
+                    [bc-display-value]="true"
+                  >
+                  </ngx-barcode6>
+                </div>
+                <div class="flex flex-row self-end gap-0.5 w-auto">
+                  <button (click)="printEAN()"
+                          class="cursor-pointer justify-around border border-gray-200 rounded-md text-center shadow font-light flex px-1 light-blu">
+
+                    <div class="blue flex justify-around gap-2">
+                      <div class="flex flex-col">
+                        <mat-icon class="icon-size material-symbols-rounded">print</mat-icon>
+                      </div>
+                      <div class="flex flex-col">
+                        Stampa
+                      </div>
+                    </div>
+                  </button>
+
+                  <button (click)="downloadEAN()"
+                          class="cursor-pointer justify-around border border-gray-200 rounded-md text-center shadow font-light flex px-1 light-blu">
+
+                    <div class="blue flex items-center justify-around gap-2">
+                      <div class="flex flex-col">
+                        <mat-icon class="icon-size material-symbols-rounded">download</mat-icon>
+                      </div>
+                      <div class="flex flex-col">
+                        Scarica
+                      </div>
+                    </div>
+                  </button>
+
+                </div>
+              </div>
+            </app-general-card>
+          </div>
+        </div>
+      </div>
+    </app-general-card>
+  </div>
+
+  <div class="prices-rowa sm:col-span-2 flex-col gap-1 font-bold h-full">
+    <div class="flex gap-3 h-full">
+          <div class="h-full">
+<!--            <pre>{{product.buyingPrices | json}}</pre>-->
+            <app-price-list [historyPrices]="product!.buyingPrices" [lastPrice]="true"></app-price-list>
+          </div>
+
+      <app-general-card [roundedProperty]="'rounded-lg'" class="grow w-0">
+          <div class="h-full p-2 max-w-full rounded-lg border-gray bg-white overflow-x-scroll" appHorizontalScroll>
+            <app-price-list *ngIf="product!.buyingPrices.length > 1; else elseBlock" [historyPrices]="product!.buyingPrices" [lastPrice]="false"></app-price-list>
+
+            <ng-template #elseBlock>
+              <div class="text-start">
+                <app-message-container
+                  type="warning"
+                  icon="warning"
+                  title="ATTENZIONE"
+                  message="Lo storico dei prezzi non è presente poiché non sono state gestite fatture d'acquisto per questo prodotto"/>
+
+                <div class="pt-4">
+                  <button *ngIf="!changeInitialPriceStatus" (click)="toggleStatus()" class="flex items-center p-1 rounded-lg default-shadow accent cursor-pointer font-normal">
+                    <mat-icon class="icon-size material-symbols-rounded-filled cursor-pointer">repeat</mat-icon> Modifica prezzo iniziale
+                  </button>
+                </div>
+
+                <div class="flex flex-row gap-1" *ngIf="changeInitialPriceStatus">
+
+                  <form class="contents" [formGroup]="initialPriceForm">
+                    <div class="relative w-28">
+                      <input
+                        type="number"
+                        class="flex justify-items-end focus:outline-none p-3 rounded-md w-28 border-input font-normal"
+                        min="0"
+                        formControlName="price"
+                      >
+                      <span class="absolute right-1 top-3">€</span>
+                    </div>
+
+                    <div class="w-24">
+                      <mat-select
+                        class="focus:outline-none p-3 border-input rounded-md w-full bg-foreground"
+                        formControlName="vat"
+                        placeholder="22%"
+                      >
+                        <mat-option class="p-3 bg-white" [value]="0">0%</mat-option>
+                        <mat-option class="p-3 bg-white" [value]="4">4%</mat-option>
+                        <mat-option class="p-3 bg-white" [value]="10">10%</mat-option>
+                        <mat-option class="p-3 bg-white" [value]="22">22%</mat-option>
+                      </mat-select>
+                    </div>
+
+                    <button (click)="toggleStatus()" class="flex items-center p-1 rounded-lg shadow-md default-shadow-hover accent cursor-pointer font-normal">
+                      <mat-icon class="icon-size material-symbols-rounded-filled cursor-pointer">check</mat-icon> Conferma
+                    </button>
+                  </form>
+
+                </div>
+              </div>
+            </ng-template>
+
+          </div>
+      </app-general-card>
+    </div>
+  </div>
+
+</div>
+
+<ng-template #showPricesQuestionDialogBody>
+  <mat-checkbox [(ngModel)]="checked">Includi prezzo</mat-checkbox>
+</ng-template>

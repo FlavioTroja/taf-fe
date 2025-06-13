@@ -1,0 +1,42 @@
+<form [formGroup]="resourceForm">
+  <div class="grid gap-3">
+    <div class="text-1xl font-extrabold uppercase">Informazioni generali</div>
+    <div class="flex flex-row gap-2">
+      <div class="flex flex-col basis-1/6">
+        <app-file-upload [ngClass]="{'pointer-events-none' : viewOnly() || resourceForm.getRawValue().image }" [mainImage]="f.image.value!" [multiple]="false" label="Foto profilo" (onUpload)="onUploadMainImage($event)" (onDeleteMainImage)="removeProfilePic()" [onlyImages]="true" />
+      </div>
+
+      <div *ngIf="!viewOnly() && resourceForm.getRawValue().image" class="flex flex-col basis-1/6 gap-2">
+        <div class="flex flex-row">
+          <div class="flex items-center p-2 rounded-lg shadow-md default-shadow-hover accent cursor-pointer" (click)="input.click()">
+            <mat-icon class="icon-size material-symbols-rounded">repeat</mat-icon>
+            <input type="file"
+                   #input
+                   hidden
+                   (change)="openChooseFileDialog($event)"
+                   accept=".gif,.jpg,.jpeg,.png">
+            Sostituisci
+          </div>
+        </div>
+
+        <div class="flex flex-row">
+          <button class="flex items-center p-2 rounded-lg shadow-md default-shadow-hover error" (click)="removeProfilePic()">
+            <mat-icon class="icon-size material-symbols-rounded">delete</mat-icon> Rimuovi
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="flex gap-2">
+      <div class="flex flex-col basis-1/2 self-end">
+        <app-input [formControl]="f.name" formControlName="name" label="nome" id="resource-name" type="text" />
+      </div>
+
+      <div class="flex flex-col basis-1/2 self-end">
+        <app-input [formControl]="f.hourlyCost" formControlName="hourlyCost" label="costo" id="hourlyCost" type="text" />
+      </div>
+    </div>
+  </div>
+</form>
