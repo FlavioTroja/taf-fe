@@ -17,15 +17,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '16'
 
       - name: Install dependencies
         run: |
-          yarn install
+          npm install
 
       - name: Build the Angular app
         run: |
-          yarn build --configuration production
+          npm run build -- --configuration production
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
