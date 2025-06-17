@@ -1,5 +1,4 @@
-# .github/workflows/deploy.yml
-name: Build & Deploy Spring-Boot Container
+name: Build & Deploy Angular Docker Image
 
 on:
   push:
@@ -8,12 +7,25 @@ on:
 
 jobs:
   build-and-push:
-    name: Build and push Docker image
+    name: Build and push Docker image to Docker Hub
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      - name: Build the Angular app
+        run: |
+          yarn build --prod
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -21,13 +33,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build and push image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/taf-be:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/taf-fe:latest
 
   deploy:
     name: SSH deploy to production server
@@ -38,8 +50,7 @@ jobs:
       - name: Checkout repository (for consistency)
         uses: actions/checkout@v4
 
-      # ===== Deploy su primo server =====
-      - name: Deploy on Server TAF-BE
+      - name: Deploy on Server
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
