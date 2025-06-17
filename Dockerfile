@@ -8,5 +8,5 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY dist /usr/share/nginx/html
 RUN mv /usr/share/nginx/html/soko-fe/** /usr/share/nginx/html/
 
-EXPOSE 4200
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
