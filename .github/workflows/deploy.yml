@@ -50,7 +50,7 @@ jobs:
             cd /home/manager/orchestrator/taf
 
             # Assicurati che l'immagine sia aggiornata
-            docker compose pull taf-be
+            docker compose pull taf-fe
 
-            # Ricrea solo il servizio taf in background
-            docker compose up -d taf-be
+            # Ricrea solo il servizio taf-fe in background
+            docker compose up -d taf-fe
