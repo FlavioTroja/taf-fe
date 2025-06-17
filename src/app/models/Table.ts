@@ -1,9 +1,9 @@
 import { TemplateRef } from "@angular/core";
-import { Roles } from "./User";
 import { TooltipOpts } from "../../global";
+import { Roles } from "./User";
 
 export interface PaginateDatasource<T> {
-  docs: T[]
+  content: T[]
   totalDocs: number
   totalPages: number
   hasPrevPage: boolean
@@ -15,8 +15,8 @@ export interface PaginateDatasource<T> {
 }
 
 export interface Table {
-    pageIndex: number,
-    pageSize: number
+  pageIndex: number,
+  pageSize: number
 }
 
 export interface Sort {

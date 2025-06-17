@@ -1,29 +1,29 @@
 import { Injectable } from "@angular/core";
 import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from "@ngrx/effects";
-import * as AuthActions from "./auth.actions";
 import { catchError, exhaustMap, filter, map, of, tap } from "rxjs";
-import { AuthService } from "../services/auth.service";
 import * as ProfileActions from "../../profile/store/profile.actions";
 import * as RouterActions from "../../router/store/router.actions";
+import { AuthService } from "../services/auth.service";
+import * as AuthActions from "./auth.actions";
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthEffects  {
+export class AuthEffects {
 
   initEffect$ = createEffect(() => this.actions$.pipe(
     ofType(ROOT_EFFECTS_INIT),
     map(() => this.authService.getAccessToken()),
     filter(accessToken => !!accessToken),
     exhaustMap((accessToken) => [
-      AuthActions.saveAuth({ auth: { token: accessToken ?? undefined } }),
+      AuthActions.saveAuth({ auth: { access_token: accessToken ?? undefined } }),
       ProfileActions.loadProfile()
     ])
   ));
 
   loginEffect$ = createEffect(() => this.actions$.pipe(
     ofType(AuthActions.login),
-    exhaustMap(({ usernameOrEmail, password }) => this.authService.login({usernameOrEmail, password})
+    exhaustMap(({ usernameOrEmail, password }) => this.authService.login({ usernameOrEmail, password })
       .pipe(
         map(auth => AuthActions.loginSuccess({ auth: auth })),
         catchError((err) => {
@@ -37,7 +37,7 @@ export class AuthEffects  {
     tap(({ auth }) => this.authService.saveAuth(auth)),
     exhaustMap(() => [
       ProfileActions.loadProfile(),
-      RouterActions.go({ path: ["home"] })
+      RouterActions.go({ path: [ "home" ] })
     ])
   ))
 
@@ -45,10 +45,12 @@ export class AuthEffects  {
     ofType(AuthActions.logout),
     tap(() => this.authService.cleanAuth()),
     exhaustMap(() => [
-      RouterActions.go({ path: ["auth/login"] }),
+      RouterActions.go({ path: [ "auth/login" ] }),
       AuthActions.logoutSuccess()
     ])
   ))
+
   constructor(private actions$: Actions,
-              private authService: AuthService) {}
+              private authService: AuthService) {
+  }
 }

@@ -1,5 +1,4 @@
 import { isNaN, isNil, omitBy, overSome } from "lodash-es";
-import { ProductDTO } from "./Product";
 
 export enum Roles {
   USER = "USER",
@@ -65,7 +64,7 @@ export function createUserPayload(user: any, initialRoles: Role[]): PartialUser 
     password: user.password,
     roles: createRolesPayload(initialRoles, user.roles ?? []),
   }
-  return <ProductDTO>omitBy(userDto, overSome([isNil, isNaN]));
+  return <any>omitBy(userDto, overSome([ isNil, isNaN ]));
 }
 
 export interface UserFilter {

@@ -1,44 +1,37 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-  ViewChild
-} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MatIconModule } from "@angular/material/icon";
-import {MatSort, MatSortModule} from "@angular/material/sort";
-import { MatTableDataSource, MatTableModule } from "@angular/material/table";
-import { PaginationComponent } from "../pagination/pagination.component";
-import { PaginateDatasource, Sort, TableButton, TableColumn } from "../../models/Table";
-import { ButtonComponent } from "../button/button.component";
-import { TableButtonComponent } from "./components/button/button.component";
 import { MatSelectChange } from "@angular/material/select";
+import { MatSort, MatSortModule } from "@angular/material/sort";
+import { MatTableDataSource, MatTableModule } from "@angular/material/table";
+import { PaginateDatasource, Sort, TableButton, TableColumn } from "../../models/Table";
+import { PaginationComponent } from "../pagination/pagination.component";
+import { TableButtonComponent } from "./components/button/button.component";
 
 @Component({
   selector: 'app-table',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatSortModule, MatTableModule, PaginationComponent, ButtonComponent, TableButtonComponent],
+  imports: [ CommonModule, MatIconModule, MatSortModule, MatTableModule, PaginationComponent, TableButtonComponent ],
   template: `
     <div class="min-w-full w-min bg-foreground default-shadow rounded-md">
       <div class="table-container">
         <table mat-table [dataSource]="matDataSource" matSort #sort="matSort" (matSortChange)="sortChange($event)">
 
           <ng-container *ngFor="let column of columns" [matColumnDef]="column.columnDef">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!column.sortable" > {{column.header}} </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!column.sortable"> {{ column.header }}
+            </th>
 
-            <ng-container *ngIf="column.cell" >
+            <ng-container *ngIf="column.cell">
               <td mat-cell *matCellDef="let row" [ngStyle]="{
                 'width': column.width
-                }" >{{ column.cell(row) }}</td>
+                }">{{ column.cell(row) }}
+              </td>
             </ng-container>
 
             <ng-container *ngIf="column.template">
               <td mat-cell *matCellDef="let row" [ngStyle]="{
                 'width': column.width
-                }" >
+                }">
                 <ng-template *ngTemplateOutlet="column.template!; context: {$implicit: row}"></ng-template>
               </td>
             </ng-container>
@@ -50,7 +43,7 @@ import { MatSelectChange } from "@angular/material/select";
 
               <div class="flex flex-row-reverse gap-2 space-x-1 space-x-reverse">
                 <ng-template ngFor let-item="$implicit" [ngForOf]="buttons">
-                  <app-table-button [item]="item" [row]="row" />
+                  <app-table-button [item]="item" [row]="row"/>
                 </ng-template>
 
               </div>
@@ -74,18 +67,18 @@ import { MatSelectChange } from "@angular/material/select";
 
     </div>
   `,
-  styles: [`
+  styles: [ `
     .mat-mdc-header-row {
       font-weight: bold !important;
-      background: rgb(255,255,255);
-      background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 40%, rgba(255,255,255,0.8) 60%, rgba(255,255,255,0) 100%);
+      background: rgb(255, 255, 255);
+      background: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 40%, rgba(255, 255, 255, 0.8) 60%, rgba(255, 255, 255, 0) 100%);
     }
 
     .mat-mdc-row, .mat-mdc-header-row, .mat-row {
       font-family: 'Poppins', sans-serif !important;
       font-size: 1rem !important;
     }
-  `]
+  ` ]
 })
 export class TableComponent<T> implements OnChanges {
   @Input({ required: true }) dataSource!: Partial<PaginateDatasource<T>>;
@@ -108,7 +101,7 @@ export class TableComponent<T> implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.matDataSource = new MatTableDataSource(this.dataSource.docs);
+    this.matDataSource = new MatTableDataSource(this.dataSource.content);
   }
 
   getNewSelectedPage(page: number) {
