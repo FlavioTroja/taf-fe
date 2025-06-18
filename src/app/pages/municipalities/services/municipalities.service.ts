@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from "../../../../environments/environment.dev";
@@ -18,8 +18,8 @@ export class MunicipalitiesService {
   loadMunicipalities() {
     const municipalityId = this.cookieService.get('municipalityId');
 
-    const headers = new HttpHeaders().set('X-Municipality-Id', municipalityId);
+    console.log('Municipality ID from cookie:', municipalityId);
 
-    return this.http.get<PaginateDatasource<Municipality>>(`${BASE_URL}/municipals`, { headers });
+    return this.http.get<PaginateDatasource<Municipality>>(`${BASE_URL}/municipals`);
   }
 }
