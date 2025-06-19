@@ -26,7 +26,12 @@ jobs:
 
       - name: Build the Angular app
         run: |
-          npm run build -- --configuration production
+          # Determina quale configurazione utilizzare per il build
+          if [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
+            npm run build -- --configuration staging
+          else
+            npm run build -- --configuration production
+          fi
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -44,7 +49,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/taf-fe:${{ github.ref == 'refs/heads/develop' && 'staging' || 'latest' }}
 
   deploy:
-    name: SSH deploy to production server
+    name: SSH deploy to server
     needs: build-and-push
     runs-on: ubuntu-latest
 
@@ -62,8 +67,17 @@ jobs:
           script: |
             cd /home/manager/orchestrator/taf
 
+            # Determina se siamo su staging o produzione
+            if [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
+              IMAGE_TAG="staging"
+              SERVICE="taf-fe-staging"
+            else
+              IMAGE_TAG="latest"
+              SERVICE="taf-fe"
+            fi
+
             # Assicurati che l'immagine sia aggiornata
-            docker compose pull taf-fe
+            docker compose pull $SERVICE
 
             # Ricrea solo il servizio taf-fe in background
-            docker compose up -d taf-fe
+            docker compose up -d $SERVICE

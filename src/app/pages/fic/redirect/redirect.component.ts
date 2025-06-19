@@ -1,5 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
 import { FicService } from "../services/fic.service";
 
 @Component({
@@ -25,7 +25,7 @@ import { FicService } from "../services/fic.service";
     width: 50px;
     height: 50px;
     border: 3px solid transparent;
-    border-radius: 50%; border-top-color: rgb(var(--soko-accent));
+    border-radius: 50%; border-top-color: rgb(var(--taf-accent));
     animation: spin 1s ease-in-out infinite;
     -webkit-animation: spin 1s ease-in-out infinite;
   }

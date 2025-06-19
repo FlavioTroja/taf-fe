@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { ReferenceNameComponent } from "../reference-name/reference-name.component";
 
 @Component({
@@ -12,7 +12,7 @@ import { ReferenceNameComponent } from "../reference-name/reference-name.compone
         <span class="text-sm font-bold"
               [ngClass]="{'font-red': (getPaymentPercentage <= 20 && !paid && !invoiceId),
                             'font-orange': (getPaymentPercentage >= 21 && getPaymentPercentage <= 49 && !paid),
-                            'font-soko-accent': (getPaymentPercentage >= 50 && getPaymentPercentage <= 99 && !paid),
+                            'font-taf-accent': (getPaymentPercentage >= 50 && getPaymentPercentage <= 99 && !paid),
                             'font-green': (paidAlready >= forfait || getPaymentPercentage > 99),
                             'font-color-gray-dark': !!invoiceId }">
             {{ !invoiceId ? getPaymentPercentage + "%" : '' }}
@@ -23,7 +23,7 @@ import { ReferenceNameComponent } from "../reference-name/reference-name.compone
                #standard
                [ngClass]="{'background-red': (getPaymentPercentage <= 20 && !paid),
                           'background-orange': (getPaymentPercentage >= 21 && getPaymentPercentage <= 49 && !paid),
-                          'background-soko-accent': (getPaymentPercentage >= 50 && getPaymentPercentage <= 99 && !paid),
+                          'background-taf-accent': (getPaymentPercentage >= 50 && getPaymentPercentage <= 99 && !paid),
                           'background-green': paidAlready >= forfait || getPaymentPercentage > 99 }"></div>
         </div>
         <div class="total-amount-part" #extraPart>
@@ -31,7 +31,7 @@ import { ReferenceNameComponent } from "../reference-name/reference-name.compone
                #extra
                [ngClass]="{'background-red': (getPaymentPercentage <= 20 && !paid),
                           'background-orange': (getPaymentPercentage >= 21 && getPaymentPercentage <= 49 && !paid),
-                          'background-soko-accent': (getPaymentPercentage >= 50 && getPaymentPercentage <= 99 && !paid),
+                          'background-taf-accent': (getPaymentPercentage >= 50 && getPaymentPercentage <= 99 && !paid),
                           'background-green': paidAlready >= forfait || getPaymentPercentage > 99 }"></div>
           </div>
         </div>
@@ -79,8 +79,8 @@ import { ReferenceNameComponent } from "../reference-name/reference-name.compone
       border-radius: 0.2rem 1rem 1rem 0.2rem;
     }
 
-    .font-soko-accent {
-      color: rgb(var(--soko-accent)) !important;
+    .font-taf-accent {
+      color: rgb(var(--taf-accent)) !important;
     }
 
     .font-green {
@@ -99,8 +99,8 @@ import { ReferenceNameComponent } from "../reference-name/reference-name.compone
       color: #666666 !important;
     }
 
-    .background-soko-accent {
-      background-color: rgb(var(--soko-accent)) !important;
+    .background-taf-accent {
+      background-color: rgb(var(--taf-accent)) !important;
     }
 
     .background-green {
@@ -121,8 +121,8 @@ import { ReferenceNameComponent } from "../reference-name/reference-name.compone
         #FAFAFA 90deg 180deg, #DCDCDC 180deg 270deg,
         #FAFAFA 270deg
       );
-      background-repeat: repeat; 
-      background-size: 8px 8px; 
+      background-repeat: repeat;
+      background-size: 8px 8px;
       background-position: top left;
     }
   `]
@@ -189,7 +189,7 @@ export class PaymentsProgressBarComponent implements AfterViewInit {
   setSections(forfait: number) {
     if (this.standardPart) {
       this.standardPart.nativeElement.style.width = (forfait === Math.floor(this.totalAmount!) || forfait < 100) ? `100%` : `${forfait}%`;
-      if (forfait === 0 && this.totalAmount !== 0) { 
+      if (forfait === 0 && this.totalAmount !== 0) {
         this.standardPart.nativeElement.style.width = '10%';
       }
     } else {

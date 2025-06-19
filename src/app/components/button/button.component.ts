@@ -1,12 +1,12 @@
-import { Component, EventEmitter, inject, Input, OnChanges, Output, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, inject, Input, OnChanges, Output, TemplateRef } from '@angular/core';
 import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
 import { MemoizedSelector, Store } from "@ngrx/store";
-import { AppState } from "../../app.config";
 import { filter, map, Subject, takeUntil } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { MatTooltipModule } from "@angular/material/tooltip";
 import { TooltipOpts } from "../../../global";
+import { AppState } from "../../app.config";
 
 @Component({
   selector: 'app-button',
@@ -43,7 +43,7 @@ import { TooltipOpts } from "../../../global";
     }
 
     .confirm-element {
-      background-color: rgb(var(--soko-accent));
+      background-color: rgb(var(--taf-accent));
       color: #FFFFFFE5;
     }
   `]

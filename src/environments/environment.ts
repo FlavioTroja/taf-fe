@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
   appVersion: require('../../package.json').version,
-  BASE_URL: "http://localhost:7480/api"
+  BASE_URL: "http://localhost:8080/api"
 };

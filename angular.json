@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "soko-fe": {
+    "taf-fe": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -48,7 +48,7 @@
               "jsbarcode",
               "moment"
             ],
-            "outputPath": "dist/soko-fe",
+            "outputPath": "dist/taf-fe",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -129,10 +129,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "soko-fe:build:production"
+              "browserTarget": "taf-fe:build:production"
             },
             "development": {
-              "browserTarget": "soko-fe:build:development"
+              "browserTarget": "taf-fe:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -140,7 +140,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "soko-fe:build"
+            "browserTarget": "taf-fe:build"
           }
         },
         "test": {

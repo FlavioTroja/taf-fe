@@ -1,14 +1,14 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ShowImageComponent } from "../../../../components/show-image/show-image.component";
+import { Component, inject } from '@angular/core';
+import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
-import { AppState } from "../../../../app.config";
-import { User } from "../../../../models/User";
-import { getProfileUser } from "../../../../core/profile/store/profile.selectors";
 import { Observable } from "rxjs";
 import { environment } from "../../../../../environments/environment";
-import { MatIconModule } from "@angular/material/icon";
+import { AppState } from "../../../../app.config";
+import { ShowImageComponent } from "../../../../components/show-image/show-image.component";
+import { getProfileUser } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
+import { User } from "../../../../models/User";
 import { HideByCodeSelectorDirective } from "../../../../shared/directives/hide-by-code-selector.directive";
 
 @Component({
@@ -32,7 +32,7 @@ import { HideByCodeSelectorDirective } from "../../../../shared/directives/hide-
             <div class="text-4xl pt-6 pb-4"> {{ profile.username }} </div>
             <div class="text-2xl"> {{ profile.email }} </div>
           </div>
-          <div class="text-sm"> {{ "Soko v. "+ appVersion }} </div>
+          <div class="text-sm"> {{ "taf v. "+ appVersion }} </div>
         </div>
       </div>
       <div *fbHideByCodeSelector="'settings.users.button-list'" (click)="navigateToUsers()" class="flex items-center justify-between text-md bg-foreground rounded-md p-3 cursor-pointer default-shadow">

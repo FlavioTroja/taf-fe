@@ -13,16 +13,16 @@ import { Directions, paymentDirectionStylesArray } from 'src/app/models/Payment'
   selector: 'app-status-value-display',
   standalone: true,
   template: `
-  <div class="flex flex-wrap justify-end items-end rounded p-2.5 gap-2.5 min-w-[10rem]" 
-      [ngClass]="{'border-solid border-[rgba(var(--soko-error))] border-2': border}"
-      [style.border-color]="valueDirection === Directions.IN ? 'rgba(var(--soko-success))' : 'rgba(var(--soko-error))'">
-    <div *ngIf="!!label" 
-          class="whitespace-nowrap font-bold self-center" 
-          [style.color]="valueDirection === Directions.IN ? 'rgba(var(--soko-success))' : 'rgba(var(--soko-error))'">
+  <div class="flex flex-wrap justify-end items-end rounded p-2.5 gap-2.5 min-w-[10rem]"
+      [ngClass]="{'border-solid border-[rgba(var(--taf-error))] border-2': border}"
+      [style.border-color]="valueDirection === Directions.IN ? 'rgba(var(--taf-success))' : 'rgba(var(--taf-error))'">
+    <div *ngIf="!!label"
+          class="whitespace-nowrap font-bold self-center"
+          [style.color]="valueDirection === Directions.IN ? 'rgba(var(--taf-success))' : 'rgba(var(--taf-error))'">
       {{ label }}
     </div>
-    <div class="whitespace-nowrap rounded currency px-4 py-1" 
-        [style]="getDirectionStyle(valueDirection)" 
+    <div class="whitespace-nowrap rounded currency px-4 py-1"
+        [style]="getDirectionStyle(valueDirection)"
         [ngClass]="{'negative': valueDirection === Directions.OUT}">
       {{ abs(+value) | currency:'':''}}
     </div>
@@ -41,7 +41,7 @@ import { Directions, paymentDirectionStylesArray } from 'src/app/models/Payment'
 .currency.negative::before {
   content: "- € ";
   font-weight: bold;
-}  
+}
   `],
   imports: [CommonModule]
 })
@@ -51,18 +51,18 @@ export class StatusValueDisplayComponent implements OnChanges {
   @Input({ required: false }) label: string = '';
   /** if you want a border in it, default = true*/
   @Input({ required: false }) border: boolean = true;
-  
+
   readonly Directions = Directions;
   valueDirection: Directions = Directions.OUT;
-    
+
   constructor() {}
-  
+
   ngOnChanges(changes: SimpleChanges): void {
     this.valueDirection = +(this.value) >= 0 ? Directions.IN : Directions.OUT;
   }
 
   /** take a number and returns his absolute
-   * 
+   *
    * @param value number
    * @returns Math.abs(value)
   */

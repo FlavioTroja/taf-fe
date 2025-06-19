@@ -49,8 +49,8 @@
 }
 
 .mat-calendar-body-selected {
-  background-color: rgb(var(--soko-accent-light)) !important;
-  color: rgb(var(--soko-accent)) !important;
+  background-color: rgb(var(--taf-accent-light)) !important;
+  color: rgb(var(--taf-accent)) !important;
 }
 
 /* Material Datepicker End */
@@ -118,16 +118,16 @@
     --foreground-color: 255, 255, 255;
     --background-color: 242,242,242;
 
-    --soko-accent: 83, 171, 222;
-    --soko-accent-light: 230, 243, 250;
-    --soko-error: 229, 79, 71;
-    --soko-error-light: 248, 233, 232;
-    --soko-warning: 238, 165, 73;
-    --soko-warning-light: 249, 241, 232;
-    --soko-success: 112, 201, 149;
-    --soko-success-light: 236, 245, 240;
-    --soko-draft: 127, 83, 222;
-    --soko-draft-light: 236, 230, 250;
+    --taf-accent: 83, 171, 222;
+    --taf-accent-light: 230, 243, 250;
+    --taf-error: 229, 79, 71;
+    --taf-error-light: 248, 233, 232;
+    --taf-warning: 238, 165, 73;
+    --taf-warning-light: 249, 241, 232;
+    --taf-success: 112, 201, 149;
+    --taf-success-light: 236, 245, 240;
+    --taf-draft: 127, 83, 222;
+    --taf-draft-light: 236, 230, 250;
 
 
     --modal-remove-element: #E54F47;
@@ -278,7 +278,7 @@ select {
 
 .selected-image {
   border-width: 2px;
-  border-color: rgb(var(--soko-accent));
+  border-color: rgb(var(--taf-accent));
 }
 
 .images-list-row {
@@ -307,7 +307,7 @@ select {
 }
 
 .blue {
-  color: rgb(var(--soko-accent)) !important;
+  color: rgb(var(--taf-accent)) !important;
 }
 
 .green {
@@ -523,7 +523,7 @@ select {
 }
 
 .checkbox input:checked ~ .checkmark {
-  background-color: rgb(var(--soko-accent));
+  background-color: rgb(var(--taf-accent));
 }
 
 .checkbox input:checked ~ .checkmark:after {
@@ -576,7 +576,7 @@ select {
 }
 
 .checkbox-payments input:checked ~ .checkmark-payments {
-  background-color: rgb(var(--soko-accent));
+  background-color: rgb(var(--taf-accent));
 }
 
 .checkbox-payments input:checked ~ .checkmark-payments:after {
@@ -624,96 +624,96 @@ select {
 }
 
 .error {
-  background-color: rgb(var(--soko-error-light));
-  color: rgb(var(--soko-error));
+  background-color: rgb(var(--taf-error-light));
+  color: rgb(var(--taf-error));
 }
 
 .icon-error {
-  background-color: rgb(var(--soko-error));
+  background-color: rgb(var(--taf-error));
 }
 
 .text-error {
-  color: rgb(var(--soko-error));
+  color: rgb(var(--taf-error));
 }
 
 .border-error {
-  border-color: rgb(var(--soko-error));
+  border-color: rgb(var(--taf-error));
 }
 
 .warning {
-  background-color: rgb(var(--soko-warning-light));
-  color: rgb(var(--soko-warning));
+  background-color: rgb(var(--taf-warning-light));
+  color: rgb(var(--taf-warning));
 }
 
 .icon-warning {
-  background-color: rgb(var(--soko-warning));
+  background-color: rgb(var(--taf-warning));
 }
 
 .text-warning {
-  color: rgb(var(--soko-warning));
+  color: rgb(var(--taf-warning));
 }
 
 .text-accent {
-  color: rgb(var(--soko-accent));
+  color: rgb(var(--taf-accent));
 }
 
 
 .border-warning {
-  border-color: rgb(var(--soko-warning));
+  border-color: rgb(var(--taf-warning));
 }
 
 .accent {
-  background-color: rgb(var(--soko-accent-light));
-  color: rgb(var(--soko-accent));
+  background-color: rgb(var(--taf-accent-light));
+  color: rgb(var(--taf-accent));
 }
 
 .red-buttons {
-  background-color: rgb(var(--soko-error-light));
-  color: rgb(var(--soko-error));
+  background-color: rgb(var(--taf-error-light));
+  color: rgb(var(--taf-error));
 }
 
 .green-buttons {
-  background-color: rgb(var(--soko-success-light));
-  color: rgb(var(--soko-success));
+  background-color: rgb(var(--taf-success-light));
+  color: rgb(var(--taf-success));
 }
 
 .priority-accent {
-  background-color: rgb(var(--soko-accent));
-  color: rgb(var(--soko-accent-light));
+  background-color: rgb(var(--taf-accent));
+  color: rgb(var(--taf-accent-light));
 }
 
 .icon-accent {
-  background-color: rgb(var(--soko-accent));
+  background-color: rgb(var(--taf-accent));
 }
 
 .text-accent {
-  color: rgb(var(--soko-accent));
+  color: rgb(var(--taf-accent));
 }
 
 .border-accent {
-  border-color: rgb(var(--soko-accent));
+  border-color: rgb(var(--taf-accent));
 }
 
 .success {
-  background-color: rgb(var(--soko-success-light));
-  color: rgb(var(--soko-success));
+  background-color: rgb(var(--taf-success-light));
+  color: rgb(var(--taf-success));
 }
 
 .icon-success {
-  background-color: rgb(var(--soko-success));
+  background-color: rgb(var(--taf-success));
 }
 
 .text-success {
-  color: rgb(var(--soko-success));
+  color: rgb(var(--taf-success));
 }
 
 .border-success {
-  border-color: rgb(var(--soko-success));
+  border-color: rgb(var(--taf-success));
 }
 
 .draft {
-  background: rgb(var(--soko-draft-light));
-  color: rgb(var(--soko-draft));
+  background: rgb(var(--taf-draft-light));
+  color: rgb(var(--taf-draft));
 }
 
 /* Custom switch Start */
@@ -758,7 +758,7 @@ select {
 }
 
 input:checked + .slider {
-  background-color: rgb(var(--soko-accent));
+  background-color: rgb(var(--taf-accent));
 }
 
 input:focus + .slider {
@@ -859,7 +859,7 @@ input:checked + .slider:before {
 }
 
 .confirm-element {
-  background-color: rgb(var(--soko-accent));
+  background-color: rgb(var(--taf-accent));
   color: #FFFFFFE5;
 }
 

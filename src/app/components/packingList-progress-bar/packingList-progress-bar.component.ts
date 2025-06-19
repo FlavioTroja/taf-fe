@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 // import { ProductsInOrder } from "../../models/Order";
 // import { ProductsOnPackingLists } from "../../models/PackingList";
 import { MatTooltipModule } from "@angular/material/tooltip";
@@ -13,7 +13,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
         <span class="text-sm font-bold ps-3"
               [ngClass]="{'font-red': (getPackingListPercentage <= 20),
                             'font-orange': (getPackingListPercentage >= 21 && getPackingListPercentage <= 49),
-                            'font-soko-accent': (getPackingListPercentage >= 50 && getPackingListPercentage <= 99),
+                            'font-taf-accent': (getPackingListPercentage >= 50 && getPackingListPercentage <= 99),
                             'font-green': getPackingListPercentage == 100 }">
             {{ productsInPackingListQuantity+"/"+productsInOrderQuantity }}
         </span>
@@ -23,7 +23,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
                #standard
                [ngClass]="{'background-red': (getPackingListPercentage <= 20),
                           'background-orange': (getPackingListPercentage >= 21 && getPackingListPercentage <= 49),
-                          'background-soko-accent': (getPackingListPercentage >= 50 && getPackingListPercentage <= 99),
+                          'background-taf-accent': (getPackingListPercentage >= 50 && getPackingListPercentage <= 99),
                           'background-green': getPackingListPercentage > 99 }"></div>
         </div>
       </div>
@@ -57,8 +57,8 @@ import { MatTooltipModule } from "@angular/material/tooltip";
       border-radius: 1rem 0.2rem 0.2rem 1rem;
     }
 
-    .font-soko-accent {
-      color: rgb(var(--soko-accent)) !important;
+    .font-taf-accent {
+      color: rgb(var(--taf-accent)) !important;
     }
 
     .font-green {
@@ -73,8 +73,8 @@ import { MatTooltipModule } from "@angular/material/tooltip";
       color: #E54F47 !important;
     }
 
-    .background-soko-accent {
-      background-color: rgb(var(--soko-accent)) !important;
+    .background-taf-accent {
+      background-color: rgb(var(--taf-accent)) !important;
     }
 
     .background-green {
