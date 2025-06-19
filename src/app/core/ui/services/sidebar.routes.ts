@@ -20,8 +20,8 @@ export const sidebarRoutes: RouteElement[] = [
     isLast: true,
   },
   {
-    iconName: 'municipalities',
-    path: '/municipalities',
+    iconName: 'location_city',
+    path: '/municipals',
     label: "Comuni",
   }
 ];

@@ -15,6 +15,16 @@ export enum Roles {
   WORKER_ASSEMBLER = "WORKER_ASSEMBLER",
 }
 
+export enum Roles {
+  ROLE_USER = 'ROLE_USER',
+  ROLE_ADMIN = 'ROLE_ADMIN',
+}
+
+export const RolesArray = [
+  Roles.ROLE_USER, Roles.ROLE_ADMIN
+]
+
+
 export interface Role {
   id?: number;
   isActive: boolean;
@@ -30,15 +40,14 @@ export interface RoleName {
 }
 
 export interface User {
-  id: number,
-  username: string,
-  email: string,
-  roles: Role[],
-  avatarUrl: string
-  note: string
-  deleted: boolean
-  createdAt: Date | string
-  updatedAt: Date | string
+  id: string,
+  userId: string,
+  name: string,
+  surname: string,
+  birthDate: string,
+  photo: string,
+  roles: Roles[]
+  municipalityId: string
 }
 
 export type PartialUser = Partial<User>;

@@ -5,8 +5,8 @@ import NotFoundComponent from "./components/not-found/not-found.component";
 import { AuthGuard } from "./core/auth/services/auth.guard";
 import { DashboardEffect } from './pages/home/store/effects/dashboard.effects';
 import { reducers as dashboardManagementReducers } from "./pages/home/store/reducers";
-import { MunicipalitiesEffects } from "./pages/municipalities/store/effects/municipalities.effects";
-import { reducers as municipalitiesManagementReducers } from "./pages/municipalities/store/reducers";
+import { MunicipalsEffects } from "./pages/municipals/store/effects/municipals.effects";
+import { reducers as municipalsManagementReducers } from "./pages/municipals/store/reducers";
 import { RoleNamesEffects } from "./pages/users/store/effects/roleNames.effects";
 import { UsersEffects } from "./pages/users/store/effects/users.effects";
 import { reducers as userManagementReducers } from "./pages/users/store/reducers";
@@ -39,13 +39,13 @@ export const routes: Routes = [
     }
   },
   {
-    path: 'municipalities',
+    path: 'municipals',
     canActivate: [ AuthGuard ],
     providers: [
-      provideState('municipalities-manager', municipalitiesManagementReducers),
-      provideEffects([ MunicipalitiesEffects ])
+      provideState('municipals-manager', municipalsManagementReducers),
+      provideEffects([ MunicipalsEffects ])
     ],
-    loadChildren: () => import("./pages/municipalities/municipalities.routing")
+    loadChildren: () => import("./pages/municipals/municipals.routing")
   },
   {
     path: "users",

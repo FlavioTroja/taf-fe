@@ -1,26 +1,26 @@
-import { Component, inject, OnDestroy, OnInit, Signal, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { InputComponent } from "../../../../components/input/input.component";
-import { MatIconModule } from "@angular/material/icon";
+import { Component, inject, OnDestroy, OnInit, Signal, TemplateRef, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
-import { Store } from "@ngrx/store";
-import { AppState } from "../../../../app.config";
-import * as UserActions from "../../../users/store/actions/users.actions";
-import { createUserPayload, findRoleLabel, PartialUser, Roles } from "../../../../models/User";
-import { difference, hasRoles } from "../../../../../utils/utils";
-import { getCurrentUser, getNewPassword } from "../../store/selectors/users.selectors";
-import { getRouterData, selectCustomRouteParam } from "../../../../core/router/store/router.selectors";
-import { MatSelectModule } from "@angular/material/select";
-import { MatFormFieldModule } from "@angular/material/form-field";
-import { FileService } from "../../../../components/upload-image/services/file.service";
-import { concatMap, map, mergeMap, of, Subject, takeUntil, pairwise, Observable } from "rxjs";
-import { FileUploadComponent } from "../../../../components/upload-image/file-upload.component";
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { MatNativeDateModule } from "@angular/material/core";
+import { MatDatepickerModule } from "@angular/material/datepicker";
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
-import { getRoleNames } from "../../store/selectors/roleNames.selectors";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
+import { MatSelectModule } from "@angular/material/select";
+import { Store } from "@ngrx/store";
+import { DateTime } from "luxon";
+import { concatMap, map, mergeMap, of, pairwise, Subject, takeUntil } from "rxjs";
+import { difference, hasRoles } from "../../../../../utils/utils";
+import { AppState } from "../../../../app.config";
+import { InputComponent } from "../../../../components/input/input.component";
+import { FileUploadComponent } from "../../../../components/upload-image/file-upload.component";
+import { FileService } from "../../../../components/upload-image/services/file.service";
 import { getProfileUser } from "../../../../core/profile/store/profile.selectors";
-import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
-import { changeUserPassword } from "../../store/actions/users.actions";
+import { getRouterData, selectCustomRouteParam } from "../../../../core/router/store/router.selectors";
+import { findRoleLabel, PartialUser, Roles, RolesArray } from "../../../../models/User";
+import * as UserActions from "../../../users/store/actions/users.actions";
+import { getCurrentUser, selectActiveUserRoles } from "../../store/selectors/users.selectors";
 
 interface ChangePasswordForm {
   newPassword: FormControl,
@@ -30,7 +30,7 @@ interface ChangePasswordForm {
 @Component({
   selector: 'app-edit-user',
   standalone: true,
-  imports: [CommonModule, InputComponent, ReactiveFormsModule, MatIconModule, MatFormFieldModule, MatSelectModule, FileUploadComponent, MatDialogModule],
+  imports: [ CommonModule, InputComponent, ReactiveFormsModule, MatIconModule, MatFormFieldModule, MatSelectModule, FileUploadComponent, MatDialogModule, MatDatepickerModule, MatNativeDateModule ],
   template: `
 
     <form [formGroup]="userForm" autocomplete="off">
@@ -38,13 +38,13 @@ interface ChangePasswordForm {
 
         <div class="flex flex-row gap-4 p-2" [ngClass]="{ 'bg-white rounded-md default-shadow' : viewOnly() }">
           <div class="flex flex-col basis-1/6">
-            <app-file-upload [ngClass]="{'pointer-events-none' : viewOnly() || userForm.getRawValue().avatarUrl }"
-                             [mainImage]="f.avatarUrl.value!" [multiple]="false" label="Foto profilo"
+            <app-file-upload [ngClass]="{'pointer-events-none' : viewOnly() || userForm.getRawValue().photo }"
+                             [mainImage]="f.photo.value!" [multiple]="false" label="Foto profilo"
                              (onUpload)="onUploadMainImage($event)" (onDeleteMainImage)="removeProfilePic()"
                              [onlyImages]="true"/>
           </div>
 
-          <div *ngIf="!viewOnly() && userForm.getRawValue().avatarUrl" class="flex flex-col basis-1/6 gap-2">
+          <div *ngIf="!viewOnly() && userForm.getRawValue().photo" class="flex flex-col basis-1/6 gap-2">
             <div class="flex flex-row">
               <div class="flex items-center p-2 rounded-lg shadow-md default-shadow-hover accent cursor-pointer"
                    (click)="input.click()">
@@ -68,89 +68,94 @@ interface ChangePasswordForm {
             </div>
           </div>
 
-          <div *ngIf="viewOnly() && (roleNames$ | async) as roleNames">
+          <div *ngIf="viewOnly()">
             <div>
-              <div class="text-4xl pt-6 pb-4 font-extrabold"> {{ userForm.getRawValue().username }}</div>
-              <div class="text-2xl pb-2"> {{ userForm.getRawValue().email }}</div>
+              <div class="text-4xl pt-6 pb-4 font-extrabold"> {{ userForm.getRawValue().name }}</div>
+              <div class="text-2xl pb-2"> {{ userForm.getRawValue().surname }}</div>
+              <div class="text-lg pb-2"> {{ userForm.getRawValue().birthDate }}</div>
             </div>
             <div class="flex gap-2">
-              <div *ngFor="let role of userForm.getRawValue().roles"
-                   class="whitespace-nowrap bg-gray-100 text-sm px-2 py-1 rounded">{{ findRoleLabel(roleNames, role) }}
+              <div *ngFor="let role of roles$ | async"
+                   class="whitespace-nowrap bg-gray-100 text-sm px-2 py-1 rounded">{{ role === Roles.ROLE_ADMIN ? 'ADMIN' : 'USER' }}
               </div>
             </div>
           </div>
         </div>
         <div *ngIf="!viewOnly()" class="grid gap-3" [ngClass]="isNewUser ? ('grid-cols-2') : ('grid-cols-3')">
           <div class="flex flex-row relative">
-            <app-input [formControl]="f.username" formControlName="username" label="username" id="user-username" type="text" class="w-full" [style.box-shadow]=""/>
+            <app-input [formControl]="f.name" formControlName="name" label="Nome" id="user-name"
+                       type="text" class="w-full" [style.box-shadow]=""/>
             <div *ngIf="!isNewUser" class="changePsswBtn">
-              <div *ngIf="hasRoles(currentUser!, [{ role: Roles.ADMIN }]) || canChangePassword" class="flex items-center justify-center rounded cursor-pointer h-12 w-12" (click)="editPassword()">
-                <mat-icon class="icon-size material-symbols-rounded cursor-pointer">key_vertical</mat-icon>
-              </div>
+              <!-- <div *ngIf="hasRoles(currentUser!, [{ role: Roles.ADMIN }]) || canChangePassword"
+                    class="flex items-center justify-center rounded cursor-pointer h-12 w-12" (click)="editPassword()">
+                 <mat-icon class="icon-size material-symbols-rounded cursor-pointer">key_vertical</mat-icon>
+               </div>-->
             </div>
           </div>
 
-<!--          <div>-->
-<!--            <app-input [formControl]="f.username" formControlName="username" label="username" id="user-username"-->
-<!--                       type="text"/>-->
-<!--          </div>-->
+          <!--          <div>-->
+          <!--            <app-input [formControl]="f.username" formControlName="username" label="username" id="user-username"-->
+          <!--                       type="text"/>-->
+          <!--          </div>-->
 
           <div>
-            <app-input [formControl]="f.email" formControlName="email" label="email" id="user-email" type="email"/>
+            <app-input [formControl]="f.surname" formControlName="surname" label="cognome" id="user-surname"
+                       type="text"/>
+          </div>
+          <div class="flex flex-col basis-1/4 relative">
+            <mat-label>Data di nascita</mat-label>
+            <input matInput [matDatepicker]="datePicker"
+                   formControlName="birthDate"
+                   placeholder="gg/mm/yyyy"
+                   class="focus:outline-none p-3 rounded-md w-full border-input">
+            <mat-datepicker-toggle class="absolute end-0.5 top-6" matIconSuffix [for]="datePicker">
+              <mat-icon class="material-symbols-rounded">event</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #datePicker></mat-datepicker>
           </div>
 
-          <div class="flex flex-col">
-            <label for="user-role" class="text-md justify-left block px-3 py-0 font-medium"
-                   [ngClass]="f.roles.invalid && f.roles.dirty ? ('text-red-800') : ('text-gray-900')">
-              ruoli
-            </label>
-            <div
-              class="w-full flex shadow-md bg-foreground text-gray-900 text-sm rounded-lg border-input focus:outline-none p-3 font-bold"
-              [ngClass]="{'viewOnly' : viewOnly()}">
-              <mat-select id="user-role" [multiple]="true" [formControl]="f.roles" placeholder="seleziona">
-                <mat-option *ngFor="let role of roleNames$ | async as roles" [value]="role.name">{{ role.label }}
-                </mat-option>
-              </mat-select>
-            </div>
-          </div>
-
-          <div class="flex flex-row gap-2 w-full">
-            <div *ngIf='isNewUser' class="relative flex flex-col w-full">
-              <app-input [type]="showPassword ? 'text' : 'password'" [formControl]="f.password"
-                         autocomplete="new-password" formControlName="password" label="password"
-                         id="user-generate-password" type="password"/>
-              <button (click)="togglePassword()" type="button"
-                      class="absolute end-0.5 -bottom-1.5 rounded-lg text-sm px-4 py-3 items-center">
-                <mat-icon class="material-symbols-rounded">visibility{{ showPassword ? '_off' : '' }}</mat-icon>
-              </button>
-            </div>
-          </div>
+          <!--          <div class="flex flex-row gap-2 w-full">
+                      <div *ngIf='isNewUser' class="relative flex flex-col w-full">
+                        <app-input [type]="showPassword ? 'text' : 'password'" [formControl]="f.password"
+                                   autocomplete="new-password" formControlName="password" label="password"
+                                   id="user-generate-password" type="password"/>
+                        <button (click)="togglePassword()" type="button"
+                                class="absolute end-0.5 -bottom-1.5 rounded-lg text-sm px-4 py-3 items-center">
+                          <mat-icon class="material-symbols-rounded">visibility{{ showPassword ? '_off' : '' }}</mat-icon>
+                        </button>
+                      </div>
+                    </div>-->
         </div>
       </div>
     </form>
 
-    <ng-template #changePasswordTemplate>
-      <form [formGroup]="changePasswordForm">
-        <div class="flex flex-row gap-1">
-          Scegli una nuova password per l'utente
-          <div class="font-bold">{{f.username.value}}</div>
-        </div>
-        <div class="relative flex flex-col w-full p-2.5">
-          <app-input [type]="showPassword ? 'text' : 'password'" [formControl]="passwordForm.newPassword" label="nuova password" id="change-password"/>
-          <button (click)="togglePassword()" type="button" class="rounded-lg text-sm px-4 py-3 items-center end-0.5 showPsswBtnModal">
-            <mat-icon class="material-symbols-rounded">visibility{{showPassword ? '_off' : ''}}</mat-icon>
-          </button>
-        </div>
-        <div class="relative flex flex-col w-full p-2.5">
-          <app-input label="conferma password" id="confirm-change-password" [type]="showConfirmPassword ? 'text' : 'password'"  [formControl]="passwordForm.confirmNewPassword"/>
-          <button (click)="toggleConfirmPassword()" type="button" class="rounded-lg text-sm px-4 py-3 items-center end-0.5 showPsswBtnModal">
-            <mat-icon class="material-symbols-rounded">visibility{{showConfirmPassword ? '_off' : ''}}</mat-icon>
-          </button>
-        </div>
-      </form>
-    </ng-template>
+    <!--    <ng-template #changePasswordTemplate>
+          <form [formGroup]="changePasswordForm">
+            <div class="flex flex-row gap-1">
+              Scegli una nuova password per l'utente
+              <div class="font-bold">{{ f.name.value }}</div>
+            </div>
+            <div class="relative flex flex-col w-full p-2.5">
+              <app-input [type]="showPassword ? 'text' : 'password'" [formControl]="passwordForm.newPassword"
+                         label="nuova password" id="change-password"/>
+              <button (click)="togglePassword()" type="button"
+                      class="rounded-lg text-sm px-4 py-3 items-center end-0.5 showPsswBtnModal">
+                <mat-icon class="material-symbols-rounded">visibility{{ showPassword ? '_off' : '' }}</mat-icon>
+              </button>
+            </div>
+            <div class="relative flex flex-col w-full p-2.5">
+              <app-input label="conferma password" id="confirm-change-password"
+                         [type]="showConfirmPassword ? 'text' : 'password'"
+                         [formControl]="passwordForm.confirmNewPassword"/>
+              <button (click)="toggleConfirmPassword()" type="button"
+                      class="rounded-lg text-sm px-4 py-3 items-center end-0.5 showPsswBtnModal">
+                <mat-icon class="material-symbols-rounded">visibility{{ showConfirmPassword ? '_off' : '' }}</mat-icon>
+              </button>
+            </div>
+          </form>
+        </ng-template>-->
   `,
-  styles: [`
+  styles: [ `
     ::ng-deep #user-username > div > input {
       padding-right: 3rem;
     }
@@ -172,11 +177,12 @@ interface ChangePasswordForm {
       bottom: calc(100% - 4.5rem);
       right: 0;
     }
+
     .showPsswBtnModal {
       position: absolute;
       bottom: calc(100% - 5.75rem);
     }
-  `]
+  ` ]
 })
 export default class EditUserComponent implements OnInit, OnDestroy {
   @ViewChild("changePasswordTemplate") changePasswordTemplate: TemplateRef<any> | undefined;
@@ -184,7 +190,6 @@ export default class EditUserComponent implements OnInit, OnDestroy {
   fb = inject(FormBuilder);
   store: Store<AppState> = inject(Store);
   imageService = inject(FileService);
-  roleNames$ = this.store.select(getRoleNames);
 
   subject = new Subject();
 
@@ -193,51 +198,54 @@ export default class EditUserComponent implements OnInit, OnDestroy {
   active$ = this.store.select(getCurrentUser)
     .pipe(takeUntilDestroyed());
 
-  isFormValid$: Observable<boolean>;
+  roles$ = this.store.select(selectActiveUserRoles)
+
+  // isFormValid$: Observable<boolean>;
 
   id = toSignal(this.store.select(selectCustomRouteParam("id")));
   viewOnly: Signal<boolean> = toSignal(this.store.select(getRouterData).pipe(
     map(data => data!["viewOnly"] ?? false)
   ));
 
-  profileId: number = 0;
+  profileId: string = '';
   currentUser: PartialUser | undefined;
 
   userForm = this.fb.group({
-    username: [{ value: "", disabled: this.viewOnly() }, Validators.required],
-    password: [{ value: "", disabled: this.viewOnly() }],
-    email: [{ value: "", disabled: this.viewOnly() }, Validators.required],
-    roles: [[""], Validators.required],
-    avatarUrl: [""]
+    name: [ { value: "", disabled: this.viewOnly() }, Validators.required ],
+    surname: [ { value: "", disabled: this.viewOnly() } ],
+    // password: [ { value: "", disabled: this.viewOnly() } ],
+    // email: [ { value: "", disabled: this.viewOnly() } ],
+    birthDate: [ { value: new Date(), disabled: this.viewOnly() }, Validators.required ],
+    photo: [ "" ]
   });
 
-  changePasswordForm: FormGroup<ChangePasswordForm>;
+  // changePasswordForm: FormGroup<ChangePasswordForm>;
 
   initFormValue: PartialUser = {};
   showPassword = false;
   showConfirmPassword = false;
 
   constructor() {
-    this.changePasswordForm = this.fb.group({
-      newPassword: [{ value: "" }, [Validators.required, Validators.min(1)]],
-      confirmNewPassword: [{ value: "" }, [Validators.required]]
-    }, {
-      validators: this.passwordMatchValidator
-    })
+    /*    this.changePasswordForm = this.fb.group({
+          newPassword: [ { value: "" }, [ Validators.required, Validators.min(1) ] ],
+          confirmNewPassword: [ { value: "" }, [ Validators.required ] ]
+        }, {
+          validators: this.passwordMatchValidator
+        })
 
-    this.isFormValid$ = this.changePasswordForm.statusChanges.pipe(
-      map(() => this.changePasswordForm.valid),
-      takeUntil(this.subject)
-    );
+        this.isFormValid$ = this.changePasswordForm.statusChanges.pipe(
+          map(() => this.changePasswordForm.valid),
+          takeUntil(this.subject)
+        );
 
-    this.isFormValid$.subscribe((change) => {
-        if(change){
-          this.store.dispatch(UserActions.editChangePasswordForm({ newPassword: this.passwordForm.newPassword.value }));
-        } else {
-          this.store.dispatch(UserActions.clearChangePasswordForm());
-        }
-      }
-    );
+        this.isFormValid$.subscribe((change) => {
+            if (change) {
+              this.store.dispatch(UserActions.editChangePasswordForm({ newPassword: this.passwordForm.newPassword.value }));
+            } else {
+              this.store.dispatch(UserActions.clearChangePasswordForm());
+            }
+          }
+        );*/
 
     this.store.select(getProfileUser).pipe(
       takeUntil(this.subject)
@@ -256,12 +264,12 @@ export default class EditUserComponent implements OnInit, OnDestroy {
   }
 
   get canChangePassword() {
-    return (this.profileId === +this.id());
+    return (this.profileId === this.id());
   }
 
-  get passwordForm() {
-    return this.changePasswordForm.controls;
-  }
+  /*  get passwordForm() {
+      return this.changePasswordForm.controls;
+    }*/
 
   ngOnInit() {
 
@@ -281,7 +289,6 @@ export default class EditUserComponent implements OnInit, OnDestroy {
         this.initFormValue = value as PartialUser;
         this.userForm.patchValue({
           ...value,
-          roles: ((value as PartialUser).roles ?? []).map((r) => r.roleName)
         });
       });
 
@@ -302,20 +309,20 @@ export default class EditUserComponent implements OnInit, OnDestroy {
   editUserChanges() {
     this.userForm.valueChanges.pipe(
       pairwise(),
-      map(([_, newState]) => {
-        if(!Object.values(this.initFormValue).length && !this.isNewUser) {
+      map(([ _, newState ]) => {
+        if (!Object.values(this.initFormValue).length && !this.isNewUser) {
           return {};
         }
         const diff = {
           ...difference(this.initFormValue, newState),
-
-          // Array data
-          roles: newState.roles
+          birthDate: typeof newState.birthDate! === "string" ? newState.birthDate! : DateTime.fromJSDate(newState.birthDate!).toISODate(),
         };
-
-        return createUserPayload(diff, this.initFormValue.roles ?? []);
+        return diff;
       }),
-      map((changes: any) => Object.keys(changes).length !== 0 && !this.userForm.invalid ? { ...changes, id: +this.id() } : {}),
+      map((changes: any) => Object.keys(changes).length !== 0 && !this.userForm.invalid ? {
+        ...changes,
+        id: +this.id()
+      } : {}),
       takeUntil(this.subject),
       // tap(changes => console.log(changes)),
     ).subscribe((changes) => {
@@ -336,52 +343,58 @@ export default class EditUserComponent implements OnInit, OnDestroy {
         formData.append("image", file, file.name);
         return formData;
       }),
-      concatMap(formData => this.imageService.uploadImage(formData)),
+      concatMap(formData => this.imageService.uploadImage(formData, this.id())),
       takeUntil(this.subject)
     ).subscribe(res => {
-        this.userForm.patchValue({ avatarUrl: res.url });
+      this.userForm.patchValue({ photo: res.url });
     });
 
   }
 
   removeProfilePic() {
-    this.userForm.patchValue({ avatarUrl: '' });
+    this.userForm.patchValue({ photo: '' });
   }
 
   onUploadMainImage(images: string[]) {
-    this.userForm.patchValue({ avatarUrl: images[0] });
+    this.userForm.patchValue({ photo: images[0] });
   }
 
   togglePassword() {
     this.showPassword = !this.showPassword;
   }
 
-  editPassword() {
-    this.changePasswordForm.reset();
+  /*  editPassword() {
+      this.changePasswordForm.reset();
 
-    const dialogRef: any = this.dialog.open(ModalComponent, {
-      backdropClass: "blur-filter",
-      data: <ModalDialogData> {
-        title: "Cambia Password",
-        templateContent: this.changePasswordTemplate,
-        buttons: [
-          { iconName: "check", label: "Conferma", bgColor: "confirm",  onClick: () => dialogRef.close(true), selectors: { disabled: getNewPassword } },
-          { iconName: "clear", label: "Annulla",  onClick: () => dialogRef.close(false) }
-        ]
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if(!!result) {
-        if(this.profileId === +this.id()) {
-          this.store.dispatch(changeUserPassword({ id: this.profileId }));
-        } else {
-          this.store.dispatch(changeUserPassword({ id: +this.id() }));
+      const dialogRef: any = this.dialog.open(ModalComponent, {
+        backdropClass: "blur-filter",
+        data: <ModalDialogData>{
+          title: "Cambia Password",
+          templateContent: this.changePasswordTemplate,
+          buttons: [
+            {
+              iconName: "check",
+              label: "Conferma",
+              bgColor: "confirm",
+              onClick: () => dialogRef.close(true),
+              selectors: { disabled: getNewPassword }
+            },
+            { iconName: "clear", label: "Annulla", onClick: () => dialogRef.close(false) }
+          ]
         }
-      }
-      this.store.dispatch(UserActions.clearChangePasswordForm());
-    });
-  }
+      });*/
+
+  /*    dialogRef.afterClosed().subscribe((result: any) => {
+        if (!!result) {
+          if (this.profileId === this.id()) {
+            this.store.dispatch(changeUserPassword({ id: this.profileId }));
+          } else {
+            this.store.dispatch(changeUserPassword({ id: this.id() }));
+          }
+        }
+        this.store.dispatch(UserActions.clearChangePasswordForm());
+      });
+    }*/
 
   ngOnDestroy(): void {
     this.userForm.reset();
@@ -393,4 +406,5 @@ export default class EditUserComponent implements OnInit, OnDestroy {
   protected readonly findRoleLabel = findRoleLabel;
   protected readonly hasRoles = hasRoles;
   protected readonly Roles = Roles;
+  protected readonly ROLES_ARRAY = RolesArray;
 }

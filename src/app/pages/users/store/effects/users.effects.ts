@@ -2,13 +2,15 @@ import { Injectable } from "@angular/core";
 import { Actions, concatLatestFrom, createEffect, ofType } from "@ngrx/effects";
 import { Store } from "@ngrx/store";
 import { catchError, concatMap, exhaustMap, map, of } from "rxjs";
+import { AppState } from "../../../../app.config";
 import * as RouterActions from "../../../../core/router/store/router.actions";
-import * as UsersActions from "../actions/users.actions";
-import { UsersService } from "../../services/users.service";
-import { getActiveUserChanges, getNewPassword } from "../selectors/users.selectors";
-import { Role, User } from "../../../../models/User";
+import { selectCustomRouteParam } from "../../../../core/router/store/router.selectors";
 import * as UIActions from "../../../../core/ui/store/ui.actions";
 import { NOTIFICATION_LISTENER_TYPE } from "../../../../models/Notification";
+import { User } from "../../../../models/User";
+import { UsersService } from "../../services/users.service";
+import * as UsersActions from "../actions/users.actions";
+import { getActiveUserChanges, getNewPassword } from "../selectors/users.selectors";
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +20,9 @@ export class UsersEffects {
   constructor(
     private actions$: Actions,
     private usersService: UsersService,
-    private store: Store
-  ) {}
+    private store: Store<AppState>
+  ) {
+  }
 
   addUserEffect$ = createEffect(() => this.actions$.pipe(
     ofType(UsersActions.addUser),
@@ -27,7 +30,7 @@ export class UsersEffects {
       .pipe(
         concatMap((user) => [
           UsersActions.addUserSuccess({ user }),
-          RouterActions.go({ path: [`/users`] })
+          RouterActions.go({ path: [ `/users` ] })
         ]),
         catchError((err) => of(UsersActions.addUserFailed(err)))
       ))
@@ -45,15 +48,15 @@ export class UsersEffects {
   getUserFailedEffect$ = createEffect(() => this.actions$.pipe(
     ofType(UsersActions.getUserFailed),
     exhaustMap(() => [
-      RouterActions.go({ path: ["/users"] })
+      RouterActions.go({ path: [ "/users" ] })
     ])
   ));
 
   deleteUserEffect$ = createEffect(() => this.actions$.pipe(
     ofType(UsersActions.deleteUser),
-    exhaustMap(({ id  }) => this.usersService.deleteUser(id)
+    exhaustMap(({ id }) => this.usersService.deleteUser(id)
       .pipe(
-        map((user) => UsersActions.loadUsers({ query: { query: {}, options: { limit: 10, page: 1 } } })),
+        map((user) => UsersActions.loadUsers({ query: { page: 0, limit: 10 } })),
         catchError((err) => of(UsersActions.deleteUserFailed(err)))
       ))
   ));
@@ -75,22 +78,22 @@ export class UsersEffects {
   editUserEffect$ = createEffect(() => this.actions$.pipe(
     ofType(UsersActions.editUser),
     concatLatestFrom(() => [
-      this.store.select(getActiveUserChanges)
+      this.store.select(getActiveUserChanges),
+      this.store.select(selectCustomRouteParam("id"))
     ]),
-    exhaustMap(([_, changes]) => {
-      if(isNaN(changes.id!)) {
+    exhaustMap(([ _, changes, id ]) => {
+      if (id === 'new') {
         return of(UsersActions.addUser({
           user: {
             ...changes,
-            roles: (changes?.roles?.map((role) => ({ ...role, id: undefined })) ?? []) as Role[],
           }
         }));
       }
-      return this.usersService.editUser(changes?.id!, changes as User)
+      return this.usersService.editUser(id, changes as User)
         .pipe(
           concatMap((user) => [
             UsersActions.editUserSuccess({ user }),
-            RouterActions.go({ path: ["/users"] })
+            RouterActions.go({ path: [ "/users" ] })
           ]),
           catchError((err) => of(UsersActions.editUserFailed(err)))
         )
@@ -103,8 +106,8 @@ export class UsersEffects {
       concatLatestFrom(() => [
         this.store.select(getNewPassword)
       ]),
-      exhaustMap(([{ id }, newPassword]) => {
-        return this.usersService.changeUserPassword( id, { newPassword: (newPassword as string) })
+      exhaustMap(([ { id }, newPassword ]) => {
+        return this.usersService.changeUserPassword(id, { newPassword: (newPassword as string) })
           .pipe(
             concatMap(() => [
               UIActions.setUiNotification({
@@ -130,7 +133,12 @@ export class UsersEffects {
       UsersActions.deleteUserFailed,
     ]),
     exhaustMap((err) => [
-      UIActions.setUiNotification({ notification: { type: NOTIFICATION_LISTENER_TYPE.ERROR, message: err.error.reason?.message || "" } })
+      UIActions.setUiNotification({
+        notification: {
+          type: NOTIFICATION_LISTENER_TYPE.ERROR,
+          message: err.error.reason?.message || ""
+        }
+      })
     ])
   ));
 

@@ -14,28 +14,30 @@ import { HideByCodeSelectorDirective } from "../../../../shared/directives/hide-
 @Component({
   selector: 'app-view-settings',
   standalone: true,
-  imports: [CommonModule, ShowImageComponent, MatIconModule, HideByCodeSelectorDirective],
+  imports: [ CommonModule, ShowImageComponent, MatIconModule, HideByCodeSelectorDirective ],
   template: `
     <div class="flex flex-col gap-2">
       <div class="flex flex-row gap-4" *ngIf="profile$ | async as profile">
         <div class="flex flex-col basis-1/6">
-          <app-show-image [imageUrl]="profile?.avatarUrl || ''" [objectName]="profile?.username || ''"/>
+          <app-show-image [imageUrl]="profile?.photo || ''" [objectName]="profile?.name || ''"/>
         </div>
 
         <div class="flex flex-col justify-between basis-1/6">
           <div>
-            <button class="flex gap-1 items-center text-sm font-bold bg-foreground rounded-md px-4 py-1 default-shadow-hover cursor-pointer"
-                    (click)="navigateToEdit(profile?.id)">
+            <button
+              class="flex gap-1 items-center text-sm font-bold bg-foreground rounded-md px-4 py-1 default-shadow-hover cursor-pointer"
+              (click)="navigateToEdit(profile?.id)">
               <mat-icon class="icon-size material-symbols-rounded-filled cursor-pointer">edit</mat-icon>
               Modifica
             </button>
-            <div class="text-4xl pt-6 pb-4"> {{ profile.username }} </div>
-            <div class="text-2xl"> {{ profile.email }} </div>
+            <div class="text-4xl pt-6 pb-4"> {{ profile.name }}</div>
+            <div class="text-2xl"> {{ profile.surname }}</div>
           </div>
-          <div class="text-sm"> {{ "taf v. "+ appVersion }} </div>
+          <div class="text-sm"> {{ "taf v. " + appVersion }}</div>
         </div>
       </div>
-      <div *fbHideByCodeSelector="'settings.users.button-list'" (click)="navigateToUsers()" class="flex items-center justify-between text-md bg-foreground rounded-md p-3 cursor-pointer default-shadow">
+      <div *fbHideByCodeSelector="'settings.users.button-list'" (click)="navigateToUsers()"
+           class="flex items-center justify-between text-md bg-foreground rounded-md p-3 cursor-pointer default-shadow">
         <div class="flex items-center gap-2">
           <mat-icon class="icon-size material-symbols-rounded cursor-pointer">groups</mat-icon>
           Utenti
@@ -46,19 +48,18 @@ import { HideByCodeSelectorDirective } from "../../../../shared/directives/hide-
       </div>
     </div>
   `,
-  styles: [
-  ]
+  styles: []
 })
 export default class ViewSettingsComponent {
   store: Store<AppState> = inject(Store);
   profile$: Observable<Partial<User>> = this.store.select(getProfileUser);
   appVersion: string = environment.appVersion;
 
-  navigateToEdit(id: number | undefined) {
-    this.store.dispatch(RouterActions.go({ path: [`users/${id}`] }));
+  navigateToEdit(id: string | undefined) {
+    this.store.dispatch(RouterActions.go({ path: [ `users/${ id }` ] }));
   }
 
   navigateToUsers() {
-    this.store.dispatch(RouterActions.go({ path: [`users`] }));
+    this.store.dispatch(RouterActions.go({ path: [ `users` ] }));
   }
 }

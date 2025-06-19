@@ -1,37 +1,49 @@
-import { Component, EventEmitter, inject, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from "@angular/material/icon";
-import { FileService } from "./services/file.service";
-import { concatMap, map, mergeMap, of, Subject, takeUntil } from "rxjs";
+import { Component, EventEmitter, inject, Input, Output, TemplateRef, ViewChild } from '@angular/core';
+import { toSignal } from "@angular/core/rxjs-interop";
 import { MatDialog } from "@angular/material/dialog";
+import { MatIconModule } from "@angular/material/icon";
+import { Store } from "@ngrx/store";
+import { concatMap, map, mergeMap, of, Subject, takeUntil } from "rxjs";
+import { AppState } from "../../app.config";
+import { selectCustomRouteParam } from "../../core/router/store/router.selectors";
 import * as UIActions from "../../core/ui/store/ui.actions";
 import { NOTIFICATION_LISTENER_TYPE } from "../../models/Notification";
-import { Store } from "@ngrx/store";
-import { AppState } from "../../app.config";
+import { FileService } from "./services/file.service";
 
 @Component({
   selector: 'app-file-upload',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [ CommonModule, MatIconModule ],
   template: `
-    <div class="relative image-div flex flex-col justify-around bg-white p-2 border border-gray-200 rounded-lg text-center shadow cursor-pointer aspect-square hover:bg-gray-100 bg-cover bg-no-repeat bg-center h-full" (click)="input.click()"
-         [style.background-image]="'url('+ currentMainImage +')'" (mouseenter)="isImageHover = true" (mouseleave)="isImageHover = false">
+    <div
+      class="relative image-div flex flex-col justify-around bg-white p-2 border border-gray-200 rounded-lg text-center shadow cursor-pointer aspect-square hover:bg-gray-100 bg-cover bg-no-repeat bg-center h-full"
+      (click)="input.click()"
+      [style.background-image]="'url('+ currentMainImage +')'" (mouseenter)="isImageHover = true"
+      (mouseleave)="isImageHover = false">
       <div></div>
-      <input  type="file"
-              #input
-              [multiple]="multiple"
-              [disabled]="currentMainImage"
-              hidden
-              (change)="openChooseFileDialog($event)"
-              accept=".gif,.jpg,.jpeg,.png,.pdf">
+      <input type="file"
+             #input
+             [multiple]="multiple"
+             [disabled]="currentMainImage"
+             hidden
+             (change)="openChooseFileDialog($event)"
+             accept=".gif,.jpg,.jpeg,.png,.pdf">
 
       <div class="font-bold">
-        <mat-icon *ngIf="!currentMainImage" class="material-symbols-rounded scale-[3.5]" [ngClass]="{'invisible' : !!currentMainImage}">add</mat-icon>
+        <mat-icon *ngIf="!currentMainImage" class="material-symbols-rounded scale-[3.5]"
+                  [ngClass]="{'invisible' : !!currentMainImage}">add
+        </mat-icon>
 
         <div class="on-hover-images h-full flex items-center justify-center">
-          <div *ngIf="currentMainImage" class="absolute top-0 left-0 w-full h-full flex flex-col gap-16 justify-center items-center bg-white-trasparent">
-            <mat-icon (click)="viewMainImage(currentMainImage)" class="material-symbols-rounded blue bigger-icon">visibility</mat-icon>
-            <mat-icon (click)="deleteMainImage($event)" class="material-symbols-rounded text-red-600 bigger-icon">delete</mat-icon>
+          <div *ngIf="currentMainImage"
+               class="absolute top-0 left-0 w-full h-full flex flex-col gap-16 justify-center items-center bg-white-trasparent">
+            <mat-icon (click)="viewMainImage(currentMainImage)" class="material-symbols-rounded blue bigger-icon">
+              visibility
+            </mat-icon>
+            <mat-icon (click)="deleteMainImage($event)" class="material-symbols-rounded text-red-600 bigger-icon">
+              delete
+            </mat-icon>
           </div>
         </div>
       </div>
@@ -42,14 +54,15 @@ import { AppState } from "../../app.config";
       <img class="w-160" [src]="data?.url" alt=""/>
     </ng-template>
   `,
-  styles: [`
-    .image-div{}
+  styles: [ `
+    .image-div {
+    }
 
-    div.image-div .on-hover-images{
+    div.image-div .on-hover-images {
       visibility: hidden;
     }
 
-    div.image-div:hover .on-hover-images{
+    div.image-div:hover .on-hover-images {
       visibility: visible;
     }
 
@@ -66,7 +79,7 @@ import { AppState } from "../../app.config";
     .bg-white-trasparent {
       background-color: rgba(255, 255, 255, 0.5);
     }
-  `]
+  ` ]
 })
 export class FileUploadComponent {
   @Input({ required: false }) mainImage: string = "";
@@ -84,6 +97,7 @@ export class FileUploadComponent {
   imageService = inject(FileService);
   dialog = inject(MatDialog);
   store: Store<AppState> = inject(Store);
+  id = toSignal(this.store.select(selectCustomRouteParam("id")));
 
   isImageHover: boolean = false;
 
@@ -107,7 +121,7 @@ export class FileUploadComponent {
       concatMap(formData => {
         const ext = (formData.get("image") as any)?.name?.split(".");
 
-        if(ext[ext.length - 1] === "pdf" && this.onlyImages) {
+        if (ext[ext.length - 1] === "pdf" && this.onlyImages) {
           this.store.dispatch(UIActions.setUiNotification({
             notification: {
               type: NOTIFICATION_LISTENER_TYPE.WARNING,
@@ -117,19 +131,19 @@ export class FileUploadComponent {
           return of(undefined);
         }
 
-        if(this.onlyImages || ext[ext.length - 1] !== "pdf") {
-          return this.imageService.uploadImage(formData);
+        if (this.onlyImages || ext[ext.length - 1] !== "pdf") {
+          return this.imageService.uploadImage(formData, this.id());
         }
 
-        if(ext[ext.length - 1] === "pdf") {
-          return this.imageService.uploadPdf(formData);
-        }
+        /*        if(ext[ext.length - 1] === "pdf") {
+                  return this.imageService.uploadPdf(formData);
+                }*/
 
         return of(undefined);
       }),
       takeUntil(this.subject)
     ).subscribe(res => {
-      if(!res) {
+      if (!res) {
         return;
       }
 
@@ -140,7 +154,7 @@ export class FileUploadComponent {
   viewMainImage(url: string | any) {
     this.dialog.open(this.showImagePreview, {
       backdropClass: "blur-filter",
-      data: <{ url: string }> {
+      data: <{ url: string }>{
         url
       }
     });
