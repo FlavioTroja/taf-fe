@@ -40,7 +40,8 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/taf-fe:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/taf-fe:${{ github.ref == 'refs/heads/develop' && 'staging' || 'latest' }}
 
   deploy:
     name: SSH deploy to production server

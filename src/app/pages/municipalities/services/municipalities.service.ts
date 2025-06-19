@@ -16,10 +16,6 @@ export class MunicipalitiesService {
   cookieService = inject(CookieService);
 
   loadMunicipalities() {
-    const municipalityId = this.cookieService.get('municipalityId');
-
-    console.log('Municipality ID from cookie:', municipalityId);
-
     return this.http.get<PaginateDatasource<Municipality>>(`${BASE_URL}/municipals`);
   }
 }
