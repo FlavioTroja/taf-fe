@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   appVersion: require('../../package.json').version,
-  BASE_URL: "https://autismfriendly.over/api"
+  BASE_URL: "https://autismfriendly.overzoom/api"
 };
