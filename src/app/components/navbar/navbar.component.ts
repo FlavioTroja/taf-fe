@@ -1,21 +1,21 @@
-import {Component, effect, EventEmitter, inject, Input, Output} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IfLoggedDirective } from "../../shared/directives/if-logged.directive";
+import { Component, effect, EventEmitter, inject, Input, Output } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import { MatIconModule } from "@angular/material/icon";
-import { ButtonComponent } from "../button/button.component";
 import { MemoizedSelector, Store } from "@ngrx/store";
+import { Observable, of } from "rxjs";
 import { AppState } from "../../app.config";
 import * as RouterActions from "../../core/router/store/router.actions";
 import { getRouterData, getRouterNavigationId, selectCustomRouteParam } from "../../core/router/store/router.selectors";
-import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import { NavBarButton, NavBarButtonDialog } from "../../models/NavBar";
-import { Observable, of } from "rxjs";
 import { HideByCodeSelectorDirective } from "../../shared/directives/hide-by-code-selector.directive";
+import { IfLoggedDirective } from "../../shared/directives/if-logged.directive";
+import { ButtonComponent } from "../button/button.component";
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, IfLoggedDirective, MatIconModule, ButtonComponent, HideByCodeSelectorDirective],
+  imports: [ CommonModule, IfLoggedDirective, MatIconModule, ButtonComponent, HideByCodeSelectorDirective ],
   template: `
     <div *fbIfLogged class="flex justify-between items-center w-full h-[3.5rem] min-h-[3.5rem]">
       <div class="flex items-center gap-1">
@@ -51,7 +51,11 @@ export class NavbarComponent {
 
   @Input() isMobile: boolean = false;
 
-  @Output() onButtonClick = new EventEmitter<{ action: string, navigate?: string, dialog?: NavBarButtonDialog<any, any> }>();
+  @Output() onButtonClick = new EventEmitter<{
+    action: string,
+    navigate?: string,
+    dialog?: NavBarButtonDialog<any, any>
+  }>();
 
   constructor() {
     this.store.select(getRouterNavigationId).pipe(
@@ -63,11 +67,11 @@ export class NavbarComponent {
         return;
       }
 
-      this.title = this.getCurrentTitle(this.routerData$()!["title"], +this.id());
+      this.title = this.getCurrentTitle(this.routerData$()!["title"], this.id());
       this.buttons = this.routerData$()!["buttons"];
       this.backPath = this.routerData$()!["backAction"];
 
-      if(this.routerData$()!["backActionSelector"]) {
+      if (this.routerData$()!["backActionSelector"]) {
         this.store.select(this.routerData$()!["backActionSelector"][0]).subscribe(previousUrl => {
           this.backPath = previousUrl ?? this.routerData$()!["backAction"];
         })
@@ -76,13 +80,13 @@ export class NavbarComponent {
     });
   }
 
-  getCurrentTitle(curr: { default: string, other: string }, id: number) {
+  getCurrentTitle(curr: { default: string, other: string }, id: string) {
     if (!curr?.other) {
       return curr?.default || "";
     }
-    if(isNaN(id)) {
-      return curr.other;
-    }
+
+    if (id === 'new') return curr?.other
+
     return curr.default;
   }
 
@@ -95,7 +99,7 @@ export class NavbarComponent {
   }
 
   showButton(hidden?: MemoizedSelector<any, any>): Observable<boolean> {
-    if(!hidden) {
+    if (!hidden) {
       return of(true);
     }
     return this.store.select(hidden);

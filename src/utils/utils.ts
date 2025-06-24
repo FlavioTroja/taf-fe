@@ -135,16 +135,18 @@ export function hasRoles(currentUser: Partial<User>, roles: { role: Roles, requi
   }
 
   //check if user has god
-  if (currentUser.roles.some(role => (role.roleName === Roles.GOD && role.isActive))) {
+  if (currentUser.roles.some(role => (role === Roles.GOD))) {
     return true;
   }
 
-  //check if the roles have at least one required
-  if (roles.some(e => e.required)) {
-    //check every role in the given roles for its existence in the user
-    return roles.every(role => currentUser.roles!.some(currentUserRole => (currentUserRole.roleName === role.role && currentUserRole.isActive)));
-  }
+  return
+  /*
+    //check if the roles have at least one required
+    if (roles.some(e => e.required)) {
+      //check every role in the given roles for its existence in the user
+      return roles.every(role => currentUser.roles!.some(currentUserRole => (currentUserRole.roleName === role.role && currentUserRole.isActive)));
+    }
 
-  //check if any role in the given roles exists in the user
-  return roles.some(role => currentUser.roles!.some(currentUserRole => (currentUserRole.roleName === role.role && currentUserRole.isActive)));
+    //check if any role in the given roles exists in the user
+    return roles.some(role => currentUser.roles!.some(currentUserRole => (currentUserRole.roleName === role.role && currentUserRole.isActive)));*/
 }

@@ -5,6 +5,19 @@ export interface Query<T> {
   options?: QueryOptions
 }
 
+export interface QuerySearch {
+  page: number,
+  limit: number,
+  search?: string,
+  filters?: object,
+  sort?: SortSearch
+}
+
+export interface SortSearch {
+  name?: "asc" | "desc",
+  surname?: "asc" | "desc",
+}
+
 export interface QueryOptions {
   limit?: number,
   page?: number,
@@ -31,6 +44,7 @@ export interface UiButton {
   iconName: string,
   isLoading: boolean
 }
+
 export interface UIButtons {
   buttons: UiButton[]
 }

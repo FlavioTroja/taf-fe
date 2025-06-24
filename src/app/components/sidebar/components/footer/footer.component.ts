@@ -1,18 +1,18 @@
-import { Component, inject, Input } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Component, inject, Input } from '@angular/core';
+import { toSignal } from "@angular/core/rxjs-interop";
 import { MatIconModule } from "@angular/material/icon";
-import { uiToggleSidebarCollapsed } from "../../../../core/ui/store/ui.actions";
-import * as AuthActions from "../../../../core/auth/store/auth.actions";
 import { Store } from "@ngrx/store";
 import { AppState } from "../../../../app.config";
-import { toSignal } from "@angular/core/rxjs-interop";
+import * as AuthActions from "../../../../core/auth/store/auth.actions";
 import { getProfileUser } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
+import { uiToggleSidebarCollapsed } from "../../../../core/ui/store/ui.actions";
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, MatIconModule, NgOptimizedImage],
+  imports: [ CommonModule, MatIconModule, NgOptimizedImage ],
   template: `
     <div class="flex justify-between items-center duration-700 ease-in-out pt-2 gap-2" [ngClass]="{
       'flex-col-reverse': collapsed,
@@ -21,7 +21,7 @@ import * as RouterActions from "../../../../core/router/store/router.actions";
       <div class="flex gap-2">
         <img class="rounded-full" width="48" height="48" [ngSrc]="getProfileImage()" priority>
         <div class="flex flex-col" *ngIf="!collapsed">
-          <div class="font-bold"> {{ profile()!.username }} </div>
+          <div class="font-bold"> {{ profile()!.name }}</div>
           <div class="flex gap-1.5 text-xs cursor-pointer">
             <div class="opacity-50 hover:opacity-100 duration-100 ease-in-out" (click)="goToSettings()"> Settings</div>
             <div class="opacity-50 hover:opacity-100 duration-100 ease-in-out" (click)="logout()"> Logout</div>
@@ -37,8 +37,7 @@ import * as RouterActions from "../../../../core/router/store/router.actions";
       </mat-icon>
     </div>
   `,
-  styles: [
-  ]
+  styles: []
 })
 export class FooterComponent {
 
@@ -54,7 +53,7 @@ export class FooterComponent {
     if (!this.profile()) {
       return "";
     }
-    return this.profile()!.avatarUrl ? this.profile()!.avatarUrl! : `https://eu.ui-avatars.com/api/?name=${this.profile()?.username}&rounded=true&size=48`;
+    return this.profile()!.photo ? this.profile()!.photo! : `https://eu.ui-avatars.com/api/?name=${ this.profile()?.name }&rounded=true&size=48`;
   }
 
   goToSettings() {

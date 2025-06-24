@@ -1,5 +1,5 @@
 import { createSelector } from "@ngrx/store";
-import { UserManagementState, selectUsersManager } from "../reducers";
+import { selectUsersManager, UserManagementState } from "../reducers";
 
 export const getUsersPaginate = createSelector(
   selectUsersManager,
@@ -9,6 +9,11 @@ export const getUsersPaginate = createSelector(
 export const getCurrentUser = createSelector(
   selectUsersManager,
   (state?: UserManagementState) => state?.active?.current
+)
+
+export const selectActiveUserRoles = createSelector(
+  selectUsersManager,
+  (state?: UserManagementState) => state?.active?.current?.roles
 )
 
 export const getActiveUserChanges = createSelector(
