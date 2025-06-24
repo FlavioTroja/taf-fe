@@ -1,0 +1,68 @@
+name: Build & Deploy Angular Docker Image to Staging
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-push:
+    name: Build and push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Build the Angular app
+        run: |
+          npm run build -- --configuration staging
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/taf-fe:staging
+
+  deploy:
+    name: SSH deploy to staging server
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (for consistency)
+        uses: actions/checkout@v4
+
+      - name: Deploy on Staging Server
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /home/manager/orchestrator/taf
+
+            # Update Docker image for staging
+            docker compose pull taf-fe-staging
+
+            # Recreate only the staging service
+            docker compose up -d taf-fe-staging
