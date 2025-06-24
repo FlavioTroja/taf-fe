@@ -6,8 +6,9 @@ export enum NAVBAR_ACTION {
 
   HOME = "HOME",
 
-  // Municipality section
   MUNICIPAL_SAVE = "MUNICIPAL_SAVE",
+  ACTIVITY_SAVE = "ACTIVITY_SAVE",
+  NEWS_SAVE = "NEWS_SAVE",
 
   USERS_CREATE = "USERS_CREATE",
   USERS_EDIT = "USERS_EDIT",
@@ -16,6 +17,7 @@ export enum NAVBAR_ACTION {
   // Users section
   USER_SAVE = "USER_SAVE",
   USER_NAVIGATE_ON_MODIFY = "USER_NAVIGATE_ON_MODIFY",
+  ACTIVITY_NAVIGATE_ON_MODIFY = "ACTIVITY_NAVIGATE_ON_MODIFY",
 }
 
 export interface NavBarButton<T, Q> {

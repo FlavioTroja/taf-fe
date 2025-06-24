@@ -13,22 +13,22 @@ import { SearchComponent } from "../../../../components/search/search.component"
 import { TableSkeletonComponent } from "../../../../components/skeleton/table-skeleton.component";
 import { TableComponent } from "../../../../components/table/table.component";
 import * as RouterActions from "../../../../core/router/store/router.actions";
-import { PartialMunicipal } from "../../../../models/Municipals";
+import { PartialNews } from "../../../../models/News";
 import { Sort, Table, TableButton } from "../../../../models/Table";
-import * as MunicipalsActions from "../../store/actions/municipals.actions";
-import { loadMunicipals } from "../../store/actions/municipals.actions";
-import { getMunicipalsPaginate } from "../../store/selectors/municipals.selectors";
+import * as NewsActions from "../../store/actions/news.actions";
+import { loadNews } from "../../store/actions/news.actions";
+import { getNewsPaginate } from "../../store/selectors/news.selectors";
 
 @Component({
-  selector: 'app-municipals',
+  selector: 'app-edits',
   standalone: true,
   imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent ],
   template: `
     <div class="grid gap-3">
       <app-search [search]="search"/>
-      <div *ngIf="municipalPaginate$ | async as municipalPaginate else skeleton">
+      <div *ngIf="newsPaginate$ | async as newsPaginate else skeleton">
         <app-table
-          [dataSource]="municipalPaginate"
+          [dataSource]="newsPaginate"
           [columns]="columns"
           [displayedColumns]="displayedColumns"
           [paginator]="paginator"
@@ -40,16 +40,24 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
     </div>
 
 
-    <ng-template #cityRow let-row>
-      <div>{{ row.city }}</div>
+    <ng-template #titleRow let-row>
+      <div>{{ row.title }}</div>
     </ng-template>
 
-    <ng-template #provinceRow let-row>
-      <div>{{ row.province }}</div>
+    <ng-template #contentRow let-row>
+      <div>{{ row.content }}</div>
     </ng-template>
 
-    <ng-template #regionRow let-row>
-      <div>{{ row.region }}</div>
+    <ng-template #authorRow let-row>
+      <div>{{ row.author }}</div>
+    </ng-template>
+
+    <ng-template #publicationDateRow let-row>
+      <div>{{ row.publicationDate }}</div>
+    </ng-template>
+
+    <ng-template #tagsRow let-row>
+      <div>{{ row.tags }}</div>
     </ng-template>
 
     <ng-template #skeleton>
@@ -58,24 +66,26 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
   `,
   styles: [ `` ]
 })
-export default class ActivitiesComponent implements AfterViewInit {
-  @ViewChild("cityRow") cityRow: TemplateRef<any> | undefined;
-  @ViewChild("provinceRow") provinceRow: TemplateRef<any> | undefined;
-  @ViewChild("regionRow") regionRow: TemplateRef<any> | undefined;
+export default class NewsComponent implements AfterViewInit {
+  @ViewChild("titleRow") titleRow: TemplateRef<any> | undefined;
+  @ViewChild("contentRow") contentRow: TemplateRef<any> | undefined;
+  @ViewChild("authorRow") authorRow: TemplateRef<any> | undefined;
+  @ViewChild("publicationDateRow") publicationDateRow: TemplateRef<any> | undefined;
+  @ViewChild("tagsRow") tagsRow: TemplateRef<any> | undefined;
 
   store: Store<AppState> = inject(Store);
-  municipalPaginate$ = this.store.select(getMunicipalsPaginate);
+  newsPaginate$ = this.store.select(getNewsPaginate);
   dialog = inject(MatDialog);
 
   columns: any[] = [];
   displayedColumns: string[] = [];
 
-  buttons: TableButton<PartialMunicipal>[] = [
+  buttons: TableButton<PartialNews>[] = [
     { iconName: "delete", bgColor: "red", callback: elem => this.openDialog(elem) },
     {
       iconName: "edit",
       bgColor: "orange",
-      callback: elem => this.store.dispatch(RouterActions.go({ path: [ `municipals/${ elem.id }` ] }))
+      callback: elem => this.store.dispatch(RouterActions.go({ path: [ `news/${ elem.id }` ] }))
     },
   ];
 
@@ -84,7 +94,7 @@ export default class ActivitiesComponent implements AfterViewInit {
     pageSize: 10
   });
 
-  sorter: WritableSignal<Sort[]> = signal([ { active: "createdAt", direction: "desc" } ]);
+  sorter: WritableSignal<Sort[]> = signal([ { active: "name", direction: "desc" } ]);
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
@@ -97,35 +107,47 @@ export default class ActivitiesComponent implements AfterViewInit {
     Promise.resolve(null).then(() => {
       this.columns = [
         {
-          columnDef: 'city',
-          header: 'Città',
-          width: "15rem",
-          template: this.cityRow,
+          columnDef: 'title',
+          header: 'Titolo',
+          width: "10rem",
+          template: this.titleRow,
         },
         {
-          columnDef: 'province',
-          header: 'Provincia',
-          width: "5rem",
-          template: this.provinceRow,
+          columnDef: 'content',
+          header: 'Contenuto',
+          width: "10rem",
+          template: this.contentRow,
         },
         {
-          columnDef: 'region',
-          header: 'Regione',
-          width: "15rem",
-          template: this.regionRow,
+          columnDef: 'author',
+          header: 'Autore',
+          width: "10rem",
+          template: this.authorRow,
+        },
+        {
+          columnDef: 'publicationDate',
+          header: 'Data di Pubblicazione',
+          width: "10rem",
+          template: this.publicationDateRow,
+        },
+        {
+          columnDef: 'tags',
+          header: 'Tags',
+          width: "10rem",
+          template: this.tagsRow,
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
     })
   }
 
-  openDialog(municipal: PartialMunicipal) {
+  openDialog(news: PartialNews) {
     const dialogRef: any = this.dialog.open(ModalComponent, {
       backdropClass: "blur-filter",
       data: <ModalDialogData>{
         title: "Conferma rimozione",
         content: `
-        Si sta eliminando il comune di ${ municipal.city }.
+        Si sta eliminando l'attività di nome ${ news.title }.
         <br>
         Questa operazione non è reversibile.
         `,
@@ -140,17 +162,17 @@ export default class ActivitiesComponent implements AfterViewInit {
       if (!result) {
         return;
       }
-      this.deleteMunicipal(municipal);
+      this.deleteNews(news);
     });
   }
 
   constructor() {
-    this.store.dispatch(loadMunicipals())
+    this.store.dispatch(loadNews())
 
   }
 
-  private deleteMunicipal(row: PartialMunicipal) {
-    this.store.dispatch(MunicipalsActions.deleteMunicipal({ id: row.id! }));
+  private deleteNews(row: PartialNews) {
+    this.store.dispatch(NewsActions.deleteNews({ id: row.id! }));
   }
 
   changePage(evt: number) {

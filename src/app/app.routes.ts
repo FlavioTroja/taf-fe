@@ -3,10 +3,14 @@ import { provideEffects } from "@ngrx/effects";
 import { provideState } from "@ngrx/store";
 import NotFoundComponent from "./components/not-found/not-found.component";
 import { AuthGuard } from "./core/auth/services/auth.guard";
+import { ActivitiesEffects } from "./pages/activities/store/effects/activities.effects";
+import { reducers as activitiesManagementReducers } from "./pages/activities/store/reducers";
 import { DashboardEffect } from './pages/home/store/effects/dashboard.effects';
 import { reducers as dashboardManagementReducers } from "./pages/home/store/reducers";
 import { MunicipalsEffects } from "./pages/municipals/store/effects/municipals.effects";
 import { reducers as municipalsManagementReducers } from "./pages/municipals/store/reducers";
+import { NewsEffects } from "./pages/news/store/effects/news.effects";
+import { reducers as newsManagementReducers } from "./pages/news/store/reducers";
 import { RoleNamesEffects } from "./pages/users/store/effects/roleNames.effects";
 import { UsersEffects } from "./pages/users/store/effects/users.effects";
 import { reducers as userManagementReducers } from "./pages/users/store/reducers";
@@ -46,6 +50,24 @@ export const routes: Routes = [
       provideEffects([ MunicipalsEffects ])
     ],
     loadChildren: () => import("./pages/municipals/municipals.routing")
+  },
+  {
+    path: 'activities',
+    canActivate: [ AuthGuard ],
+    providers: [
+      provideState('activities-manager', activitiesManagementReducers),
+      provideEffects([ ActivitiesEffects ])
+    ],
+    loadChildren: () => import("./pages/activities/activities.routing")
+  },
+  {
+    path: 'news',
+    canActivate: [ AuthGuard ],
+    providers: [
+      provideState('news-manager', newsManagementReducers),
+      provideEffects([ NewsEffects ])
+    ],
+    loadChildren: () => import("./pages/news/news.routing")
   },
   {
     path: "users",

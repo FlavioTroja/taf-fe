@@ -8,10 +8,8 @@ export interface Query<T> {
 export interface QuerySearch {
   page: number,
   limit: number,
-  filters?: {
-    name?: string,
-    surname?: string
-  },
+  search?: string,
+  filters?: object,
   sort?: SortSearch
 }
 

@@ -14,31 +14,31 @@ import { FormControl } from "@angular/forms";
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
-import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { distinctUntilChanged } from "rxjs";
+import { debounceTime } from "rxjs/operators";
 import { QuerySearch, SortSearch } from "../../../../../global";
 import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
-import { ShowImageComponent } from "../../../../components/show-image/show-image.component";
 import { TableSkeletonComponent } from "../../../../components/skeleton/table-skeleton.component";
 import { TableComponent } from "../../../../components/table/table.component";
 import * as RouterActions from "../../../../core/router/store/router.actions";
+import { PartialActivity } from "../../../../models/Activities";
 import { Sort, Table, TableButton } from "../../../../models/Table";
-import { PartialUser, Roles } from "../../../../models/User";
-import * as UserActions from "../../../users/store/actions/users.actions";
-import { getUsersPaginate } from "../../store/selectors/users.selectors";
+import * as ActivitiesActions from "../../store/actions/activities.actions";
+import { getActivitiesPaginate } from "../../store/selectors/activities.selectors";
 
 @Component({
-  selector: 'app-list-user',
+  selector: 'app-activities',
   standalone: true,
-  imports: [ CommonModule, MatIconModule, SearchComponent, TableComponent, TableSkeletonComponent, MatDialogModule, ShowImageComponent ],
+  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent ],
   template: `
     <div class="grid gap-3">
       <app-search [search]="search"/>
-      <div *ngIf="userPaginate$ | async as userPaginate else skeleton">
+      <div *ngIf="activitiesPaginate$ | async as activitiesPaginate else skeleton">
         <app-table
-          [dataSource]="userPaginate"
+          [dataSource]="activitiesPaginate"
           [columns]="columns"
           [displayedColumns]="displayedColumns"
           [paginator]="paginator"
@@ -50,41 +50,45 @@ import { getUsersPaginate } from "../../store/selectors/users.selectors";
     </div>
 
 
-    <ng-template #imageRow let-row>
-      <app-show-image classes="w-16 h-16" [imageUrl]="row.avatarUrl || ''" [objectName]="row.name"/>
-    </ng-template>
-
     <ng-template #nameRow let-row>
-      <div class="flex">
-          <span *ngIf="!!row.name"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-md shadow-sm accent text-sm font-medium"
-                href="row.email">
-           {{ row.name }}
-          </span>
-      </div>
-
+      <div>{{ row.name }}</div>
     </ng-template>
 
-    <ng-template #surnameRow let-row>
-      <div class="flex">
-          <span *ngIf="!!row.name"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-md shadow-sm accent text-sm font-medium"
-                href="row.email">
-           {{ row.surname }}
-          </span>
-      </div>
-
+    <ng-template #addressRow let-row>
+      <div>{{ row.address }}</div>
     </ng-template>
 
-    <ng-template #birthDateRow let-row>
-      <div>{{ row.birthDate }}</div>
+    <ng-template #phoneRow let-row>
+      <div>{{ row.phone }}</div>
     </ng-template>
 
-    <ng-template #rolesRow let-row>
+    <ng-template #emailRow let-row>
+      <div>{{ row.email }}</div>
+    </ng-template>
+
+    <ng-template #openingHoursRow let-row>
       <div class="flex flex-wrap gap-1">
-        <div class="gap-1" *ngFor="let role of row.roles">
+        <div class="gap-1" *ngFor="let hour of row.openingHours">
           <span
-            class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">{{ role === Roles.ROLE_ADMIN ? 'ADMIN' : 'USER' }}</span>
+            class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">{{ hour }}</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #typeRow let-row>
+      <div class="flex flex-wrap gap-1">
+        <span
+          class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">
+            {{ row.type }}
+          </span>
+      </div>
+    </ng-template>
+
+    <ng-template #tagsRow let-row>
+      <div class="flex flex-wrap gap-1">
+        <div class="gap-1" *ngFor="let tag of row.tags">
+          <span
+            class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">{{ tag }}</span>
         </div>
       </div>
     </ng-template>
@@ -93,32 +97,35 @@ import { getUsersPaginate } from "../../store/selectors/users.selectors";
       <app-table-skeleton [columns]="columns"/>
     </ng-template>
   `,
-  styles: []
+  styles: [ `` ]
 })
-export default class UsersComponent implements AfterViewInit {
-  @ViewChild("imageRow") imageRow: TemplateRef<any> | undefined;
+export default class ActivitiesComponent implements AfterViewInit {
   @ViewChild("nameRow") nameRow: TemplateRef<any> | undefined;
-  @ViewChild("surnameRow") surnameRow: TemplateRef<any> | undefined;
-  @ViewChild("birthDateRow") birthDateRow: TemplateRef<any> | undefined;
-  @ViewChild("rolesRow") rolesRow: TemplateRef<any> | undefined;
+  @ViewChild("addressRow") addressRow: TemplateRef<any> | undefined;
+  @ViewChild("phoneRow") phoneRow: TemplateRef<any> | undefined;
+  @ViewChild("emailRow") emailRow: TemplateRef<any> | undefined;
+  @ViewChild("openingHoursRow") openingHoursRow: TemplateRef<any> | undefined;
+  @ViewChild("typeRow") typeRow: TemplateRef<any> | undefined;
+  @ViewChild("tagsRow") tagsRow: TemplateRef<any> | undefined;
 
   store: Store<AppState> = inject(Store);
-  userPaginate$ = this.store.select(getUsersPaginate);
+  activitiesPaginate$ = this.store.select(getActivitiesPaginate);
   dialog = inject(MatDialog);
 
   columns: any[] = [];
   displayedColumns: string[] = [];
 
-  buttons: TableButton<PartialUser>[] = [
+  buttons: TableButton<PartialActivity>[] = [
+    { iconName: "delete", bgColor: "red", callback: elem => this.openDialog(elem) },
     {
       iconName: "edit",
       bgColor: "orange",
-      callback: elem => this.store.dispatch(RouterActions.go({ path: [ `users/${ elem.id }` ] }))
+      callback: elem => this.store.dispatch(RouterActions.go({ path: [ `activities/${ elem.id }` ] }))
     },
     {
       iconName: "visibility",
       bgColor: "sky",
-      callback: elem => this.store.dispatch(RouterActions.go({ path: [ `users/${ elem.id }/view` ] }))
+      callback: elem => this.store.dispatch(RouterActions.go({ path: [ `activities/${ elem.id }/view` ] }))
     }
   ];
 
@@ -131,60 +138,68 @@ export default class UsersComponent implements AfterViewInit {
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
-    debounceTime(500),
+    debounceTime(250),
     distinctUntilChanged(),
   ));
 
   ngAfterViewInit() {
+
     Promise.resolve(null).then(() => {
       this.columns = [
         {
-          columnDef: 'image',
-          header: 'Foto',
-          template: this.imageRow,
-          width: "5rem",
-          sortable: false
-        },
-        {
           columnDef: 'name',
           header: 'Nome',
-          template: this.nameRow,
-          width: "10rem",
-          sortable: true
-        },
-        {
-          columnDef: 'surname',
-          header: 'Cognome',
-          template: this.surnameRow,
-          width: "10rem",
-          sortable: true
-        },
-        {
-          columnDef: 'birthDate',
-          header: 'Data di Nascita',
-          template: this.birthDateRow,
           width: "15rem",
-          sortable: true
+          template: this.nameRow,
         },
         {
-          columnDef: 'roles',
-          header: 'Ruoli',
-          template: this.rolesRow,
-          width: "12rem",
-          sortable: false
+          columnDef: 'address',
+          header: 'Indirizzo',
+          width: "10rem",
+          template: this.addressRow,
+        },
+        {
+          columnDef: 'phone',
+          header: 'Telefono',
+          width: "8rem",
+          template: this.phoneRow,
+        },
+        {
+          columnDef: 'email',
+          header: 'Email',
+          width: "15rem",
+          template: this.emailRow,
+        },
+        {
+          columnDef: 'openingHours',
+          header: 'Orari di Apertura',
+          width: "15rem",
+          template: this.openingHoursRow,
+        },
+        {
+          columnDef: 'type',
+          header: 'Tipo',
+          width: "10rem",
+          template: this.typeRow,
+        },
+        {
+          columnDef: 'tags',
+          header: 'Tags',
+          width: "10rem",
+          template: this.tagsRow,
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
     })
   }
 
-  openDialog(user: PartialUser) {
+  openDialog(activity: PartialActivity) {
     const dialogRef: any = this.dialog.open(ModalComponent, {
       backdropClass: "blur-filter",
       data: <ModalDialogData>{
         title: "Conferma rimozione",
         content: `
-        Si sta eliminando il cliente ${ user.surname }.
+        Si sta eliminando l'attività di nome ${ activity.name }.
         <br>
         Questa operazione non è reversibile.
         `,
@@ -199,7 +214,7 @@ export default class UsersComponent implements AfterViewInit {
       if (!result) {
         return;
       }
-      this.deleteUser(user);
+      this.deleteActivity(activity);
     });
   }
 
@@ -214,13 +229,13 @@ export default class UsersComponent implements AfterViewInit {
       }
 
       this.store.dispatch(
-        UserActions.loadUsers({ query })
+        ActivitiesActions.loadActivities({ query })
       );
     }, { allowSignalWrites: true })
   }
 
-  private deleteUser(row: PartialUser) {
-    this.store.dispatch(UserActions.deleteUser({ id: row.id! }));
+  private deleteActivity(row: PartialActivity) {
+    this.store.dispatch(ActivitiesActions.deleteActivity({ id: row.id! }));
   }
 
   changePage(evt: number) {
@@ -238,6 +253,4 @@ export default class UsersComponent implements AfterViewInit {
       value[0] = (evt?.direction === "asc" || evt?.direction === "desc" ? evt : {} as Sort);
     });
   }
-
-  protected readonly Roles = Roles;
 }

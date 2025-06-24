@@ -10,8 +10,20 @@ const BASE_URL = environment.BASE_URL;
 export class FileService {
   http = inject(HttpClient);
 
-  uploadImage(payload: FormData, id: string) {
-    return this.http.post<{ url: string }>(`${ BASE_URL }/images/upload`, payload);
+  uploadUserImage(payload: FormData, id: string) {
+    return this.http.post<{ url: string }>(`${ BASE_URL }/users/${ id }/upload-foto`, payload);
+  }
+
+  uploadGalleryImage(formData: FormData, id: string) {
+    return this.http.post<{ url: string }>(`${ BASE_URL }/activities/${ id }/upload-gallery`, formData);
+  }
+
+  uploadLogoImage(formData: FormData, id: string) {
+    return this.http.post<{ url: string }>(`${ BASE_URL }/activities/${ id }/upload-logo`, formData)
+  }
+
+  updateCoverImage(formData: FormData, id: string) {
+    return this.http.post<{ url: string }>(`${ BASE_URL }/activities/${ id }/upload-cover`, formData)
   }
 
   /*

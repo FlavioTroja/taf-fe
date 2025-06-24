@@ -19,7 +19,8 @@ import { FileService } from "./services/file.service";
     <div
       class="relative image-div flex flex-col justify-around bg-white p-2 border border-gray-200 rounded-lg text-center shadow cursor-pointer aspect-square hover:bg-gray-100 bg-cover bg-no-repeat bg-center h-full"
       (click)="input.click()"
-      [style.background-image]="'url('+ currentMainImage +')'" (mouseenter)="isImageHover = true"
+      [style.background-image]="currentMainImage ? 'url('+ currentMainImage +')' : 'unset'"
+      (mouseenter)="isImageHover = true"
       (mouseleave)="isImageHover = false">
       <div></div>
       <input type="file"
@@ -87,6 +88,7 @@ export class FileUploadComponent {
   @Input({ required: false }) multiple: boolean = true;
   @Input({ required: false }) images: string[] = [];
   @Input({ required: false }) onlyImages: boolean = false;
+  @Input({ required: false }) forImageService: string = '';
 
   @Output() onUpload = new EventEmitter<string[]>();
   @Output() onDeleteMainImage = new EventEmitter();
@@ -132,7 +134,17 @@ export class FileUploadComponent {
         }
 
         if (this.onlyImages || ext[ext.length - 1] !== "pdf") {
-          return this.imageService.uploadImage(formData, this.id());
+
+          switch (this.forImageService) {
+            case 'USER':
+              return this.imageService.uploadUserImage(formData, this.id());
+            case 'ACTIVITY_UPLOAD_GALLERY':
+              return this.imageService.uploadGalleryImage(formData, this.id());
+            case 'ACTIVITY_UPLOAD_LOGO':
+              return this.imageService.uploadLogoImage(formData, this.id());
+            case 'ACTIVITY_UPLOAD_COVER':
+              return this.imageService.updateCoverImage(formData, this.id());
+          }
         }
 
         /*        if(ext[ext.length - 1] === "pdf") {

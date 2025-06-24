@@ -23,5 +23,15 @@ export const sidebarRoutes: RouteElement[] = [
     iconName: 'location_city',
     path: '/municipals',
     label: "Comuni",
+  },
+  {
+    iconName: 'overview',
+    path: '/activities',
+    label: "Attività",
+  },
+  {
+    iconName: 'campaign',
+    path: '/news',
+    label: "News",
   }
 ];

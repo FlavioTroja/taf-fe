@@ -52,19 +52,10 @@ interface ChangePasswordForm {
                 <input type="file"
                        #input
                        hidden
-                       (change)="openChooseFileDialog($event)"
+                       (change)="replaceImage($event)"
                        accept=".gif,.jpg,.jpeg,.png">
                 Sostituisci
               </div>
-            </div>
-
-            <div class="flex flex-row">
-              <button class="flex items-center p-2 rounded-lg shadow-md default-shadow-hover error"
-                      (click)="removeProfilePic()">
-                <mat-icon class="icon-size material-symbols-rounded">delete</mat-icon>
-                Rimuovi
-              </button>
-
             </div>
           </div>
 
@@ -212,10 +203,10 @@ export default class EditUserComponent implements OnInit, OnDestroy {
 
   userForm = this.fb.group({
     name: [ { value: "", disabled: this.viewOnly() }, Validators.required ],
-    surname: [ { value: "", disabled: this.viewOnly() } ],
+    surname: [ { value: "", disabled: this.viewOnly() }, Validators.required ],
     // password: [ { value: "", disabled: this.viewOnly() } ],
     // email: [ { value: "", disabled: this.viewOnly() } ],
-    birthDate: [ { value: new Date(), disabled: this.viewOnly() }, Validators.required ],
+    birthDate: [ { value: null, disabled: this.viewOnly() } ],
     photo: [ "" ]
   });
 
@@ -330,7 +321,7 @@ export default class EditUserComponent implements OnInit, OnDestroy {
     });
   }
 
-  openChooseFileDialog(event: any) {
+  replaceImage(event: any) {
 
     const files: File[] = event.target.files;
     if (files.length === 0) {
@@ -343,7 +334,7 @@ export default class EditUserComponent implements OnInit, OnDestroy {
         formData.append("image", file, file.name);
         return formData;
       }),
-      concatMap(formData => this.imageService.uploadImage(formData, this.id())),
+      concatMap(formData => this.imageService.uploadUserImage(formData, this.id())),
       takeUntil(this.subject)
     ).subscribe(res => {
       this.userForm.patchValue({ photo: res.url });
