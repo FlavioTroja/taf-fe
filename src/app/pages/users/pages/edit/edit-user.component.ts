@@ -10,13 +10,13 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatSelectModule } from "@angular/material/select";
 import { Store } from "@ngrx/store";
 import { DateTime } from "luxon";
-import { concatMap, map, mergeMap, of, pairwise, Subject, takeUntil } from "rxjs";
+import { map, pairwise, Subject, takeUntil } from "rxjs";
 import { difference, hasRoles } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { InputComponent } from "../../../../components/input/input.component";
 import { FileUploadComponent } from "../../../../components/upload-image/file-upload.component";
 import { FileService } from "../../../../components/upload-image/services/file.service";
-import { getProfileUser } from "../../../../core/profile/store/profile.selectors";
+import { getProfileMunicipalityId, getProfileUser } from "../../../../core/profile/store/profile.selectors";
 import { getRouterData, selectCustomRouteParam } from "../../../../core/router/store/router.selectors";
 import { findRoleLabel, PartialUser, Roles, RolesArray } from "../../../../models/User";
 import * as UserActions from "../../../users/store/actions/users.actions";
@@ -38,27 +38,13 @@ interface ChangePasswordForm {
 
         <div class="flex flex-row gap-4 p-2" [ngClass]="{ 'bg-white rounded-md default-shadow' : viewOnly() }">
           <div class="flex flex-col basis-1/6">
-            <app-file-upload [ngClass]="{'pointer-events-none' : viewOnly() || userForm.getRawValue().photo }"
-                             [mainImage]="f.photo.value!" [multiple]="false" label="Foto profilo"
+            <app-file-upload [ngClass]="{'pointer-events-none' : viewOnly() }"
+                             forImageService="USER"
+                             [mainImage]="f.photo.getRawValue()"
+                             [multiple]="false" label="Foto profilo"
                              (onUpload)="onUploadMainImage($event)" (onDeleteMainImage)="removeProfilePic()"
                              [onlyImages]="true"/>
           </div>
-
-          <div *ngIf="!viewOnly() && userForm.getRawValue().photo" class="flex flex-col basis-1/6 gap-2">
-            <div class="flex flex-row">
-              <div class="flex items-center p-2 rounded-lg shadow-md default-shadow-hover accent cursor-pointer"
-                   (click)="input.click()">
-                <mat-icon class="icon-size material-symbols-rounded">repeat</mat-icon>
-                <input type="file"
-                       #input
-                       hidden
-                       (change)="replaceImage($event)"
-                       accept=".gif,.jpg,.jpeg,.png">
-                Sostituisci
-              </div>
-            </div>
-          </div>
-
           <div *ngIf="viewOnly()">
             <div>
               <div class="text-4xl pt-6 pb-4 font-extrabold"> {{ userForm.getRawValue().name }}</div>
@@ -197,6 +183,7 @@ export default class EditUserComponent implements OnInit, OnDestroy {
   viewOnly: Signal<boolean> = toSignal(this.store.select(getRouterData).pipe(
     map(data => data!["viewOnly"] ?? false)
   ));
+  municipalityId = this.store.selectSignal(getProfileMunicipalityId);
 
   profileId: string = '';
   currentUser: PartialUser | undefined;
@@ -307,12 +294,12 @@ export default class EditUserComponent implements OnInit, OnDestroy {
         const diff = {
           ...difference(this.initFormValue, newState),
           birthDate: typeof newState.birthDate! === "string" ? newState.birthDate! : DateTime.fromJSDate(newState.birthDate!).toISODate(),
+          municipalityId: this.municipalityId()
         };
         return diff;
       }),
       map((changes: any) => Object.keys(changes).length !== 0 && !this.userForm.invalid ? {
         ...changes,
-        id: +this.id()
       } : {}),
       takeUntil(this.subject),
       // tap(changes => console.log(changes)),
@@ -322,23 +309,23 @@ export default class EditUserComponent implements OnInit, OnDestroy {
   }
 
   replaceImage(event: any) {
-
-    const files: File[] = event.target.files;
-    if (files.length === 0) {
-      return;
-    }
-    of(files).pipe(
-      mergeMap(r => r),
-      map(file => {
-        const formData = new FormData();
-        formData.append("image", file, file.name);
-        return formData;
-      }),
-      concatMap(formData => this.imageService.uploadUserImage(formData, this.id())),
-      takeUntil(this.subject)
-    ).subscribe(res => {
-      this.userForm.patchValue({ photo: res.url });
-    });
+    //
+    // const files: File[] = event.target.files;
+    // if (files.length === 0) {
+    //   return;
+    // }
+    // of(files).pipe(
+    //   mergeMap(r => r),
+    //   map(file => {
+    //     const formData = new FormData();
+    //     formData.append("image", file, file.name);
+    //     return formData;
+    //   }),
+    //   concatMap(formData => this.imageService.uploadUserImage(formData, this.id())),
+    //   takeUntil(this.subject)
+    // ).subscribe(res => {
+    //   this.userForm.patchValue({ photo: res.url });
+    // });
 
   }
 

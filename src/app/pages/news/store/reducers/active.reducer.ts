@@ -15,6 +15,10 @@ const activeNewsReducer = createReducer(
     ...state,
     changes: { ...changes }
   })),
+  on(NewsActions.clearNewsActive, (state) => ({
+    changes: undefined,
+    current: undefined
+  }))
 )
 
 export function reducer(state: Partial<ActiveEntity<News>> | undefined, action: Action) {

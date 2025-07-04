@@ -9,7 +9,9 @@ export const deleteActivityFailed = createAction("[Activities] Delete Activity F
   error: HttpError
 }>());
 
-export const loadActivities = createAction("[Activities] Load Activities", props<{ query: QuerySearch }>());
+export const loadActivities = createAction("[Activities] Load Activities", props<{
+  query: QuerySearch<string, string>
+}>());
 export const loadActivitiesSuccess = createAction("[Activities] Load Activities Success", props<{
   activities: PaginateDatasource<Activity>
 }>())
@@ -46,5 +48,6 @@ export const editActivityFailed = createAction("[Activities] Edit Activity Faile
   error: HttpError
 }>())
 
+export const clearActivityActive = createAction("[Activities] Clear Active changes");
 
 

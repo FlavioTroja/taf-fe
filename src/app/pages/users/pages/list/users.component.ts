@@ -23,6 +23,7 @@ import { SearchComponent } from "../../../../components/search/search.component"
 import { ShowImageComponent } from "../../../../components/show-image/show-image.component";
 import { TableSkeletonComponent } from "../../../../components/skeleton/table-skeleton.component";
 import { TableComponent } from "../../../../components/table/table.component";
+import { getProfileMunicipalityId } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
 import { Sort, Table, TableButton } from "../../../../models/Table";
 import { PartialUser, Roles } from "../../../../models/User";
@@ -51,7 +52,7 @@ import { getUsersPaginate } from "../../store/selectors/users.selectors";
 
 
     <ng-template #imageRow let-row>
-      <app-show-image classes="w-16 h-16" [imageUrl]="row.avatarUrl || ''" [objectName]="row.name"/>
+      <app-show-image classes="w-16 h-16" [imageUrl]="row.photo || ''" [objectName]="row.name"/>
     </ng-template>
 
     <ng-template #nameRow let-row>
@@ -82,9 +83,9 @@ import { getUsersPaginate } from "../../store/selectors/users.selectors";
 
     <ng-template #rolesRow let-row>
       <div class="flex flex-wrap gap-1">
-        <div class="gap-1" *ngFor="let role of row.roles">
+        <div *ngFor="let role of row.roles">
           <span
-            class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">{{ role === Roles.ROLE_ADMIN ? 'ADMIN' : 'USER' }}</span>
+            class="whitespace-nowrap bg-gray-100 text-sm px-2.5 py-0.5 rounded">{{ role === Roles.ROLE_ADMIN ? 'ADMIN' : 'USER' }}</span>
         </div>
       </div>
     </ng-template>
@@ -134,6 +135,8 @@ export default class UsersComponent implements AfterViewInit {
     debounceTime(500),
     distinctUntilChanged(),
   ));
+
+  municipalityId = this.store.selectSignal(getProfileMunicipalityId);
 
   ngAfterViewInit() {
     Promise.resolve(null).then(() => {
@@ -206,15 +209,23 @@ export default class UsersComponent implements AfterViewInit {
   constructor() {
     // Questo effect viene triggerato ogni qual volta un dei signal presenti all'interno cambia di valore
     effect(() => {
-      const query: QuerySearch = {
+
+      const municipalityId = this.municipalityId()
+
+      if (!municipalityId) {
+        return
+      }
+
+      const query: QuerySearch<string, string> = {
         page: this.paginator().pageIndex,
         limit: this.paginator().pageSize,
         search: this.searchText()!,
-        sort: createSortArray(this.sorter()) as SortSearch
+        filters: { municipalityId },
+        sort: createSortArray(this.sorter()) as SortSearch<string, string>
       }
 
       this.store.dispatch(
-        UserActions.loadUsers({ query })
+        UserActions.loadPaginateUsers({ query })
       );
     }, { allowSignalWrites: true })
   }

@@ -26,6 +26,11 @@ export const getProfileUserRoleNames = createSelector(
   (state: ProfileState) => state.user?.roles?.map(r => r === Roles.ROLE_USER ? 'USER' : 'ADMIN') || []
 );
 
+export const getProfileMunicipalityId = createSelector(
+  getProfile,
+  (state: ProfileState) => state?.municipalityId
+)
+
 export const disabledByRolesSelector = (disabledRoles: Roles[]) =>
   createSelector(
     getProfile,

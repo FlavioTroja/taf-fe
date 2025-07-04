@@ -31,7 +31,7 @@ export class UsersService {
     return this.http.delete<User>(`${ BASE_URL }/users/${ id }`);
   }
 
-  loadUsers(payload: QuerySearch) {
+  loadUsers(payload: QuerySearch<string, string>) {
     return this.http.post<PaginateDatasource<User>>(`${ BASE_URL }/users/search`, payload);
   }
 

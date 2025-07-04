@@ -1,6 +1,6 @@
 {
   "name": "taf-fe",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "scripts": {
     "ng": "ng",
     "patch-version": "yarn version --no-git-tag-version --no-commit-hooks --patch && git add ./package.json",
@@ -21,6 +21,7 @@
     "@angular/compiler": "^16.2.0",
     "@angular/core": "^16.2.0",
     "@angular/forms": "^16.2.0",
+    "@angular/google-maps": "^20.0.5",
     "@angular/material": "^16.2.11",
     "@angular/material-moment-adapter": "^16.2.14",
     "@angular/platform-browser": "^16.2.0",

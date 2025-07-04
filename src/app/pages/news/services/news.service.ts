@@ -2,6 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from "../../../../environments/environment";
+import { QuerySearch } from "../../../../global";
 import { News, PartialNews } from "../../../models/News";
 import { PaginateDatasource } from "../../../models/Table";
 
@@ -29,8 +30,8 @@ export class NewsService {
     return this.http.delete<News>(`${ BASE_URL }/news/${ id }`)
   }
 
-  loadNews() {
-    return this.http.get<PaginateDatasource<News>>(`${ BASE_URL }/news`);
+  loadNews(query: QuerySearch<string, string>) {
+    return this.http.post<PaginateDatasource<News>>(`${ BASE_URL }/news/search`, query);
   }
 
   getActiveNews(id: string) {

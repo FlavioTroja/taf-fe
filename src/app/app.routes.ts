@@ -3,14 +3,19 @@ import { provideEffects } from "@ngrx/effects";
 import { provideState } from "@ngrx/store";
 import NotFoundComponent from "./components/not-found/not-found.component";
 import { AuthGuard } from "./core/auth/services/auth.guard";
+import { RegisterGuard } from "./core/auth/services/register.guard";
 import { ActivitiesEffects } from "./pages/activities/store/effects/activities.effects";
 import { reducers as activitiesManagementReducers } from "./pages/activities/store/reducers";
+import { EventsEffects } from "./pages/events/store/effects/events.effects";
+import { reducers as eventsManagementReducers } from "./pages/events/store/reducers";
 import { DashboardEffect } from './pages/home/store/effects/dashboard.effects';
 import { reducers as dashboardManagementReducers } from "./pages/home/store/reducers";
 import { MunicipalsEffects } from "./pages/municipals/store/effects/municipals.effects";
 import { reducers as municipalsManagementReducers } from "./pages/municipals/store/reducers";
 import { NewsEffects } from "./pages/news/store/effects/news.effects";
 import { reducers as newsManagementReducers } from "./pages/news/store/reducers";
+import { NotificationEffects } from "./pages/notifications/store/effects/notification.effects";
+import { reducers as notificationsManagementReducers } from "./pages/notifications/store/reducers";
 import { RoleNamesEffects } from "./pages/users/store/effects/roleNames.effects";
 import { UsersEffects } from "./pages/users/store/effects/users.effects";
 import { reducers as userManagementReducers } from "./pages/users/store/reducers";
@@ -20,6 +25,17 @@ export const routes: Routes = [
     path: "auth/login",
     pathMatch: "full",
     loadComponent: () => import("./pages/auth/login/login.component")
+  },
+  {
+    path: "auth/register",
+    pathMatch: "full",
+    loadComponent: () => import("./pages/auth/register/register.component")
+  },
+  {
+    canActivate: [ RegisterGuard ],
+    path: "auth/confirm",
+    pathMatch: "full",
+    loadComponent: () => import("./pages/auth/confirm/confirm.component")
   },
   {
     path: "",
@@ -70,6 +86,16 @@ export const routes: Routes = [
     loadChildren: () => import("./pages/news/news.routing")
   },
   {
+    path: 'events',
+    canActivate: [ AuthGuard ],
+    providers: [
+      provideState('events-manager', eventsManagementReducers),
+      provideState('activities-manager', activitiesManagementReducers),
+      provideEffects([ EventsEffects, ActivitiesEffects ])
+    ],
+    loadChildren: () => import("./pages/events/events.routing")
+  },
+  {
     path: "users",
     canActivate: [ AuthGuard ],
     providers: [
@@ -77,6 +103,16 @@ export const routes: Routes = [
       provideEffects([ UsersEffects, RoleNamesEffects ])
     ],
     loadChildren: () => import("./pages/users/users.routing")
+  },
+  {
+    path: "notifications",
+    canActivate: [ AuthGuard ],
+    providers: [
+      provideState("notifications-manager", notificationsManagementReducers),
+      provideState("user-manager", userManagementReducers),
+      provideEffects([ NotificationEffects, UsersEffects ])
+    ],
+    loadChildren: () => import("./pages/notifications/notifications.routing")
   },
   {
     path: "settings",

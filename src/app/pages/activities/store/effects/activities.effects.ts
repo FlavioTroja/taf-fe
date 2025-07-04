@@ -3,6 +3,7 @@ import { Actions, concatLatestFrom, createEffect, ofType } from "@ngrx/effects";
 import { Store } from "@ngrx/store";
 import { catchError, concatMap, exhaustMap, map, of } from "rxjs";
 import { AppState } from "../../../../app.config";
+import { getProfileMunicipalityId } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
 import { selectCustomRouteParam } from "../../../../core/router/store/router.selectors";
 import * as UIActions from "../../../../core/ui/store/ui.actions";
@@ -63,9 +64,12 @@ export class ActivitiesEffects {
 
   deleteActivityEffect$ = createEffect(() => this.actions$.pipe(
     ofType(ActivitiesActions.deleteActivity),
-    exhaustMap(({ id }) => this.activitiesService.deleteActivity(id)
+    concatLatestFrom(() => [
+      this.store.select(getProfileMunicipalityId),
+    ]),
+    exhaustMap(([ { id }, municipalityId ]) => this.activitiesService.deleteActivity(id)
       .pipe(
-        map(() => ActivitiesActions.loadActivities({ query: { page: 0, limit: 10 } })),
+        map(() => ActivitiesActions.loadActivities({ query: { page: 0, limit: 10, filters: { municipalityId } } })),
         catchError((err) => of(ActivitiesActions.deleteActivityFailed(err)))
       ))
   ))
@@ -75,7 +79,8 @@ export class ActivitiesEffects {
     exhaustMap(({ query }) => this.activitiesService.loadActivities(query)
       .pipe(
         concatMap((activities) => [
-          ActivitiesActions.loadActivitiesSuccess({ activities })
+          ActivitiesActions.loadActivitiesSuccess({ activities }),
+          ActivitiesActions.clearActivityActive()
         ]),
         catchError((error) => of(ActivitiesActions.loadActivitiesFailed({ error })))
       ))

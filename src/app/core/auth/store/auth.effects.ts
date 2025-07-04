@@ -41,6 +41,35 @@ export class AuthEffects {
     ])
   ))
 
+  registerEffect$ = createEffect(() => this.actions$.pipe(
+    ofType(AuthActions.register),
+    exhaustMap(({ payload }) => this.authService.register(payload)
+      .pipe(
+        map(registerResp => AuthActions.registerSuccess({ registerResp })),
+        catchError((err) => {
+          return of(AuthActions.registerFailed(err))
+        })
+      )),
+  ))
+
+  registerSuccessEffect$ = createEffect(() => this.actions$.pipe(
+    ofType(AuthActions.registerSuccess),
+    map(() => RouterActions.go({ path: [ "auth/confirm" ] }))
+  ))
+
+  confirmEffect$ = createEffect(() => this.actions$.pipe(
+    ofType(AuthActions.confirm),
+    exhaustMap(({ payload }) => this.authService.confirm(payload).pipe(
+      map(auth => AuthActions.confirmSuccess({ auth: auth })),
+      catchError((err) => of(AuthActions.confirmFailed(err)))
+    ))
+  ))
+
+  confirmSuccessEffect$ = createEffect(() => this.actions$.pipe(
+    ofType(AuthActions.confirmSuccess),
+    map(() => RouterActions.go({ path: [ "auth/login" ] })),
+  ))
+
   logoutEffect$ = createEffect(() => this.actions$.pipe(
     ofType(AuthActions.logout),
     tap(() => this.authService.cleanAuth()),

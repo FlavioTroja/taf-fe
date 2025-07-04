@@ -23,6 +23,13 @@ export const selectCustomRouteParam = (param: string) => createSelector(
   }
 );
 
+export const selectRouteUrl = createSelector(
+  getRouter,
+  (router: RouterReducerState) => {
+    return router?.state.url;
+  }
+)
+
 export const selectRouteQueryParamParam = () => createSelector(
   getRouter,
   (router: RouterReducerState) => {
@@ -46,7 +53,7 @@ export const getRouterNavigationId = createSelector(
 export const getRouterData = createSelector(
   getRouter,
   (router: RouterReducerState) => {
-    if(!router) {
+    if (!router) {
       return;
     }
     let current = router.state.root;
@@ -62,7 +69,7 @@ export const getRouterData = createSelector(
 export const getCurrentRouter = createSelector(
   getRouter,
   (router: RouterReducerState) => {
-    if(!router) {
+    if (!router) {
       return;
     }
     let current = router.state.root;

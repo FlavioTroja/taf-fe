@@ -23,8 +23,10 @@ import { ModalComponent, ModalDialogData } from "../../../../components/modal/mo
 import { SearchComponent } from "../../../../components/search/search.component";
 import { TableSkeletonComponent } from "../../../../components/skeleton/table-skeleton.component";
 import { TableComponent } from "../../../../components/table/table.component";
+import { TagListComponent } from "../../../../components/tag-list/tag-list.component";
+import { getProfileMunicipalityId } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
-import { PartialActivity } from "../../../../models/Activities";
+import { getActivityTypeName, PartialActivity } from "../../../../models/Activities";
 import { Sort, Table, TableButton } from "../../../../models/Table";
 import * as ActivitiesActions from "../../store/actions/activities.actions";
 import { getActivitiesPaginate } from "../../store/selectors/activities.selectors";
@@ -32,7 +34,7 @@ import { getActivitiesPaginate } from "../../store/selectors/activities.selector
 @Component({
   selector: 'app-activities',
   standalone: true,
-  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent ],
+  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent, TagListComponent ],
   template: `
     <div class="grid gap-3">
       <app-search [search]="search"/>
@@ -66,31 +68,21 @@ import { getActivitiesPaginate } from "../../store/selectors/activities.selector
       <div>{{ row.email }}</div>
     </ng-template>
 
-    <ng-template #openingHoursRow let-row>
-      <div class="flex flex-wrap gap-1">
-        <div class="gap-1" *ngFor="let hour of row.openingHours">
-          <span
-            class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">{{ hour }}</span>
-        </div>
-      </div>
+    <ng-template #openingHoursRow let-row let-i="index">
+      <app-tag-list [row]="row.openingHours" [index]="i"/>
     </ng-template>
 
     <ng-template #typeRow let-row>
       <div class="flex flex-wrap gap-1">
-        <span
-          class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">
-            {{ row.type }}
+        <span *ngIf="row.type"
+              class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">
+            {{ getActivityTypeName(row.type) }}
           </span>
       </div>
     </ng-template>
 
-    <ng-template #tagsRow let-row>
-      <div class="flex flex-wrap gap-1">
-        <div class="gap-1" *ngFor="let tag of row.tags">
-          <span
-            class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">{{ tag }}</span>
-        </div>
-      </div>
+    <ng-template #tagsRow let-row let-i="index">
+      <app-tag-list [row]="row.tags" [index]="i"/>
     </ng-template>
 
     <ng-template #skeleton>
@@ -142,6 +134,8 @@ export default class ActivitiesComponent implements AfterViewInit {
     distinctUntilChanged(),
   ));
 
+  municipalityId = this.store.selectSignal(getProfileMunicipalityId);
+
   ngAfterViewInit() {
 
     Promise.resolve(null).then(() => {
@@ -185,7 +179,7 @@ export default class ActivitiesComponent implements AfterViewInit {
         {
           columnDef: 'tags',
           header: 'Tags',
-          width: "10rem",
+          width: "20rem",
           template: this.tagsRow,
         },
       ];
@@ -221,11 +215,18 @@ export default class ActivitiesComponent implements AfterViewInit {
   constructor() {
     // Questo effect viene triggerato ogni qual volta un dei signal presenti all'interno cambia di valore
     effect(() => {
-      const query: QuerySearch = {
+      const municipalityId = this.municipalityId();
+
+      if (!municipalityId) {
+        return;
+      }
+
+      const query: QuerySearch<string, string> = {
         page: this.paginator().pageIndex,
         limit: this.paginator().pageSize,
         search: this.searchText()!,
-        sort: createSortArray(this.sorter()) as SortSearch
+        filters: { municipalityId },
+        sort: createSortArray(this.sorter()) as SortSearch<string, string>
       }
 
       this.store.dispatch(
@@ -253,4 +254,6 @@ export default class ActivitiesComponent implements AfterViewInit {
       value[0] = (evt?.direction === "asc" || evt?.direction === "desc" ? evt : {} as Sort);
     });
   }
+
+  protected readonly getActivityTypeName = getActivityTypeName;
 }

@@ -1,28 +1,42 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, signal, TemplateRef, ViewChild, WritableSignal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  effect,
+  inject,
+  signal,
+  TemplateRef,
+  ViewChild,
+  WritableSignal
+} from '@angular/core';
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl } from "@angular/forms";
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
+import { DateTime } from "luxon";
 import { distinctUntilChanged } from "rxjs";
 import { debounceTime } from "rxjs/operators";
+import { SortSearch } from "../../../../../global";
+import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
 import { TableSkeletonComponent } from "../../../../components/skeleton/table-skeleton.component";
 import { TableComponent } from "../../../../components/table/table.component";
+import { TagListComponent } from "../../../../components/tag-list/tag-list.component";
+import { getProfileMunicipalityId } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
 import { PartialNews } from "../../../../models/News";
 import { Sort, Table, TableButton } from "../../../../models/Table";
+import { Roles } from "../../../../models/User";
 import * as NewsActions from "../../store/actions/news.actions";
-import { loadNews } from "../../store/actions/news.actions";
 import { getNewsPaginate } from "../../store/selectors/news.selectors";
 
 @Component({
   selector: 'app-edits',
   standalone: true,
-  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent ],
+  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent, TagListComponent ],
   template: `
     <div class="grid gap-3">
       <app-search [search]="search"/>
@@ -53,12 +67,13 @@ import { getNewsPaginate } from "../../store/selectors/news.selectors";
     </ng-template>
 
     <ng-template #publicationDateRow let-row>
-      <div>{{ row.publicationDate }}</div>
+      <div>{{ row.publicationDate ? (row.publicationDate | date: 'dd/MM/yyyy HH:mm') : '' }}</div>
     </ng-template>
 
-    <ng-template #tagsRow let-row>
-      <div>{{ row.tags }}</div>
+    <ng-template #tagsRow let-row let-i="index">
+      <app-tag-list [row]="row.tags" [index]="i"/>
     </ng-template>
+
 
     <ng-template #skeleton>
       <app-table-skeleton [columns]="columns"/>
@@ -87,6 +102,11 @@ export default class NewsComponent implements AfterViewInit {
       bgColor: "orange",
       callback: elem => this.store.dispatch(RouterActions.go({ path: [ `news/${ elem.id }` ] }))
     },
+    {
+      iconName: "visibility",
+      bgColor: "sky",
+      callback: elem => this.store.dispatch(RouterActions.go({ path: [ `news/${ elem.id }/view` ] }))
+    }
   ];
 
   paginator: WritableSignal<Table> = signal({
@@ -102,6 +122,8 @@ export default class NewsComponent implements AfterViewInit {
     distinctUntilChanged(),
   ));
 
+  municipalityId = this.store.selectSignal(getProfileMunicipalityId);
+
   ngAfterViewInit() {
 
     Promise.resolve(null).then(() => {
@@ -109,31 +131,31 @@ export default class NewsComponent implements AfterViewInit {
         {
           columnDef: 'title',
           header: 'Titolo',
-          width: "10rem",
+          width: "15rem",
           template: this.titleRow,
         },
         {
           columnDef: 'content',
           header: 'Contenuto',
-          width: "10rem",
+          width: "15rem",
           template: this.contentRow,
         },
         {
           columnDef: 'author',
           header: 'Autore',
-          width: "10rem",
+          width: "15rem",
           template: this.authorRow,
         },
         {
           columnDef: 'publicationDate',
           header: 'Data di Pubblicazione',
-          width: "10rem",
+          width: "15rem",
           template: this.publicationDateRow,
         },
         {
           columnDef: 'tags',
           header: 'Tags',
-          width: "10rem",
+          width: "15rem",
           template: this.tagsRow,
         },
       ];
@@ -147,7 +169,7 @@ export default class NewsComponent implements AfterViewInit {
       data: <ModalDialogData>{
         title: "Conferma rimozione",
         content: `
-        Si sta eliminando l'attività di nome ${ news.title }.
+        Si sta eliminando la news di nome ${ news.title }.
         <br>
         Questa operazione non è reversibile.
         `,
@@ -167,7 +189,27 @@ export default class NewsComponent implements AfterViewInit {
   }
 
   constructor() {
-    this.store.dispatch(loadNews())
+    effect(() => {
+      const municipalityId = this.municipalityId();
+
+      if (!municipalityId) {
+        return;
+      }
+
+      const query = {
+        page: this.paginator().pageIndex,
+        limit: this.paginator().pageSize,
+        search: this.searchText()!,
+        filters: { municipalityId },
+        sort: createSortArray(this.sorter()) as SortSearch<string, string>
+      }
+
+      this.store.dispatch(
+        NewsActions.loadPaginateNews({
+          query
+        })
+      );
+    }, { allowSignalWrites: true })
 
   }
 
@@ -190,4 +232,7 @@ export default class NewsComponent implements AfterViewInit {
       value[0] = (evt?.direction === "asc" || evt?.direction === "desc" ? evt : {} as Sort);
     });
   }
+
+  protected readonly Roles = Roles;
+  protected readonly DateTime = DateTime;
 }

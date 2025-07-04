@@ -6,7 +6,12 @@ import { MemoizedSelector, Store } from "@ngrx/store";
 import { Observable, of } from "rxjs";
 import { AppState } from "../../app.config";
 import * as RouterActions from "../../core/router/store/router.actions";
-import { getRouterData, getRouterNavigationId, selectCustomRouteParam } from "../../core/router/store/router.selectors";
+import {
+  getRouterData,
+  getRouterNavigationId,
+  selectCustomRouteParam,
+  selectRouteUrl
+} from "../../core/router/store/router.selectors";
 import { NavBarButton, NavBarButtonDialog } from "../../models/NavBar";
 import { HideByCodeSelectorDirective } from "../../shared/directives/hide-by-code-selector.directive";
 import { IfLoggedDirective } from "../../shared/directives/if-logged.directive";
@@ -44,6 +49,7 @@ export class NavbarComponent {
   store: Store<AppState> = inject(Store);
   routerData$ = toSignal(this.store.select(getRouterData));
   id = toSignal(this.store.select(selectCustomRouteParam("id")));
+  routeUrl = toSignal(this.store.select(selectRouteUrl));
   navigationId: number | undefined;
   title: string = "";
   buttons: NavBarButton<any, any>[] = [];
@@ -67,7 +73,7 @@ export class NavbarComponent {
         return;
       }
 
-      this.title = this.getCurrentTitle(this.routerData$()!["title"], this.id());
+      this.title = this.getCurrentTitle(this.routerData$()!["title"], this.routeUrl(), this.id());
       this.buttons = this.routerData$()!["buttons"];
       this.backPath = this.routerData$()!["backAction"];
 
@@ -80,12 +86,14 @@ export class NavbarComponent {
     });
   }
 
-  getCurrentTitle(curr: { default: string, other: string }, id: string) {
+  getCurrentTitle(curr: { default: string, other: string }, routeUrl: any, id: any) {
     if (!curr?.other) {
       return curr?.default || "";
     }
 
-    if (id === 'new') return curr?.other
+    const newRoute = routeUrl.split("/").find((x: any) => x === 'new');
+    if (newRoute === 'new') return curr?.other;
+    if (id === 'new') return curr?.other;
 
     return curr.default;
   }
