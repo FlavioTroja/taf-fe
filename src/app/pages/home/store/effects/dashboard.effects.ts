@@ -9,7 +9,7 @@ import { NOTIFICATION_LISTENER_TYPE } from "../../../../models/Notification";
 @Injectable({
   providedIn: 'root'
 })
-export class DashboardEffect  {
+export class DashboardEffect {
 
   manageNotificationDashboardEffect$ = createEffect(() => this.actions$.pipe(
     ofType(...[
@@ -18,9 +18,15 @@ export class DashboardEffect  {
       DashboardActions.getDashboardWarehouseLastStatisticFailed,
     ]),
     exhaustMap((err) => [
-      UIActions.setUiNotification({ notification: { type: NOTIFICATION_LISTENER_TYPE.ERROR, message: err.error?.reason?.message || "" } })
+      UIActions.setUiNotification({
+        notification: {
+          type: NOTIFICATION_LISTENER_TYPE.ERROR,
+          message: err.error.error || ""
+        }
+      })
     ])
   ));
 
-  constructor(private actions$: Actions) {}
+  constructor(private actions$: Actions) {
+  }
 }

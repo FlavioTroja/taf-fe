@@ -18,3 +18,8 @@ export const getAuthRegisterConfirmStatus = createSelector(
   selectAuth,
   (state: AuthState) => state?.userConfirmed
 )
+
+export const getAuthLoading = createSelector(
+  selectAuth,
+  (state: AuthState) => state.loading
+)

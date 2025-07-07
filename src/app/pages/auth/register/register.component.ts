@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -15,7 +15,7 @@ import { Store } from "@ngrx/store";
 import { AppState } from "../../../app.config";
 import { InputComponent } from "../../../components/input/input.component";
 import * as AuthActions from "../../../core/auth/store/auth.actions";
-import { getAccessToken, getAuthError } from "../../../core/auth/store/auth.selectors";
+import { getAccessToken, getAuthError, getAuthLoading } from "../../../core/auth/store/auth.selectors";
 import { RegisterPayload } from "../../../models/Auth";
 
 @Component({
@@ -23,11 +23,11 @@ import { RegisterPayload } from "../../../models/Auth";
   standalone: true,
   imports: [ CommonModule, FormsModule, MatIconModule, ReactiveFormsModule, InputComponent, RouterLink ],
   template: `
-    <div class="m-auto max-w-[20em] min-w-[10em] flex flex flex-wrap items-start justify-between md:max-w-screen-xl">
+    <div class="m-auto max-w-[30em] min-w-[10em] flex flex flex-wrap items-start justify-between md:max-w-screen-xl">
       <img src="/../assets/images/logo.png" class="h-14" alt="Logo"/>
     </div>
 
-    <div class="m-auto max-w-[20em] min-w-[10em] flex flex-col gap-4 py-28 items-center">
+    <div class="m-auto max-w-[30em] min-w-[10em] flex flex-col gap-4 py-28 items-center">
       <div class="text-3xl font-extrabold">Accedi</div>
       <form class="contents" [formGroup]="registerFormGroup" (ngSubmit)="register()">
         <div class="w-full">
@@ -92,7 +92,7 @@ import { RegisterPayload } from "../../../models/Auth";
               warning
             </mat-icon>
             <span class="sr-only">Info</span>
-            <p class="break-words">{{ error()?.reason?.message }}</p>
+            <p class="break-words">{{ error()?.error?.error }}</p>
           </div>
         </div>
 
@@ -110,9 +110,9 @@ import { RegisterPayload } from "../../../models/Auth";
 
         <button type="submit" [disabled]="registerFormGroup.invalid"
                 [ngClass]="{ 'opacity-50': registerFormGroup.invalid }"
-                class="flex items-center rounded-full icon-accent px-12 py-3 font-extrabold text-white shadow-md hover:bg-cyan-950">
+                class="flex items-center gap-1 rounded-full icon-accent px-12 py-3 font-extrabold text-white shadow-md hover:bg-cyan-950">
           Registrati
-          <mat-icon *ngIf="!isLoaded()"
+          <mat-icon *ngIf="!!(isLoading | async)"
                     class="icon-size material-symbols-rounded-filled cursor-pointer animate-spin duration-700 ease-in-out">
             progress_activity
           </mat-icon>
@@ -122,6 +122,10 @@ import { RegisterPayload } from "../../../models/Auth";
 
       <div>Sei già registrato? <span class="underline text-accent hover:text-cyan-950 cursor-pointer"
                                      [routerLink]="'/auth/login'">Login</span>
+      </div>
+      <div class="text-center">Hai bisogno di confermare l'account? <span
+        class="underline text-accent hover:text-cyan-950 cursor-pointer"
+        [routerLink]="'/auth/confirm'">Vai alla conferma</span>
       </div>
     </div>
   `,
@@ -135,10 +139,7 @@ export default class RegisterComponent {
   error = this.store.selectSignal(getAuthError);
   token = this.store.selectSignal(getAccessToken);
 
-  loading = signal(!!this.error() || !!this.token());
-  isLoaded = computed(() => {
-    return (!this.loading());
-  });
+  isLoading = this.store.select(getAuthLoading);
 
   registerFormGroup = this.fb.group({
     name: [ "", Validators.required ],

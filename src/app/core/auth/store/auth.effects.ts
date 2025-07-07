@@ -54,13 +54,13 @@ export class AuthEffects {
 
   registerSuccessEffect$ = createEffect(() => this.actions$.pipe(
     ofType(AuthActions.registerSuccess),
-    map(() => RouterActions.go({ path: [ "auth/confirm" ] }))
+    map(() => RouterActions.go({ path: [ "auth/confirm" ], extras: { queryParams: { isFromRegister: true } } }))
   ))
 
   confirmEffect$ = createEffect(() => this.actions$.pipe(
     ofType(AuthActions.confirm),
     exhaustMap(({ payload }) => this.authService.confirm(payload).pipe(
-      map(auth => AuthActions.confirmSuccess({ auth: auth })),
+      map(auth => AuthActions.confirmSuccess()),
       catchError((err) => of(AuthActions.confirmFailed(err)))
     ))
   ))
@@ -80,6 +80,6 @@ export class AuthEffects {
   ))
 
   constructor(private actions$: Actions,
-              private authService: AuthService) {
+    private authService: AuthService) {
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { MatIconModule } from "@angular/material/icon";
 import { RouterLink } from "@angular/router";
@@ -8,7 +8,7 @@ import { AppState } from "../../../app.config";
 import { InputComponent } from "../../../components/input/input.component";
 
 import * as AuthActions from "../../../core/auth/store/auth.actions";
-import { getAccessToken, getAuthError } from "../../../core/auth/store/auth.selectors";
+import { getAccessToken, getAuthError, getAuthLoading } from "../../../core/auth/store/auth.selectors";
 import { LoginPayload } from "../../../models/Auth";
 
 @Component({
@@ -54,14 +54,14 @@ import { LoginPayload } from "../../../models/Auth";
               warning
             </mat-icon>
             <span class="sr-only">Info</span>
-            <p class="break-words">{{ error()?.reason?.message }}</p>
+            <p class="break-words">{{ error()?.error?.error }}</p>
           </div>
         </div>
 
         <button type="submit" [disabled]="loginFormGroup.invalid" [ngClass]="{ 'opacity-50': loginFormGroup.invalid }"
-                class="flex items-center rounded-full icon-accent px-12 py-3 font-extrabold text-white shadow-md hover:bg-cyan-950">
+                class="flex items-center gap-1 rounded-full icon-accent px-12 py-3 font-extrabold text-white shadow-md hover:bg-cyan-950">
           Entra
-          <mat-icon *ngIf="!isLoaded()"
+          <mat-icon *ngIf="!!(isLoading | async)"
                     class="icon-size material-symbols-rounded-filled cursor-pointer animate-spin duration-700 ease-in-out">
             progress_activity
           </mat-icon>
@@ -71,6 +71,10 @@ import { LoginPayload } from "../../../models/Auth";
 
       <div>Non hai un account? <span class="underline text-accent hover:text-cyan-950 cursor-pointer"
                                      [routerLink]="'/auth/register'">Registrati</span>
+      </div>
+      <div class="text-center">Hai bisogno di confermare l'account? <span
+        class="underline text-accent hover:text-cyan-950 cursor-pointer"
+        [routerLink]="'/auth/confirm'">Vai alla conferma</span>
       </div>
     </div>
   `,
@@ -84,11 +88,7 @@ export default class LoginComponent {
 
   error = this.store.selectSignal(getAuthError);
   token = this.store.selectSignal(getAccessToken);
-
-  loading = signal(!!this.error() || !!this.token());
-  isLoaded = computed(() => {
-    return (!this.loading());
-  });
+  isLoading = this.store.select(getAuthLoading);
 
   loginFormGroup = this.fb.group({
     usernameOrEmail: [ "", Validators.required ],

@@ -44,7 +44,7 @@ export class MunicipalsEffects {
       this.store.select(selectCustomRouteParam("id"))
     ]),
     exhaustMap(([ _, changes, id ]) => {
-      if (id === 'new') {
+      if ( id === 'new' ) {
         return of(MunicipalsActions.addMunicipal({
           municipal: {
             ...changes,
@@ -115,7 +115,7 @@ export class MunicipalsEffects {
       UIActions.setUiNotification({
         notification: {
           type: NOTIFICATION_LISTENER_TYPE.ERROR,
-          message: err.error.reason?.message || ""
+          message: err.error.error || ""
         }
       })
     ])

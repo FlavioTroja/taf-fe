@@ -47,7 +47,7 @@ export class NotificationEffects {
       this.store.select(getRouterUrl)
     ]),
     exhaustMap(([ _, changes, id, routeUrl ]) => {
-      if (routeUrl === '/notifications/new') {
+      if ( routeUrl === '/notifications/new' ) {
         return of(NotificationActions.addNotification({
           notification: {
             ...changes,
@@ -133,7 +133,7 @@ export class NotificationEffects {
       UIActions.setUiNotification({
         notification: {
           type: NOTIFICATION_LISTENER_TYPE.ERROR,
-          message: err.error.reason?.message || ""
+          message: err.error.error || ""
         }
       })
     ])

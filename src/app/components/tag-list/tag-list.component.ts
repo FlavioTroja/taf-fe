@@ -1,32 +1,32 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Component, Input} from '@angular/core';
 
 @Component({
   selector: 'app-tag-list',
   standalone: true,
-  imports: [ CommonModule ],
+  imports: [CommonModule],
   template: `
     <div class="flex flex-wrap gap-1 items-center">
 
-      <ng-container *ngFor="let hour of row | slice:0:4">
+      <ng-container *ngFor="let hour of row | slice:0:1">
           <span class="whitespace-nowrap bg-gray-100 text-sm px-2.5 py-0.5 rounded">
             {{ hour }}
           </span>
       </ng-container>
 
       <ng-container *ngIf="isExpanded(index)">
-        <ng-container *ngFor="let hour of row | slice:4">
+        <ng-container *ngFor="let hour of row | slice:1">
             <span class="whitespace-nowrap bg-gray-100 text-sm px-2.5 py-0.5 rounded">
               {{ hour }}
             </span>
         </ng-container>
       </ng-container>
 
-      <ng-container *ngIf="!isExpanded(index) && row.length > 4">
+      <ng-container *ngIf="!isExpanded(index) && row?.length > 1">
         <button
           class="whitespace-nowrap bg-gray-200 text-sm px-2.5 py-0.5 rounded-full hover:bg-gray-300"
           (click)="toggleRow(index)">
-          +{{ row.length - 4 }}
+          +{{ row.length - 1 }}
         </button>
       </ng-container>
 
@@ -43,8 +43,8 @@ import { Component, Input } from '@angular/core';
   styles: []
 })
 export class TagListComponent {
-  @Input({ required: true }) row: any;
-  @Input({ required: true }) index: number = 0;
+  @Input({required: true}) row: any;
+  @Input({required: true}) index: number = 0;
 
 
   expandedRows = new Set<number>();

@@ -44,7 +44,7 @@ export class ActivitiesEffects {
       this.store.select(selectCustomRouteParam("id"))
     ]),
     exhaustMap(([ _, changes, id ]) => {
-      if (id === 'new') {
+      if ( id === 'new' ) {
         return of(ActivitiesActions.addActivity({
           activity: {
             ...changes,
@@ -108,7 +108,7 @@ export class ActivitiesEffects {
       UIActions.setUiNotification({
         notification: {
           type: NOTIFICATION_LISTENER_TYPE.ERROR,
-          message: err.error.reason?.message || ""
+          message: err.error.error || ""
         }
       })
     ])
