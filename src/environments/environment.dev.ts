@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
   appVersion: require('../../package.json').version,
-  googleMapsApiKey: 'INSERISCI_LA_TUA_API_KEY',
+  googleMapsApiKey: 'AIzaSyDuTSNbwTmDHCuBIIztizClYVEB5Pn1WDA',
   BASE_URL: "https://autismfriendly.overzoom.it/api"
 };

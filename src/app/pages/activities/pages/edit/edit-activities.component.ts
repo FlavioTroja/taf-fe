@@ -87,61 +87,69 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
             </div>
           </div>
         </div>
-        <!--
-                <google-map
-                  [height]="'500px'"
-                  [width]="'800px'"
-                  [center]="center"
-                  [zoom]="zoom"
-                  (mapClick)="onMapClick($event)">
-                  <map-marker
-                    *ngFor="let m of markers"
-                    [position]="m.position">
-                  </map-marker>
-                </google-map>
-        -->
-
-        <app-input type="text" id="website" label="Sito" formControlName="website" [formControl]="f.website"/>
-        <app-input type="text" id="description" label="Descrizione" formControlName="description"
-                   [formControl]="f.description"/>
-        <div class="basis-1/4">
-          <label class="text-md justify-left block px-3 py-0 font-medium">Tipo</label>
-          <mat-select
-            class="focus:outline-none p-3 border-input rounded-md w-full !font-bold bg-foreground"
-            formControlName="type"
-            placeholder="Seleziona"
-          >
-            <mat-option class="p-3 bg-white !italic">Nessun valore</mat-option>
-            <mat-option class="p-3 bg-white" *ngFor="let type of ACTIVITY_TYPES" [value]="type.value">{{ type.label }}
-            </mat-option>
-          </mat-select>
-        </div>
-        <div class="flex w-full flex-col gap-2">
-          <div class="flex items-center justify-between w-1/2">
-            <div>Tags:</div>
-            <div>
-              <button type="submit"
-                      [disabled]="viewOnly()"
-                      (click)="addTag()"
-                      [ngClass]="{ 'disabled': viewOnly() }"
-                      class="focus:outline-none p-2 rounded-full w-full border-input bg-foreground flex items-center"
-              >
-                <mat-icon class="align-to-center icon-size material-symbols-rounded">add</mat-icon>
-              </button>
-            </div>
+        <div class="flex gap-4 basis-full">
+          <div class="flex flex-col gap-1">
+            <div>Coordinate dell'attività</div>
+            <google-map
+              class="overflow-clip bg-foreground p-0.5 rounded-md"
+              [height]="'400px'"
+              [width]="'600px'"
+              [center]="center"
+              [zoom]="zoom"
+              (mapClick)="onMapClick($event)">
+              <map-marker
+                [position]="marker.position">
+              </map-marker>
+            </google-map>
           </div>
-          <div class="flex flex-col gap-2 w-1/2 p-1 overflow-y-scroll h-96">
-            <div *ngFor="let a of f.tags.controls; index as i" class="relative tag">
-              <app-input
-                type="text"
-                id="tags"
-                label=""
-                [formControl]="a"
-              />
-              <button type="button" *ngIf="!viewOnly()" class="close-icon hidden absolute top-1/4 right-1"
-                      (click)="removeTag(i)">
-                <mat-icon class="align-to-center icon-size material-symbols-rounded">close</mat-icon>
-              </button>
+          <div class="flex flex-col gap-2">
+            <div class="flex gap-2">
+
+              <app-input type="text" id="website" label="Sito" formControlName="website" [formControl]="f.website"/>
+              <app-input type="text" id="description" label="Descrizione" formControlName="description"
+                         [formControl]="f.description"/>
+              <div class="basis-1/4">
+                <label class="text-md justify-left block px-3 py-0 font-medium">Tipo</label>
+                <mat-select
+                  class="focus:outline-none p-3 border-input rounded-md w-full !font-bold bg-foreground"
+                  formControlName="type"
+                  placeholder="Seleziona"
+                >
+                  <mat-option class="p-3 bg-white !italic">Nessun valore</mat-option>
+                  <mat-option class="p-3 bg-white" *ngFor="let type of ACTIVITY_TYPES"
+                              [value]="type.value">{{ type.label }}
+                  </mat-option>
+                </mat-select>
+              </div>
+            </div>
+            <div class="flex w-full basis-full flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <div>Tags:</div>
+                <div>
+                  <button type="submit"
+                          [disabled]="viewOnly()"
+                          (click)="addTag()"
+                          [ngClass]="{ 'disabled': viewOnly() }"
+                          class="focus:outline-none p-2 rounded-full w-full border-input bg-foreground flex items-center"
+                  >
+                    <mat-icon class="align-to-center icon-size material-symbols-rounded">add</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 p-1 overflow-y-scroll h-96">
+                <div *ngFor="let a of f.tags.controls; index as i" class="relative tag">
+                  <app-input
+                    type="text"
+                    id="tags"
+                    label=""
+                    [formControl]="a"
+                  />
+                  <button type="button" *ngIf="!viewOnly()" class="close-icon hidden absolute top-1/4 right-1"
+                          (click)="removeTag(i)">
+                    <mat-icon class="align-to-center icon-size material-symbols-rounded">close</mat-icon>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -167,9 +175,9 @@ export default class EditActivitiesComponent implements OnInit, OnDestroy {
   ));
   municipalityId = this.store.selectSignal(getProfileMunicipalityId);
 
-  center: google.maps.LatLngLiteral;
+  center: any;
   zoom = 6;
-  markers: { position: google.maps.LatLngLiteral }[] = [];
+  marker: any = {};
 
   subject = new Subject();
 
@@ -207,7 +215,7 @@ export default class EditActivitiesComponent implements OnInit, OnDestroy {
   }
 
   addTime() {
-    if (this.f.newTime.value) {
+    if ( this.f.newTime.value ) {
       this.f.openingHours.push(this.fb.control(this.f.newTime.value));
     }
   }
@@ -229,14 +237,8 @@ export default class EditActivitiesComponent implements OnInit, OnDestroy {
       startWith(this.initFormValue),
       pairwise(),
       map(([ _, newState ]) => {
-        if (!Object.values(this.initFormValue).length && !this.isNewActivity) {
+        if ( !Object.values(this.initFormValue).length && !this.isNewActivity ) {
           return {};
-        }
-
-        if (this.activityForm.valid) {
-          const { latitude, longitude } = newState;
-          this.center = { lat: latitude ?? 0, lng: longitude ?? 0 };
-          this.markers = [ { position: this.center } ];
         }
 
         const diff = {
@@ -261,33 +263,31 @@ export default class EditActivitiesComponent implements OnInit, OnDestroy {
   }
 
   onMapClick(event: any) {
-    if (event.latLng) {
+
+    if ( this.viewOnly() ) {
+      return;
+    }
+
+    if ( event.latLng ) {
       const pos = event.latLng.toJSON();
       this.activityForm.patchValue({
         latitude: pos.lat,
         longitude: pos.lng
-      }, { emitEvent: false });
+      });
       this.center = pos;
-      this.markers = [ ...this.markers, { position: pos } ];
-      console.log('Marker aggiunto:', pos);
+      this.marker = { position: pos };
     }
-  }
-
-  constructor() {
-    this.center = { lat: this.activityForm.value.latitude ?? 0, lng: this.activityForm.value.longitude ?? 0 };
   }
 
   ngOnInit() {
 
-    if (!this.isNewActivity) {
+    if ( !this.isNewActivity ) {
       this.store.dispatch(ActivityActions.getActivity({ id: this.id() }))
     }
 
-    this.markers = [ { position: this.center } ];
-
     this.active$.pipe()
       .subscribe((value: PartialActivity | any) => {
-        if (!value) {
+        if ( !value ) {
           return
         }
 
@@ -296,12 +296,25 @@ export default class EditActivitiesComponent implements OnInit, OnDestroy {
           cover: (value?.cover ? value?.cover + `?cd=${ Date.now() }` : undefined)
         } as PartialActivity;
 
+        const latValid = typeof value?.latitude === 'number' && value?.latitude >= -90 && value?.latitude <= 90;
+        const lngValid = typeof value?.longitude === 'number' && value?.longitude >= -180 && value?.longitude <= 180;
+
+        if ( latValid && lngValid ) {
+          this.center = { lat: value?.latitude, lng: value?.longitude };
+        } else {
+          this.center = { lat: this.activityForm.value.latitude ?? 0, lng: this.activityForm.value.longitude ?? 0 };
+        }
+
+        this.marker = { position: this.center };
+
+        console.log(this.initFormValue);
+
         this.activityForm.patchValue({
           ...value,
           cover: (value?.cover ? value?.cover + `?cd=${ Date.now() }` : undefined)
         }, { emitEvent: false });
 
-        if (value?.tags) {
+        if ( value?.tags ) {
           const newTags: FormArray = this.fb.array(
             value!.tags.map((tg: string) =>
               this.fb.control(
@@ -315,7 +328,7 @@ export default class EditActivitiesComponent implements OnInit, OnDestroy {
         }
 
 
-        if (value?.openingHours) {
+        if ( value?.openingHours ) {
           const newOpeningHours: FormArray = this.fb.array(
             value!.openingHours.map((oh: string) =>
               this.fb.control(

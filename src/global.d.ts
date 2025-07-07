@@ -14,6 +14,7 @@ export interface QuerySearch<T, F> {
     senderId?: string,
     recipientId?: string,
   },
+  ciucc?: boolean,
   sort?: SortSearch<T, F>
 }
 

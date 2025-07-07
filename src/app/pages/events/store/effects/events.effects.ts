@@ -117,7 +117,7 @@ export class EventsEffects {
       UIActions.setUiNotification({
         notification: {
           type: NOTIFICATION_LISTENER_TYPE.ERROR,
-          message: err.error.error || ""
+          message: err.error.error.error.error || ""
         }
       })
     ])

@@ -46,7 +46,7 @@ import { FileService } from "./services/file.service";
         </div>
       </div>
       <div
-        [ngClass]="{'disabled' : isNew, 'pointer-events-none': viewOnly()}"
+        [ngClass]="{'disabled' : isNew}"
         class="relative h-[300px] image-div flex flex-col justify-around bg-white p-2 border border-gray-200 rounded-lg text-center shadow cursor-pointer aspect-square hover:bg-gray-100 bg-cover bg-no-repeat bg-center"
         (click)="clickFileInput($event)"
         [style.background-image]="mainImage ? 'url('+ 'https://autismfriendly.overzoom.it/media/' + mainImage +')' : 'unset'">
@@ -54,7 +54,7 @@ import { FileService } from "./services/file.service";
         <input type="file"
                #input
                [multiple]="multiple"
-               [disabled]="isNew"
+               [disabled]="isNew || viewOnly()"
                hidden
                (change)="openChooseFileDialog($event)"
                accept=".gif,.jpg,.jpeg,.png,.pdf">
@@ -65,17 +65,19 @@ import { FileService } from "./services/file.service";
           </mat-icon>
 
           <div class="on-hover-images h-full flex items-center justify-center">
-            <div *ngIf="mainImage && !viewOnly()"
+            <div *ngIf="mainImage"
                  [style.visibility]="isImageHover ? 'visible' : 'hidden'"
                  class="absolute top-0 left-0 w-full h-full flex flex-col gap-16 justify-center items-center bg-white-transparent">
               <mat-icon (click)="viewMainImage($event, mainImage)" class="material-symbols-rounded blue bigger-icon">
                 visibility
               </mat-icon>
-              <mat-icon *ngIf="images.length" (click)="deleteMainImage($event)"
+              <mat-icon *ngIf="images.length && !viewOnly()" [ngClass]="{'pointer-events-none': viewOnly()}"
+                        (click)="deleteMainImage($event)"
                         class="material-symbols-rounded text-red-600 bigger-icon">
                 delete
               </mat-icon>
-              <mat-icon *ngIf="!images.length" (click)="clickFileInput($event)"
+              <mat-icon *ngIf="!images.length && !viewOnly()" [ngClass]="{'pointer-events-none': viewOnly()}"
+                        (click)="clickFileInput($event)"
                         class="material-symbols-rounded text-red-600 bigger-icon">
                 repeat
               </mat-icon>
@@ -138,7 +140,9 @@ export class FileUploadComponent implements OnChanges {
 
   clickFileInput(event: any) {
     event.stopPropagation();
-    this.input.nativeElement.click()
+    if ( !this.viewOnly() ) {
+      this.input.nativeElement.click()
+    }
   }
 
   subject = new Subject();
@@ -155,7 +159,7 @@ export class FileUploadComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
 
-    if (this.images.length > 0) {
+    if ( this.images.length > 0 ) {
       this.galleryImages = [ ...this.images.map(x => ({
         src: x,
         selected: false
@@ -164,7 +168,7 @@ export class FileUploadComponent implements OnChanges {
   }
 
   showMainImage(image: ImageType) {
-    if (image.selected) {
+    if ( image.selected ) {
       this.mainImage = null;
       this.galleryImages.forEach(img => img.selected = false);
     } else {
@@ -178,7 +182,7 @@ export class FileUploadComponent implements OnChanges {
 
   openChooseFileDialog(event: any) {
     const files: FileList = event.target.files;
-    if (files.length === 0) {
+    if ( files.length === 0 ) {
       return;
     }
 
@@ -192,7 +196,7 @@ export class FileUploadComponent implements OnChanges {
       concatMap(formData => {
         const ext = (formData.get("file") as any)?.name?.split(".");
 
-        if (ext[ext.length - 1] === "pdf" && this.onlyImages) {
+        if ( ext[ext.length - 1] === "pdf" && this.onlyImages ) {
           this.store.dispatch(UIActions.setUiNotification({
             notification: {
               type: NOTIFICATION_LISTENER_TYPE.WARNING,
@@ -202,9 +206,9 @@ export class FileUploadComponent implements OnChanges {
           return of(undefined);
         }
 
-        if (this.onlyImages || ext[ext.length - 1] !== "pdf") {
+        if ( this.onlyImages || ext[ext.length - 1] !== "pdf" ) {
 
-          switch (this.forImageService) {
+          switch ( this.forImageService ) {
             case 'USER':
               return this.imageService.uploadUserImage(formData, this.id());
             case 'ACTIVITY_UPLOAD_GALLERY':
@@ -232,11 +236,11 @@ export class FileUploadComponent implements OnChanges {
       }),
       takeUntil(this.subject)
     ).subscribe(res => {
-      if (!res) {
+      if ( !res ) {
         return;
       }
 
-      switch (this.forImageService) {
+      switch ( this.forImageService ) {
         case 'USER':
           const photo = `${ (res as unknown as User).photo }?cb=${ Date.now() }`;
           this.onUpload.emit([ photo ]);
@@ -287,7 +291,7 @@ export class FileUploadComponent implements OnChanges {
     event.stopPropagation();
     event.preventDefault();
 
-    switch (this.forImageService) {
+    switch ( this.forImageService ) {
       case 'USER':
         break;
       case 'ACTIVITY_UPLOAD_GALLERY':
