@@ -45,6 +45,22 @@ export const routes: Routes = [
       ],
       backAction: "/news",
     }
+  },
+  {
+    path: ':id/view',
+    loadComponent: () => import('./pages/edit/edit-news.component'),
+    data: {
+      viewOnly: true,
+      title: {
+        default: "Visualizza news",
+      },
+      buttons: [
+        { label: "Modifica", iconName: "edit", action: NAVBAR_ACTION.NEWS_NAVIGATE_ON_MODIFY },
+        // { label: "", iconName: "search", action: NAVBAR_ACTION.USERS_EDIT },
+        // { label: "", iconName: "home", action: NAVBAR_ACTION.USERS_DELETE }
+      ],
+      backAction: "/news",
+    }
   }
 ]
 

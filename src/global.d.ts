@@ -5,17 +5,21 @@ export interface Query<T> {
   options?: QueryOptions
 }
 
-export interface QuerySearch {
+export interface QuerySearch<T, F> {
   page: number,
   limit: number,
   search?: string,
-  filters?: object,
-  sort?: SortSearch
+  filters?: {
+    municipalityId?: string,
+    senderId?: string,
+    recipientId?: string,
+  },
+  sort?: SortSearch<T, F>
 }
 
-export interface SortSearch {
-  name?: "asc" | "desc",
-  surname?: "asc" | "desc",
+export interface SortSearch<T, F> {
+  name?: T,
+  surname?: T,
 }
 
 export interface QueryOptions {

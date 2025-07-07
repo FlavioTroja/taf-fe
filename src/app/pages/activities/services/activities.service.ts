@@ -30,7 +30,7 @@ export class ActivitiesService {
     return this.http.delete<Activity>(`${ BASE_URL }/activities/${ id }`)
   }
 
-  loadActivities(query: QuerySearch) {
+  loadActivities(query: QuerySearch<string, string>) {
     return this.http.post<PaginateDatasource<Activity>>(`${ BASE_URL }/activities/search`, query);
   }
 

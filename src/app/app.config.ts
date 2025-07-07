@@ -1,24 +1,24 @@
+import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { ApplicationConfig, DEFAULT_CURRENCY_CODE } from '@angular/core';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { provideAnimations } from "@angular/platform-browser/animations";
 import { provideRouter } from '@angular/router';
-
-import { routes } from './app.routes';
+import { provideEffects } from "@ngrx/effects";
+import { provideRouterStore, routerReducer, RouterReducerState, RouterState } from "@ngrx/router-store";
 import { provideStore } from "@ngrx/store";
 import { provideStoreDevtools } from "@ngrx/store-devtools";
-import { provideRouterStore, routerReducer, RouterReducerState, RouterState } from "@ngrx/router-store";
-import { provideEffects } from "@ngrx/effects";
-import { RouterEffects } from "./core/router/store/router.effects";
-import { ProfileEffects } from "./core/profile/store/profile.effects";
-import { provideHttpClient, withInterceptors } from "@angular/common/http";
-import { ProfileState, reducer as profileReducer } from "./core/profile/store/profile.reducer";
+
+import { routes } from './app.routes';
+import { AuthInterceptor } from "./core/auth/services/auth.interceptor";
 import { AuthEffects } from "./core/auth/store/auth.effects";
 import { AuthState, reducer as authReducer } from "./core/auth/store/auth.reducer";
-import { AuthInterceptor } from "./core/auth/services/auth.interceptor";
+import { HideEffects } from "./core/hide/store/hide.effects";
+import { HideState, reducer as configReducer } from "./core/hide/store/hide.reducer";
+import { ProfileEffects } from "./core/profile/store/profile.effects";
+import { ProfileState, reducer as profileReducer } from "./core/profile/store/profile.reducer";
+import { RouterEffects } from "./core/router/store/router.effects";
 import { SidebarEffects } from "./core/ui/store/ui.effects";
 import { reducer as sidebarReducer, UIState } from "./core/ui/store/ui.reducer";
-import { provideAnimations } from "@angular/platform-browser/animations";
-import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { HideState, reducer as configReducer } from "./core/hide/store/hide.reducer";
-import { HideEffects } from "./core/hide/store/hide.effects";
 
 export interface AppState {
   auth: AuthState,
@@ -33,7 +33,7 @@ export const appConfig: ApplicationConfig = {
     // provideRouter(routes, withDebugTracing()),
     provideAnimations(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([AuthInterceptor])),
+    provideHttpClient(withInterceptors([ AuthInterceptor ])),
     provideStore({
       auth: authReducer,
       ui: sidebarReducer,
@@ -49,7 +49,7 @@ export const appConfig: ApplicationConfig = {
       }
     }),
     provideStoreDevtools({
-      maxAge: 25
+      maxAge: 250
     }),
     provideRouterStore({
       routerState: RouterState.Minimal

@@ -1,14 +1,14 @@
 import { Action, createReducer, on } from "@ngrx/store";
-import * as UsersActions from "../actions/users.actions";
 import { PaginateDatasource } from "../../../../models/Table";
 import { User } from "../../../../models/User";
+import * as UsersActions from "../actions/users.actions";
 
 
 const initialState: Partial<PaginateDatasource<User>> = {}
 
 const usersReducer = createReducer(
   initialState,
-  on(UsersActions.loadUsersSuccess, (state, { users }) => ({
+  on(UsersActions.loadPaginateUsersSuccess, (state, { users }) => ({
     ...users
   }))
 );

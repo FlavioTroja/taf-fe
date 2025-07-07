@@ -8,7 +8,7 @@ const initialState: Partial<PaginateDatasource<News>> = {};
 
 const newsReducer = createReducer(
   initialState,
-  on(ActivitiesActions.loadNewsSuccess, (state, { news }) => ({
+  on(ActivitiesActions.loadPaginateNewsSuccess, (state, { news }) => ({
     ...news
   })),
 )

@@ -8,7 +8,7 @@ const initialState: Partial<PaginateDatasource<Municipal>> = {};
 
 const municipalsReducer = createReducer(
   initialState,
-  on(MunicipalsActions.loadMunicipalsSuccess, (state, { municipals }) => ({
+  on(MunicipalsActions.loadMunicipalsPaginateSuccess, (state, { municipals }) => ({
     ...municipals
   })),
 )

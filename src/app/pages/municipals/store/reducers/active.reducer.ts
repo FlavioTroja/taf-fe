@@ -15,6 +15,10 @@ const activeMunicipalityReducer = createReducer(
     ...state,
     changes: { ...changes }
   })),
+  on(MunicipalsActions.clearMunicipalActive, (state) => ({
+    changes: undefined,
+    current: undefined
+  }))
 )
 
 export function reducer(state: Partial<ActiveEntity<Municipal>> | undefined, action: Action) {

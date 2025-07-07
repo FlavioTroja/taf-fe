@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, signal, TemplateRef, ViewChild, WritableSignal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  effect,
+  inject,
+  signal,
+  TemplateRef,
+  ViewChild,
+  WritableSignal
+} from '@angular/core';
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl } from "@angular/forms";
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
@@ -7,6 +16,8 @@ import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
 import { distinctUntilChanged } from "rxjs";
 import { debounceTime } from "rxjs/operators";
+import { QuerySearch, SortSearch } from "../../../../../global";
+import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
@@ -16,7 +27,6 @@ import * as RouterActions from "../../../../core/router/store/router.actions";
 import { PartialMunicipal } from "../../../../models/Municipals";
 import { Sort, Table, TableButton } from "../../../../models/Table";
 import * as MunicipalsActions from "../../store/actions/municipals.actions";
-import { loadMunicipals } from "../../store/actions/municipals.actions";
 import { getMunicipalsPaginate } from "../../store/selectors/municipals.selectors";
 
 @Component({
@@ -52,6 +62,10 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
       <div>{{ row.region }}</div>
     </ng-template>
 
+    <ng-template #domainRow let-row>
+      <div>{{ row.domain }}</div>
+    </ng-template>
+
     <ng-template #skeleton>
       <app-table-skeleton [columns]="columns"/>
     </ng-template>
@@ -62,6 +76,7 @@ export default class ActivitiesComponent implements AfterViewInit {
   @ViewChild("cityRow") cityRow: TemplateRef<any> | undefined;
   @ViewChild("provinceRow") provinceRow: TemplateRef<any> | undefined;
   @ViewChild("regionRow") regionRow: TemplateRef<any> | undefined;
+  @ViewChild("domainRow") domainRow: TemplateRef<any> | undefined;
 
   store: Store<AppState> = inject(Store);
   municipalPaginate$ = this.store.select(getMunicipalsPaginate);
@@ -114,6 +129,12 @@ export default class ActivitiesComponent implements AfterViewInit {
           width: "15rem",
           template: this.regionRow,
         },
+        {
+          columnDef: 'domain',
+          header: 'Dominio',
+          width: "15rem",
+          template: this.domainRow,
+        },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
     })
@@ -145,8 +166,22 @@ export default class ActivitiesComponent implements AfterViewInit {
   }
 
   constructor() {
-    this.store.dispatch(loadMunicipals())
+    effect(() => {
+      const query: QuerySearch<string, string> = {
+        page: this.paginator().pageIndex,
+        limit: this.paginator().pageSize,
+        search: this.searchText()!,
+        sort: createSortArray(this.sorter()) as SortSearch<string, string>
+      }
 
+      this.store.dispatch(
+        MunicipalsActions.loadMunicipalsPaginate({ query })
+      );
+    }, { allowSignalWrites: true })
+
+    this.store.dispatch(
+      MunicipalsActions.loadMunicipalsPaginate({ query: { page: 0, limit: 10 } })
+    );
   }
 
   private deleteMunicipal(row: PartialMunicipal) {

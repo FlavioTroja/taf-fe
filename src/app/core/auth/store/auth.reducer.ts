@@ -5,6 +5,7 @@ import * as AuthActions from "./auth.actions";
 export interface AuthState {
   access_token?: string,
   httpError?: HttpError
+  userConfirmed?: boolean,
 }
 
 export const initialState: AuthState = {}
@@ -17,7 +18,16 @@ const authReducer = createReducer(
   on(AuthActions.loginSuccess, (state, { auth }) => ({
     access_token: createAuthorizationToken(auth.access_token)
   })),
+  on(AuthActions.confirmSuccess, (state, { auth }) => ({
+    access_token: createAuthorizationToken(auth.access_token)
+  })),
+  on(AuthActions.registerSuccess, (state, { registerResp }) => ({
+    userConfirmed: registerResp.userConfirmed
+  })),
   on(AuthActions.loginFailed, (state, { error }) => ({
+    httpError: { ...error }
+  })),
+  on(AuthActions.registerFailed, (state, { error }) => ({
     httpError: { ...error }
   })),
   on(AuthActions.logoutSuccess, (state) => ({

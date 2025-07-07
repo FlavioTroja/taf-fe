@@ -3,6 +3,7 @@ import { Actions, concatLatestFrom, createEffect, ofType } from "@ngrx/effects";
 import { Store } from "@ngrx/store";
 import { catchError, concatMap, exhaustMap, map, of } from "rxjs";
 import { AppState } from "../../../../app.config";
+import { getProfileMunicipalityId } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
 import { selectCustomRouteParam } from "../../../../core/router/store/router.selectors";
 import * as UIActions from "../../../../core/ui/store/ui.actions";
@@ -63,21 +64,25 @@ export class NewsEffects {
 
   deleteNewsEffect$ = createEffect(() => this.actions$.pipe(
     ofType(NewsActions.deleteNews),
-    exhaustMap(({ id }) => this.newsService.deleteNews(id)
+    concatLatestFrom(() => [
+      this.store.select(getProfileMunicipalityId),
+    ]),
+    exhaustMap(([ { id }, municipalityId ]) => this.newsService.deleteNews(id)
       .pipe(
-        map(() => NewsActions.loadNews()),
+        map(() => NewsActions.loadPaginateNews({ query: { page: 0, limit: 10, filters: { municipalityId } } })),
         catchError((err) => of(NewsActions.deleteNewsFailed(err)))
       ))
   ))
 
   loadNewsEffect$ = createEffect(() => this.actions$.pipe(
-    ofType(NewsActions.loadNews),
-    exhaustMap(() => this.newsService.loadNews()
+    ofType(NewsActions.loadPaginateNews),
+    exhaustMap(({ query }) => this.newsService.loadNews(query)
       .pipe(
         concatMap((news) => [
-          NewsActions.loadNewsSuccess({ news })
+          NewsActions.loadPaginateNewsSuccess({ news }),
+          NewsActions.clearNewsActive()
         ]),
-        catchError((error) => of(NewsActions.loadNewsFailed({ error })))
+        catchError((error) => of(NewsActions.loadPaginateNewsFailed({ error })))
       ))
   ))
 
@@ -94,7 +99,7 @@ export class NewsEffects {
 
   manageNotificationNewsErrorEffect$ = createEffect(() => this.actions$.pipe(
     ofType(...[
-      NewsActions.loadNewsFailed,
+      NewsActions.loadPaginateNewsFailed,
       NewsActions.getNewsFailed,
       NewsActions.addNewsFailed,
       NewsActions.editNewsFailed

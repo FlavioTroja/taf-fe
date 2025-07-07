@@ -4,8 +4,10 @@ import { Store } from "@ngrx/store";
 import { AppState } from "../../../app.config";
 import { NAVBAR_ACTION } from "../../../models/NavBar";
 import { editActivity } from "../../../pages/activities/store/actions/activities.actions";
+import { editEvent } from "../../../pages/events/store/actions/events.actions";
 import { editMunicipal } from "../../../pages/municipals/store/actions/municipals.actions";
 import { editNews } from "../../../pages/news/store/actions/news.actions";
+import { editNotification } from "../../../pages/notifications/store/actions/notification.actions";
 import * as UserActions from "../../../pages/users/store/actions/users.actions";
 import * as RouterActions from "../../router/store/router.actions";
 import { selectCustomRouteParam } from "../../router/store/router.selectors";
@@ -36,12 +38,36 @@ export class NavbuttonService {
       callback: () => this.store.dispatch(editNews())
     },
     {
+      actionName: NAVBAR_ACTION.EVENT_SAVE,
+      callback: () => this.store.dispatch(editEvent())
+    },
+    {
+      actionName: NAVBAR_ACTION.NOTIFICATION_SAVE,
+      callback: () => this.store.dispatch(editNotification())
+    },
+    {
       actionName: NAVBAR_ACTION.USER_NAVIGATE_ON_MODIFY,
       callback: () => this.store.dispatch(RouterActions.go({ path: [ `users/${ this.id() }` ] }))
     },
     {
       actionName: NAVBAR_ACTION.ACTIVITY_NAVIGATE_ON_MODIFY,
       callback: () => this.store.dispatch(RouterActions.go({ path: [ `activities/${ this.id() }` ] }))
+    },
+    {
+      actionName: NAVBAR_ACTION.NEWS_NAVIGATE_ON_MODIFY,
+      callback: () => this.store.dispatch(RouterActions.go({ path: [ `news/${ this.id() }` ] }))
+    },
+    {
+      actionName: NAVBAR_ACTION.EVENTS_NAVIGATE_ON_MODIFY,
+      callback: () => this.store.dispatch(RouterActions.go({ path: [ `events/${ this.id() }` ] }))
+    },
+    {
+      actionName: NAVBAR_ACTION.SENT_NOTIFICATIONS_NAVIGATE_ON_MODIFY,
+      callback: () => this.store.dispatch(RouterActions.go({ path: [ `notifications/sent/${ this.id() }` ] }))
+    },
+    {
+      actionName: NAVBAR_ACTION.RECEIVED_NOTIFICATIONS_NAVIGATE_ON_MODIFY,
+      callback: () => this.store.dispatch(RouterActions.go({ path: [ `notifications/received/${ this.id() }` ] }))
     },
     {
       actionName: NAVBAR_ACTION.HOME,

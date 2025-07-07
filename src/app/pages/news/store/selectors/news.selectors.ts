@@ -13,5 +13,5 @@ export const getActiveNews = createSelector(
 
 export const getActiveNewsChanges = createSelector(
   selectNewsManager,
-  (state?: NewsManagementState) => state?.active?.changes
+  (state?: NewsManagementState) => state?.active?.changes ?? {}
 )

@@ -1,4 +1,5 @@
 import { createAction, props } from "@ngrx/store";
+import { QuerySearch } from "../../../../../global";
 import { Municipal, PartialMunicipal } from "../../../../models/Municipals";
 import { HttpError } from "../../../../models/Notification";
 import { PaginateDatasource } from "../../../../models/Table";
@@ -8,11 +9,13 @@ export const deleteMunicipalFailed = createAction("[Municipals] Delete Municipal
   error: HttpError
 }>());
 
-export const loadMunicipals = createAction("[Municipals] Load Municipals");
-export const loadMunicipalsSuccess = createAction("[Municipals] Load Municipals Success", props<{
+export const loadMunicipalsPaginate = createAction("[Municipals] Load Municipals", props<{
+  query: QuerySearch<string, string>
+}>());
+export const loadMunicipalsPaginateSuccess = createAction("[Municipals] Load Municipals Success", props<{
   municipals: PaginateDatasource<Municipal>
 }>())
-export const loadMunicipalsFailed = createAction("[Municipals] Load Municipals Failed", props<{
+export const loadMunicipalsPaginateFailed = createAction("[Municipals] Load Municipals Failed", props<{
   error: HttpError
 }>())
 
@@ -45,6 +48,7 @@ export const editMunicipalFailed = createAction("[Municipals] Edit Municipal Fai
   error: HttpError
 }>())
 
+export const clearMunicipalActive = createAction("[Municipals] Clear Active changes");
 
 
 

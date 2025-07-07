@@ -1,6 +1,7 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { NAVBAR_ACTION } from "../../models/NavBar";
+import { getActiveMunicipalChanges } from "./store/selectors/municipals.selectors";
 
 export const routes: Routes = [
   {
@@ -27,7 +28,12 @@ export const routes: Routes = [
         other: "Aggiungi Comune"
       },
       buttons: [
-        { label: "Salva", iconName: "edit", action: NAVBAR_ACTION.MUNICIPAL_SAVE, selectors: {} },
+        {
+          label: "Salva",
+          iconName: "edit",
+          action: NAVBAR_ACTION.MUNICIPAL_SAVE,
+          selectors: { disabled: getActiveMunicipalChanges }
+        },
         // {
         //   label: "",
         //   iconName: "key",

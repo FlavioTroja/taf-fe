@@ -33,5 +33,10 @@ export const sidebarRoutes: RouteElement[] = [
     iconName: 'campaign',
     path: '/news',
     label: "News",
+  },
+  {
+    iconName: 'calendar_add_on',
+    path: '/events',
+    label: "Eventi",
   }
 ];
