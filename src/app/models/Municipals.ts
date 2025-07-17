@@ -1,4 +1,4 @@
-import { isNaN, isNil, omitBy, overSome } from "lodash-es";
+import { isNaN, omitBy, overSome } from "lodash-es";
 
 export interface Municipal {
   id: string,
@@ -14,10 +14,10 @@ export type PartialMunicipal = Partial<Municipal>;
 
 export function createMunicipalPayload(payload: any) {
   const municipalDTO = {
-    city: payload.city,
-    province: payload.province,
-    region: payload.region,
-    domain: payload.domain,
+    city: payload.city || null,
+    province: payload.province || null,
+    region: payload.region || null,
+    domain: payload.domain || null,
   }
-  return <Municipal>omitBy(municipalDTO, overSome([ isNil, isNaN ]))
+  return <Municipal>omitBy(municipalDTO, overSome([ isNaN ]))
 }

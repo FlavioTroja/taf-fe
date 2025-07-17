@@ -73,7 +73,6 @@ export class MunicipalsEffects {
           query: {
             page: 0,
             limit: 10,
-            filters: { municipalityId }
           }
         })),
         catchError((err) => of(MunicipalsActions.deleteMunicipalFailed(err)))
