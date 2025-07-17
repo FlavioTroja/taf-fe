@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
   effect,
   inject,
+  Signal,
   signal,
   TemplateRef,
   ViewChild,
@@ -16,7 +18,6 @@ import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { QuerySearch, SortSearch } from "../../../../../global";
-import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
@@ -128,7 +129,14 @@ export default class UsersComponent implements AfterViewInit {
     pageSize: 10
   });
 
-  sorter: WritableSignal<Sort[]> = signal([ { active: "name", direction: "desc" } ]);
+  sorter: WritableSignal<Sort[]> = signal([ { active: "name", direction: "asc" } ]);
+
+  sorterPayload: Signal<SortSearch> = computed(() =>
+    this.sorter().reduce<SortSearch>((acc, { active, direction }) => {
+      acc[active] = direction;
+      return acc;
+    }, {})
+  );
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
@@ -174,7 +182,7 @@ export default class UsersComponent implements AfterViewInit {
           header: 'Ruoli',
           template: this.rolesRow,
           width: "12rem",
-          sortable: false
+          sortable: true
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
@@ -199,7 +207,7 @@ export default class UsersComponent implements AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (!result) {
+      if ( !result ) {
         return;
       }
       this.deleteUser(user);
@@ -212,16 +220,16 @@ export default class UsersComponent implements AfterViewInit {
 
       const municipalityId = this.municipalityId()
 
-      if (!municipalityId) {
+      if ( !municipalityId ) {
         return
       }
 
-      const query: QuerySearch<string, string> = {
+      const query: QuerySearch = {
         page: this.paginator().pageIndex,
         limit: this.paginator().pageSize,
         search: this.searchText()!,
         filters: { municipalityId },
-        sort: createSortArray(this.sorter()) as SortSearch<string, string>
+        sort: this.sorterPayload()
       }
 
       this.store.dispatch(

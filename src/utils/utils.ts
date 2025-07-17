@@ -6,7 +6,7 @@ import { Roles, User } from "../app/models/User";
 function changes(newObj: any, origObj: any) {
   let arrayIndexCounter = 0
   return transform(newObj, function (result: any, value, key) {
-    if (!isEqual(value, origObj[key])) {
+    if ( !isEqual(value, origObj[key]) ) {
       let resultKey = isArray(origObj) ? arrayIndexCounter++ : key
       result[resultKey] = (isObject(value) && isObject(origObj[key])) ? changes(value, origObj[key]) : value
     }
@@ -18,7 +18,7 @@ export function difference(origObj: any, newObj: any) {
 }
 
 export function createORQuery(noActionColumns: string[], searchText: string) {
-  if (!searchText) {
+  if ( !searchText ) {
     return {}
   }
   return {
@@ -33,6 +33,7 @@ export function createSortArray(arr: Sort[]) {
     [active]: direction
   }));
 }
+
 
 export function formatDate(date: string) {
   return DateTime.fromISO(date).setLocale("it").toLocaleString({ month: "long", day: "numeric", year: "numeric" });
@@ -89,15 +90,15 @@ export function preventInvalidCharactersForNumericTextInput(event: KeyboardEvent
     'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'
   ];
 
-  if (!!decimal) {
+  if ( !!decimal ) {
     allowedKeys = [ ...allowedKeys, '.', ',' ];
   }
 
-  if (!!negative) {
+  if ( !!negative ) {
     allowedKeys = [ ...allowedKeys, '-' ];
   }
 
-  if ((event.key >= '0' && event.key <= '9') || allowedKeys.includes(event.key)) {
+  if ( (event.key >= '0' && event.key <= '9') || allowedKeys.includes(event.key) ) {
     return;
   }
   event.preventDefault();
@@ -130,12 +131,12 @@ export function capitalizeFirstCharOfAString(str: string): string {
  * the second param is the flag for having all the roles (with this param at true) in AND instead of OR
  */
 export function hasRoles(currentUser: Partial<User>, roles: { role: Roles, required?: boolean }[]) {
-  if (!currentUser.roles) {
+  if ( !currentUser.roles ) {
     return false;
   }
 
   //check if user has god
-  if (currentUser.roles.some(role => (role === Roles.GOD))) {
+  if ( currentUser.roles.some(role => (role === Roles.GOD)) ) {
     return true;
   }
 

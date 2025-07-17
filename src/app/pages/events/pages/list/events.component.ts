@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
   effect,
   inject,
+  Signal,
   signal,
   TemplateRef,
   ViewChild,
@@ -17,8 +19,6 @@ import { Store } from "@ngrx/store";
 import { DateTime } from "luxon";
 import { distinctUntilChanged } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { SortSearch } from "../../../../../global";
-import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
@@ -32,6 +32,7 @@ import { Sort, Table, TableButton } from "../../../../models/Table";
 import { Roles } from "../../../../models/User";
 import * as EventActions from "../../../events/store/actions/events.actions";
 import { getEventsPaginate } from "../../../events/store/selectors/events.selectors";
+import { SortSearch } from "../../../../../global";
 
 @Component({
   selector: 'app-events',
@@ -133,7 +134,14 @@ export default class EventsComponent implements AfterViewInit {
     pageSize: 10
   });
 
-  sorter: WritableSignal<Sort[]> = signal([ { active: "title", direction: "desc" } ]);
+  sorter: WritableSignal<Sort[]> = signal([ { active: "title", direction: "asc" } ]);
+
+  sorterPayload: Signal<SortSearch> = computed(() =>
+    this.sorter().reduce<SortSearch>((acc, { active, direction }) => {
+      acc[active] = direction;
+      return acc;
+    }, {})
+  );
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
@@ -152,48 +160,56 @@ export default class EventsComponent implements AfterViewInit {
           header: 'Titolo',
           width: "15rem",
           template: this.titleRow,
+          sortable: true
         },
         {
           columnDef: 'description',
           header: 'Descrizione',
           width: "15rem",
           template: this.descriptionRow,
+          sortable: true
         },
         {
           columnDef: 'type',
           header: 'Tipo',
           width: "15rem",
           template: this.typeRow,
+          sortable: true
         },
         {
           columnDef: 'startDateTime',
           header: 'Data di inizio',
           width: "15rem",
           template: this.startDateTimeRow,
+          sortable: true
         },
         {
           columnDef: 'endDateTime',
           header: 'Data di fine',
           width: "15rem",
           template: this.endDateTimeRow,
+          sortable: true
         },
         {
           columnDef: 'location',
           header: 'Luogo',
           width: "15rem",
           template: this.locationRow,
+          sortable: true
         },
         {
           columnDef: 'organizerRow',
           header: 'Organizzatore',
           width: "15rem",
           template: this.organizerRow,
+          sortable: true
         },
         {
           columnDef: 'tags',
           header: 'Tags',
           width: "15rem",
           template: this.tagsRow,
+          sortable: true
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
@@ -218,7 +234,7 @@ export default class EventsComponent implements AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (!result) {
+      if ( !result ) {
         return;
       }
       this.deleteEvent(events);
@@ -229,7 +245,7 @@ export default class EventsComponent implements AfterViewInit {
     effect(() => {
       const municipalityId = this.municipalityId();
 
-      if (!municipalityId) {
+      if ( !municipalityId ) {
         return;
       }
 
@@ -238,7 +254,7 @@ export default class EventsComponent implements AfterViewInit {
         limit: this.paginator().pageSize,
         search: this.searchText()!,
         filters: { municipalityId },
-        sort: createSortArray(this.sorter()) as SortSearch<string, string>
+        sort: this.sorterPayload()
       }
 
       this.store.dispatch(

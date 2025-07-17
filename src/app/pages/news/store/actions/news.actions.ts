@@ -9,7 +9,7 @@ export const deleteNewsFailed = createAction("[News] Delete News Failed]", props
   error: HttpError
 }>());
 
-export const loadPaginateNews = createAction("[News] Load News", props<{ query: QuerySearch<string, string> }>());
+export const loadPaginateNews = createAction("[News] Load News", props<{ query: QuerySearch }>());
 export const loadPaginateNewsSuccess = createAction("[News] Load News Success", props<{
   news: PaginateDatasource<News>
 }>())

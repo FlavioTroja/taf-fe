@@ -7,11 +7,16 @@ export interface ProfileState {
   user: PartialUser,
   error: boolean,
   municipalityId?: string
+  domainImages?: {
+    logo?: string;
+    icon?: string;
+  }
 }
 
 export const initialState: ProfileState = {
   user: {} as PartialUser,
-  error: false
+  error: false,
+  domainImages: {}
 }
 
 const profileReducer = createReducer(
@@ -42,6 +47,10 @@ const profileReducer = createReducer(
   on(ProfileActions.getByDomainSuccess, (state, { municipalityId }) => ({
     ...state,
     municipalityId
+  })),
+  on(ProfileActions.setDomainImages, (state, { domainImages }) => ({
+    ...state,
+    domainImages
   }))
 );
 

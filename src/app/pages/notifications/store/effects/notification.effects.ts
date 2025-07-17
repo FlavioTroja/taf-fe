@@ -33,7 +33,7 @@ export class NotificationEffects {
       .pipe(
         concatMap((notification) => [
           NotificationActions.addNotificationSuccess({ notification }),
-          RouterActions.go({ path: [ '/notifications' ] })
+          RouterActions.go({ path: [ '/notifications/sent' ] })
         ]),
         catchError((error) => of(NotificationActions.addNotificationFailed({ error })))
       ))

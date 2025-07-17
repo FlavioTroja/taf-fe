@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
   effect,
   inject,
+  Signal,
   signal,
   TemplateRef,
   ViewChild,
@@ -17,8 +19,6 @@ import { Store } from "@ngrx/store";
 import { DateTime } from "luxon";
 import { distinctUntilChanged } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { SortSearch } from "../../../../../global";
-import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
@@ -32,6 +32,7 @@ import { Sort, Table, TableButton } from "../../../../models/Table";
 import { Roles } from "../../../../models/User";
 import * as NewsActions from "../../store/actions/news.actions";
 import { getNewsPaginate } from "../../store/selectors/news.selectors";
+import { SortSearch } from "../../../../../global";
 
 @Component({
   selector: 'app-edits',
@@ -114,7 +115,14 @@ export default class NewsComponent implements AfterViewInit {
     pageSize: 10
   });
 
-  sorter: WritableSignal<Sort[]> = signal([ { active: "name", direction: "desc" } ]);
+  sorter: WritableSignal<Sort[]> = signal([ { active: "title", direction: "asc" } ]);
+
+  sorterPayload: Signal<SortSearch> = computed(() =>
+    this.sorter().reduce<SortSearch>((acc, { active, direction }) => {
+      acc[active] = direction;
+      return acc;
+    }, {})
+  );
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
@@ -133,30 +141,35 @@ export default class NewsComponent implements AfterViewInit {
           header: 'Titolo',
           width: "15rem",
           template: this.titleRow,
+          sortable: true
         },
         {
           columnDef: 'content',
           header: 'Contenuto',
           width: "15rem",
           template: this.contentRow,
+          sortable: true
         },
         {
           columnDef: 'author',
           header: 'Autore',
           width: "15rem",
           template: this.authorRow,
+          sortable: true
         },
         {
           columnDef: 'publicationDate',
           header: 'Data di Pubblicazione',
           width: "15rem",
           template: this.publicationDateRow,
+          sortable: true
         },
         {
           columnDef: 'tags',
           header: 'Tags',
           width: "15rem",
           template: this.tagsRow,
+          sortable: true
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
@@ -181,7 +194,7 @@ export default class NewsComponent implements AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (!result) {
+      if ( !result ) {
         return;
       }
       this.deleteNews(news);
@@ -192,7 +205,7 @@ export default class NewsComponent implements AfterViewInit {
     effect(() => {
       const municipalityId = this.municipalityId();
 
-      if (!municipalityId) {
+      if ( !municipalityId ) {
         return;
       }
 
@@ -201,7 +214,7 @@ export default class NewsComponent implements AfterViewInit {
         limit: this.paginator().pageSize,
         search: this.searchText()!,
         filters: { municipalityId },
-        sort: createSortArray(this.sorter()) as SortSearch<string, string>
+        sort: this.sorterPayload()
       }
 
       this.store.dispatch(

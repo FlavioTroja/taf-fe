@@ -6,6 +6,8 @@ export interface Municipal {
   province: string,
   region: string,
   domain: string
+  icon: string,
+  logo: string,
 }
 
 export type PartialMunicipal = Partial<Municipal>;

@@ -10,7 +10,7 @@ export const deleteEventFailed = createAction("[Events] Delete Event Failed]", p
   error: HttpError
 }>());
 
-export const loadPaginateEvents = createAction("[Events] Load Events", props<{ query: QuerySearch<string, string> }>());
+export const loadPaginateEvents = createAction("[Events] Load Events", props<{ query: QuerySearch }>());
 export const loadPaginateEventsSuccess = createAction("[Events] Load Events Success", props<{
   events: PaginateDatasource<Event>
 }>())

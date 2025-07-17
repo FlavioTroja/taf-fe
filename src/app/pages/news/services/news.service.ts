@@ -30,7 +30,7 @@ export class NewsService {
     return this.http.delete<News>(`${ BASE_URL }/news/${ id }`)
   }
 
-  loadNews(query: QuerySearch<string, string>) {
+  loadNews(query: QuerySearch) {
     return this.http.post<PaginateDatasource<News>>(`${ BASE_URL }/news/search`, query);
   }
 

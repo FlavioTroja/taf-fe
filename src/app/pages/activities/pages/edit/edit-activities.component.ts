@@ -61,7 +61,6 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
         <app-input type="text" id="name" label="Nome" formControlName="name" [formControl]="f.name"/>
         <app-input type="text" id="address" label="Indirizzo" formControlName="address" [formControl]="f.address"/>
         <app-input type="text" id="phone" label="Telefono" formControlName="phone" [formControl]="f.phone"/>
-        <app-input type="email" id="email" label="Email" formControlName="email" [formControl]="f.email"/>
         <div class="flex w-full gap-2 items-end">
           <app-input type="time" id="newTime" label="Orari di Apertura" *ngIf="!viewOnly()"
                      [formControl]="f.newTime" formControlName="newTime"/>
@@ -87,8 +86,8 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
             </div>
           </div>
         </div>
-        <div class="flex gap-4 basis-full">
-          <div class="flex flex-col gap-1">
+        <div class="flex gap-4 h-[450px] basis-full">
+          <div class="flex flex-col h-full gap-1">
             <div>Coordinate dell'attività</div>
             <google-map
               class="overflow-clip bg-foreground p-0.5 rounded-md"
@@ -102,7 +101,7 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
               </map-marker>
             </google-map>
           </div>
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col h-full gap-2">
             <div class="flex gap-2">
 
               <app-input type="text" id="website" label="Sito" formControlName="website" [formControl]="f.website"/>
@@ -136,7 +135,7 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
                   </button>
                 </div>
               </div>
-              <div class="flex flex-col gap-2 p-1 overflow-y-scroll h-96">
+              <div class="flex flex-col basis-1/2 gap-2 p-1 overflow-y-scroll h-full">
                 <div *ngFor="let a of f.tags.controls; index as i" class="relative tag">
                   <app-input
                     type="text"
@@ -199,7 +198,6 @@ export default class EditActivitiesComponent implements OnInit, OnDestroy {
       disabled: this.viewOnly()
     }, [ Validators.min(-180), Validators.max(180) ]),
     logo: this.fb.control({ value: '', disabled: this.viewOnly() }),
-    email: this.fb.control({ value: '', disabled: this.viewOnly() }),
     openingHours: this.fb.array<string>([]),
     newTime: this.fb.control({ value: '', disabled: this.viewOnly() }),
     website: this.fb.control({ value: '', disabled: this.viewOnly() }),
