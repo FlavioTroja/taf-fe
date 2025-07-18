@@ -1,4 +1,4 @@
-import { isNaN, isNil, omitBy, overSome } from "lodash-es";
+import { isNaN, omitBy, overSome } from "lodash-es";
 import { PartialUser } from "./User";
 
 export interface Notification {
@@ -19,13 +19,13 @@ export type PartialNotification = Partial<Notification>;
 
 export const createNotificationPayload = (payload: any) => {
   const notificationDTO = {
-    message: payload.message,
-    read: payload.read,
-    recipientId: payload.recipientId,
-    senderId: payload.senderId,
-    timestamp: payload.timestamp,
+    message: payload.message || null,
+    read: payload.read || null,
+    recipientId: payload.recipientId || null,
+    senderId: payload.senderId || null,
+    timestamp: payload.timestamp || null,
     municipalityId: payload.municipalityId,
   }
 
-  return <Notification>omitBy(notificationDTO, overSome(isNil, isNaN))
+  return <Notification>omitBy(notificationDTO, overSome(isNaN))
 }

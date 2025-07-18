@@ -30,7 +30,7 @@ export class MunicipalsService {
     return this.http.delete<Municipal>(`${ BASE_URL }/municipals/${ id }`)
   }
 
-  loadPaginateMunicipals(query: QuerySearch<string, string>) {
+  loadPaginateMunicipals(query: QuerySearch) {
     return this.http.post<PaginateDatasource<Municipal>>(`${ BASE_URL }/municipals/search`, query);
   }
 

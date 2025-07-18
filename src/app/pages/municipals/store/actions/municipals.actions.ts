@@ -10,7 +10,7 @@ export const deleteMunicipalFailed = createAction("[Municipals] Delete Municipal
 }>());
 
 export const loadMunicipalsPaginate = createAction("[Municipals] Load Municipals", props<{
-  query: QuerySearch<string, string>
+  query: QuerySearch
 }>());
 export const loadMunicipalsPaginateSuccess = createAction("[Municipals] Load Municipals Success", props<{
   municipals: PaginateDatasource<Municipal>

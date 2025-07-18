@@ -30,7 +30,7 @@ export class EventsService {
     return this.http.delete<Event>(`${ BASE_URL }/events/${ id }`)
   }
 
-  loadEvents(query: QuerySearch<string, string>) {
+  loadEvents(query: QuerySearch) {
     return this.http.post<PaginateDatasource<Event>>(`${ BASE_URL }/events/search`, query);
   }
 

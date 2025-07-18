@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
   effect,
   inject,
+  Signal,
   signal,
   TemplateRef,
   ViewChild,
@@ -17,7 +19,6 @@ import { Store } from "@ngrx/store";
 import { distinctUntilChanged } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { QuerySearch, SortSearch } from "../../../../../global";
-import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
@@ -99,7 +100,14 @@ export default class ActivitiesComponent implements AfterViewInit {
     pageSize: 10
   });
 
-  sorter: WritableSignal<Sort[]> = signal([ { active: "createdAt", direction: "desc" } ]);
+  sorter: WritableSignal<Sort[]> = signal([ { active: "city", direction: "asc" } ]);
+
+  sorterPayload: Signal<SortSearch> = computed(() =>
+    this.sorter().reduce<SortSearch>((acc, { active, direction }) => {
+      acc[active] = direction;
+      return acc;
+    }, {})
+  );
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
@@ -116,24 +124,28 @@ export default class ActivitiesComponent implements AfterViewInit {
           header: 'Città',
           width: "15rem",
           template: this.cityRow,
+          sortable: true
         },
         {
           columnDef: 'province',
           header: 'Provincia',
           width: "5rem",
           template: this.provinceRow,
+          sortable: true
         },
         {
           columnDef: 'region',
           header: 'Regione',
           width: "15rem",
           template: this.regionRow,
+          sortable: true
         },
         {
           columnDef: 'domain',
           header: 'Dominio',
           width: "15rem",
           template: this.domainRow,
+          sortable: true
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
@@ -158,7 +170,7 @@ export default class ActivitiesComponent implements AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (!result) {
+      if ( !result ) {
         return;
       }
       this.deleteMunicipal(municipal);
@@ -167,11 +179,11 @@ export default class ActivitiesComponent implements AfterViewInit {
 
   constructor() {
     effect(() => {
-      const query: QuerySearch<string, string> = {
+      const query: QuerySearch = {
         page: this.paginator().pageIndex,
         limit: this.paginator().pageSize,
         search: this.searchText()!,
-        sort: createSortArray(this.sorter()) as SortSearch<string, string>
+        sort: this.sorterPayload()
       }
 
       this.store.dispatch(

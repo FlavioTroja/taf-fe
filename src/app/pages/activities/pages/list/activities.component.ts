@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
   effect,
   inject,
+  Signal,
   signal,
   TemplateRef,
   ViewChild,
@@ -17,7 +19,6 @@ import { Store } from "@ngrx/store";
 import { distinctUntilChanged } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { QuerySearch, SortSearch } from "../../../../../global";
-import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
@@ -64,8 +65,8 @@ import { getActivitiesPaginate } from "../../store/selectors/activities.selector
       <div>{{ row.phone }}</div>
     </ng-template>
 
-    <ng-template #emailRow let-row>
-      <div>{{ row.email }}</div>
+    <ng-template #websiteRow let-row>
+      <div>{{ row.website }}</div>
     </ng-template>
 
     <ng-template #openingHoursRow let-row let-i="index">
@@ -95,7 +96,7 @@ export default class ActivitiesComponent implements AfterViewInit {
   @ViewChild("nameRow") nameRow: TemplateRef<any> | undefined;
   @ViewChild("addressRow") addressRow: TemplateRef<any> | undefined;
   @ViewChild("phoneRow") phoneRow: TemplateRef<any> | undefined;
-  @ViewChild("emailRow") emailRow: TemplateRef<any> | undefined;
+  @ViewChild("websiteRow") websiteRow: TemplateRef<any> | undefined;
   @ViewChild("openingHoursRow") openingHoursRow: TemplateRef<any> | undefined;
   @ViewChild("typeRow") typeRow: TemplateRef<any> | undefined;
   @ViewChild("tagsRow") tagsRow: TemplateRef<any> | undefined;
@@ -126,7 +127,12 @@ export default class ActivitiesComponent implements AfterViewInit {
     pageSize: 10
   });
 
-  sorter: WritableSignal<Sort[]> = signal([ { active: "name", direction: "desc" } ]);
+  sorter: WritableSignal<Sort[]> = signal([ { active: "name", direction: "asc" } ]);
+
+  sorterPayload: Signal<SortSearch> = computed(() => this.sorter().reduce<SortSearch>((acc, { active, direction }) => {
+    acc[active] = direction
+    return acc;
+  }, {}))
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
@@ -145,24 +151,28 @@ export default class ActivitiesComponent implements AfterViewInit {
           header: 'Nome',
           width: "15rem",
           template: this.nameRow,
+          sortable: true
         },
         {
           columnDef: 'address',
           header: 'Indirizzo',
           width: "10rem",
           template: this.addressRow,
+          sortable: true
         },
         {
           columnDef: 'phone',
           header: 'Telefono',
           width: "8rem",
           template: this.phoneRow,
+          sortable: true
         },
         {
-          columnDef: 'email',
-          header: 'Email',
+          columnDef: 'website',
+          header: 'Sito',
           width: "15rem",
-          template: this.emailRow,
+          template: this.websiteRow,
+          sortable: true
         },
         {
           columnDef: 'openingHours',
@@ -175,12 +185,14 @@ export default class ActivitiesComponent implements AfterViewInit {
           header: 'Tipo',
           width: "10rem",
           template: this.typeRow,
+          sortable: true
         },
         {
           columnDef: 'tags',
           header: 'Tags',
           width: "20rem",
           template: this.tagsRow,
+          sortable: true
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
@@ -205,7 +217,7 @@ export default class ActivitiesComponent implements AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (!result) {
+      if ( !result ) {
         return;
       }
       this.deleteActivity(activity);
@@ -217,16 +229,16 @@ export default class ActivitiesComponent implements AfterViewInit {
     effect(() => {
       const municipalityId = this.municipalityId();
 
-      if (!municipalityId) {
+      if ( !municipalityId ) {
         return;
       }
 
-      const query: QuerySearch<string, string> = {
+      const query: QuerySearch = {
         page: this.paginator().pageIndex,
         limit: this.paginator().pageSize,
         search: this.searchText()!,
         filters: { municipalityId },
-        sort: createSortArray(this.sorter()) as SortSearch<string, string>
+        sort: this.sorterPayload()
       }
 
       this.store.dispatch(

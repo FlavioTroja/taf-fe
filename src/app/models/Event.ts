@@ -1,4 +1,4 @@
-import { isNaN, isUndefined, omitBy, overSome } from "lodash-es";
+import { isNaN, omitBy, overSome } from "lodash-es";
 import { PartialActivity } from "./Activities";
 
 export interface Event {
@@ -44,30 +44,30 @@ export enum EventType {
 
 export function createEventPayload(payload: any) {
   const eventDTO = {
-    title: payload.title,
-    startDateTime: payload.startDateTime,
-    endDateTime: payload.endDateTime,
-    location: payload.location,
-    photos: payload.photos,
-    cover: payload.cover,
-    organizer: payload.organizer,
-    contactEmail: payload.contactEmail,
-    contactPhone: payload.contactPhone,
-    activityId: payload.activity?.id,
-    maxParticipants: payload.maxParticipants !== '' ? +payload.maxParticipants : null,
-    currentParticipants: payload.currentParticipants !== '' ? +payload.currentParticipants : null,
-    isPublic: payload.isPublic,
-    isCancelled: payload.isCancelled,
-    url: payload.url,
-    participants: payload.participants,
-    checkInTimes: payload.checkInTimes,
-    description: payload.description,
-    type: payload.type,
-    tags: payload.tags,
+    title: payload.title || null,
+    startDateTime: payload.startDateTime || null,
+    endDateTime: payload.endDateTime || null,
+    location: payload.location || null,
+    photos: payload.photos || null,
+    cover: payload.cover || null,
+    organizer: payload.organizer || null,
+    contactEmail: payload.contactEmail || null,
+    contactPhone: payload.contactPhone || null,
+    activityId: payload.activity?.id || null,
+    maxParticipants: payload.maxParticipants || +payload.maxParticipants,
+    currentParticipants: payload.currentParticipants || +payload.currentParticipants,
+    isPublic: payload.isPublic || null,
+    isCancelled: payload.isCancelled || null,
+    url: payload.url || null,
+    participants: payload.participants || null,
+    checkInTimes: payload.checkInTimes || null,
+    description: payload.description || null,
+    type: payload.type || null,
+    tags: payload.tags || null,
     municipalityId: payload.municipalityId,
   }
 
-  return <Event>omitBy(eventDTO, overSome([ isUndefined, isNaN ]))
+  return <Event>omitBy(eventDTO, overSome([ isNaN ]))
 }
 
 export const EVENT_TYPES = Object.entries(EventType).map(([ name, value ]) => ({
@@ -85,7 +85,7 @@ export const getEventTypeName = (value: EventType) => {
 
   const foundKey = keys.find(key => EventType[key] === value);
 
-  if (!foundKey) {
+  if ( !foundKey ) {
     return '';
   }
 

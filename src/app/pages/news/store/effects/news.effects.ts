@@ -44,7 +44,7 @@ export class NewsEffects {
       this.store.select(selectCustomRouteParam("id"))
     ]),
     exhaustMap(([ _, changes, id ]) => {
-      if (id === 'new') {
+      if ( id === 'new' ) {
         return of(NewsActions.addNews({
           news: {
             ...changes,
@@ -108,7 +108,7 @@ export class NewsEffects {
       UIActions.setUiNotification({
         notification: {
           type: NOTIFICATION_LISTENER_TYPE.ERROR,
-          message: err.error.reason?.message || ""
+          message: err.error.error.error.error || ""
         }
       })
     ])

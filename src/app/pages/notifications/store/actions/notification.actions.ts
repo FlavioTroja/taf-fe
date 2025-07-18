@@ -11,7 +11,7 @@ export const deleteNotificationFailed = createAction("[Notifications] Delete Not
 }>());
 
 export const loadPaginateNotifications = createAction("[Notifications] Load Notifications", props<{
-  query: QuerySearch<string, string>
+  query: QuerySearch
 }>());
 export const loadPaginateNotificationsSuccess = createAction("[Notifications] Load Notifications Success", props<{
   notifications: PaginateDatasource<Notification>

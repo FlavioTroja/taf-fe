@@ -5,7 +5,7 @@ export interface Query<T> {
   options?: QueryOptions
 }
 
-export interface QuerySearch<T, F> {
+export interface QuerySearch {
   page: number,
   limit: number,
   search?: string,
@@ -14,12 +14,11 @@ export interface QuerySearch<T, F> {
     senderId?: string,
     recipientId?: string,
   },
-  sort?: SortSearch<T, F>
+  sort?: SortSearch
 }
 
-export interface SortSearch<T, F> {
-  name?: T,
-  surname?: T,
+export interface SortSearch {
+  [field: string]: 'asc' | 'desc';
 }
 
 export interface QueryOptions {

@@ -11,7 +11,7 @@ import * as ProfileAction from "./profile.actions";
 })
 export class ProfileEffects {
   constructor(private actions$: Actions,
-              private profileService: ProfileService) {
+    private profileService: ProfileService) {
   }
 
   document = inject(DOCUMENT);
@@ -38,7 +38,10 @@ export class ProfileEffects {
     ofType(ProfileAction.getByDomain),
     exhaustMap(({ domain }) => this.profileService.findByDomain(domain)
       .pipe(
-        map(({ id }) => ProfileAction.getByDomainSuccess({ municipalityId: id }))
+        concatMap(({ id, logo, icon }) => [
+          ProfileAction.setDomainImages({ domainImages: { logo, icon } }),
+          ProfileAction.getByDomainSuccess({ municipalityId: id })
+        ])
       )))
   )
 

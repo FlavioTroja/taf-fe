@@ -10,7 +10,7 @@ export const deleteActivityFailed = createAction("[Activities] Delete Activity F
 }>());
 
 export const loadActivities = createAction("[Activities] Load Activities", props<{
-  query: QuerySearch<string, string>
+  query: QuerySearch
 }>());
 export const loadActivitiesSuccess = createAction("[Activities] Load Activities Success", props<{
   activities: PaginateDatasource<Activity>

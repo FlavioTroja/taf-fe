@@ -4,10 +4,11 @@ export interface Notification {
   title?: string,
   message: string
 }
+
 export interface HttpError {
   statusCode: number,
   statusText: string,
-  reason: any
+  error: any
 }
 
 export enum NOTIFICATION_LISTENER_TYPE {

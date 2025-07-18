@@ -30,7 +30,7 @@ export class NotificationsService {
     return this.http.delete<Notification>(`${ BASE_URL }/notifications/${ id }`)
   }
 
-  loadNotifications(query: QuerySearch<string, string>) {
+  loadNotifications(query: QuerySearch) {
     return this.http.post<PaginateDatasource<Notification>>(`${ BASE_URL }/notifications/search`, query);
   }
 

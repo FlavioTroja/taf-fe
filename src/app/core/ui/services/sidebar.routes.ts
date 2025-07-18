@@ -23,6 +23,7 @@ export const sidebarRoutes: RouteElement[] = [
     iconName: 'location_city',
     path: '/municipals',
     label: "Comuni",
+    // provideRoles: [ Roles.ROLE_ADMIN ]
   },
   {
     iconName: 'overview',

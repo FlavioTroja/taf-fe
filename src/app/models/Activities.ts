@@ -1,4 +1,4 @@
-import { isNaN, isNil, omitBy, overSome } from "lodash-es";
+import { isNaN, omitBy, overSome } from "lodash-es";
 
 export interface Activity {
   id: string
@@ -34,24 +34,24 @@ export enum ActivitiesType {
 
 export function createActivityPayload(activity: any) {
   const activityDTO = {
-    name: activity.name,
-    address: activity.address,
-    latitude: activity.latitude ? +activity.latitude : undefined,
-    longitude: activity.longitude ? +activity.longitude : undefined,
-    phone: activity.phone,
-    photos: activity.photos,
-    cover: activity.cover,
-    logo: activity.logo,
-    email: activity.email,
-    openingHours: activity.openingHours,
-    website: activity.website,
-    description: activity.description,
-    type: activity.type,
-    tags: activity.tags,
+    name: activity.name || null,
+    address: activity.address || null,
+    latitude: activity.latitude || +activity.latitude,
+    longitude: activity.longitude || +activity.longitude,
+    phone: activity.phone || null,
+    photos: activity.photos || null,
+    cover: activity.cover || null,
+    logo: activity.logo || null,
+    email: activity.email || null,
+    openingHours: activity.openingHours || null,
+    website: activity.website || null,
+    description: activity.description || null,
+    type: activity.type || null,
+    tags: activity.tags || null,
     municipalityId: activity.municipalityId,
   }
 
-  return <Activity>omitBy(activityDTO, overSome([ isNil, isNaN ]))
+  return <Activity>omitBy(activityDTO, overSome([ isNaN ]))
 }
 
 export const ACTIVITY_TYPES = Object.entries(ActivitiesType).map(([ name, value ]) => ({
@@ -68,7 +68,7 @@ export const getActivityTypeName = (value: ActivitiesType) => {
 
   const foundKey = keys.find(key => ActivitiesType[key] === value);
 
-  if (!foundKey) {
+  if ( !foundKey ) {
     return '';
   }
 

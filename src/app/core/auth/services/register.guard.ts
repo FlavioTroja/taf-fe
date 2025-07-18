@@ -1,9 +1,9 @@
 import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { map, Observable, tap } from "rxjs";
+import { map, Observable } from "rxjs";
 import { AppState } from "../../../app.config";
-import * as RouterActions from "../../router/store/router.actions";
-import { getAuthRegisterConfirmStatus } from "../store/auth.selectors";
+import { go } from "../../router/store/router.actions";
+import { getProfileUser } from "../../profile/store/profile.selectors";
 
 @Injectable({
   providedIn: 'root'
@@ -11,17 +11,17 @@ import { getAuthRegisterConfirmStatus } from "../store/auth.selectors";
 export class RegisterGuard {
   store: Store<AppState> = inject(Store);
 
-  canActivate(): Observable<boolean> {
+  canActivate(): Observable<void> {
 
 
-    return this.store.select(getAuthRegisterConfirmStatus).pipe(
-      map(value => !!value),
-      tap(isRegistered => {
-        if (!isRegistered) {
-          this.store.dispatch(RouterActions.go({ path: [ "auth/register" ] }));
-        }
-      })
-    );
+    return this.store.select(getProfileUser)
+      .pipe(
+        map((user) => {
+          if ( user.id ) {
+            this.store.dispatch(go({ path: [ "/home" ] }))
+          }
+        })
+      )
   }
 
 }

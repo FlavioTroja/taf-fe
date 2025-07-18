@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
   effect,
   inject,
+  Signal,
   signal,
   TemplateRef,
   ViewChild,
@@ -16,8 +18,6 @@ import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
 import { distinctUntilChanged } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { SortSearch } from "../../../../../global";
-import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
@@ -32,6 +32,7 @@ import { Roles } from "../../../../models/User";
 import * as NotificationActions from "../../store/actions/notification.actions";
 import { toggleReadNotification } from "../../store/actions/notification.actions";
 import { getNotificationsPaginate } from "../../store/selectors/notification.selectors";
+import { SortSearch } from "../../../../../global";
 
 @Component({
   selector: 'app-edits',
@@ -102,7 +103,7 @@ export default class SentNotificationsComponent implements AfterViewInit {
   }
 
   get getButtons() {
-    if (this.isSentNotificationRoute) {
+    if ( this.isSentNotificationRoute ) {
       return this.sentRouteButtons
     } else {
       return this.receivedRouteButtons;
@@ -110,7 +111,7 @@ export default class SentNotificationsComponent implements AfterViewInit {
   }
 
   toggleNotificationRoute(bool: boolean) {
-    if (bool) {
+    if ( bool ) {
       this.store.dispatch(RouterActions.go({ path: [ `notifications/sent` ] }))
     } else {
       this.store.dispatch(RouterActions.go({ path: [ `notifications/received` ] }))
@@ -149,7 +150,14 @@ export default class SentNotificationsComponent implements AfterViewInit {
     pageSize: 10
   });
 
-  sorter: WritableSignal<Sort[]> = signal([ { active: "name", direction: "desc" } ]);
+  sorter: WritableSignal<Sort[]> = signal([ { active: "message", direction: "asc" } ]);
+
+  sorterPayload: Signal<SortSearch> = computed(() =>
+    this.sorter().reduce<SortSearch>((acc, { active, direction }) => {
+      acc[active] = direction;
+      return acc;
+    }, {})
+  );
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
@@ -168,12 +176,14 @@ export default class SentNotificationsComponent implements AfterViewInit {
           header: 'Messaggio',
           width: "40rem",
           template: this.messageRow,
+          sortable: true
         },
         {
           columnDef: 'timestamp',
           header: 'Data',
           width: "15rem",
           template: this.timeStampRow,
+          sortable: true
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
@@ -198,7 +208,7 @@ export default class SentNotificationsComponent implements AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (!result) {
+      if ( !result ) {
         return;
       }
       this.deleteNotification(notification);
@@ -210,7 +220,7 @@ export default class SentNotificationsComponent implements AfterViewInit {
       const municipalityId = this.municipalityId();
       const userId = this.currentUser()?.id;
 
-      if (!municipalityId || !userId) {
+      if ( !municipalityId || !userId ) {
         return;
       }
 
@@ -219,7 +229,7 @@ export default class SentNotificationsComponent implements AfterViewInit {
         limit: this.paginator().pageSize,
         search: this.searchText()!,
         filters: { municipalityId, senderId: userId },
-        sort: createSortArray(this.sorter()) as SortSearch<string, string>
+        sort: this.sorterPayload()
       }
 
       const receivedRouteQuery = {
@@ -227,7 +237,7 @@ export default class SentNotificationsComponent implements AfterViewInit {
         limit: this.paginator().pageSize,
         search: this.searchText()!,
         filters: { municipalityId, recipientId: userId },
-        sort: createSortArray(this.sorter()) as SortSearch<string, string>
+        sort: this.sorterPayload()
       }
 
       this.store.dispatch(

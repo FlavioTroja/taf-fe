@@ -32,7 +32,7 @@ export const deleteUserSuccess = createAction("[Users] Delete User Success", pro
 
 export const deleteUserFailed = createAction("[Users] Delete Failed", props<{ error: HttpError }>());
 
-export const loadPaginateUsers = createAction("[Users] Load", props<{ query: QuerySearch<string, string> }>());
+export const loadPaginateUsers = createAction("[Users] Load", props<{ query: QuerySearch }>());
 
 export const loadPaginateUsersSuccess = createAction("[Users] Load Success", props<{
   users: PaginateDatasource<User>

@@ -24,6 +24,6 @@ export const registerFailed = createAction("[Auth] Sign Up Failed", props<{ erro
 
 export const confirm = createAction("[Auth] Confirm User", props<{ payload: ConfirmPayload }>());
 
-export const confirmSuccess = createAction("[Auth] Confirm Success", props<{ auth: Auth }>());
+export const confirmSuccess = createAction("[Auth] Confirm Success");
 
 export const confirmFailed = createAction("[Auth] Confirm Failed", props<{ error: HttpError }>());
