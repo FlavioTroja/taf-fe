@@ -62,7 +62,7 @@ import { Municipal } from "../../models/Municipals";
 
         <div class="font-bold">
           <mat-icon *ngIf="!mainImage" class="material-symbols-rounded scale-[3.5]"
-                    [ngClass]="{'invisible' : !!mainImage}">add
+                    [ngClass]="{'invisible' : !!mainImage}">{{ !viewOnly() ? 'add' : 'visibility' }}
           </mat-icon>
 
           <div class="on-hover-images h-full flex items-center justify-center">
