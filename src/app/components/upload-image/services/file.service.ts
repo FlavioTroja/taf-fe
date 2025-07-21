@@ -4,6 +4,7 @@ import { environment } from "../../../../environments/environment";
 import { Activity } from "../../../models/Activities";
 import { News } from "../../../models/News";
 import { User } from "../../../models/User";
+import { Municipal } from "../../../models/Municipals";
 
 const BASE_URL = environment.BASE_URL;
 
@@ -55,5 +56,17 @@ export class FileService {
 
   updateEventsGalleryImages(formData: FormData, id: string) {
     return this.http.post<News>(`${ BASE_URL }/events/${ id }/upload-gallery`, formData);
+  }
+
+  uploadMunicipalsLogoImage(formData: FormData, id: string) {
+    return this.http.post<Municipal>(`${ BASE_URL }/municipals/${ id }/upload-logo`, formData)
+  }
+
+  uploadMunicipalsCoverImage(formData: FormData, id: string) {
+    return this.http.post<Municipal>(`${ BASE_URL }/municipals/${ id }/upload-cover`, formData)
+  }
+
+  uploadMunicipalsIconImage(formData: FormData, id: string) {
+    return this.http.post<Municipal>(`${ BASE_URL }/municipals/${ id }/upload-icon`, formData)
   }
 }

@@ -7,6 +7,7 @@ export interface Municipal {
   region: string,
   domain: string
   icon: string,
+  cover: string,
   logo: string,
 }
 
@@ -18,6 +19,7 @@ export function createMunicipalPayload(payload: any) {
     province: payload.province || null,
     region: payload.region || null,
     domain: payload.domain || null,
+    description: payload.description || null,
   }
   return <Municipal>omitBy(municipalDTO, overSome([ isNaN ]))
 }

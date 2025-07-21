@@ -11,18 +11,62 @@ import { selectCustomRouteParam } from "../../../../core/router/store/router.sel
 import { createMunicipalPayload, PartialMunicipal } from "../../../../models/Municipals";
 import * as MunicipalActions from "../../store/actions/municipals.actions";
 import { getActiveMunicipal } from "../../store/selectors/municipals.selectors";
+import { FileUploadComponent } from "../../../../components/upload-image/file-upload.component";
+import { MatDialogModule } from "@angular/material/dialog";
 
 @Component({
   selector: 'app-edit-municipals',
   standalone: true,
-  imports: [ CommonModule, ReactiveFormsModule, InputComponent ],
+  imports: [ CommonModule, ReactiveFormsModule, InputComponent, FileUploadComponent, MatDialogModule ],
   template: `
     <form [formGroup]="municipalForm" autocomplete="off">
-      <div class="flex gap-4">
-        <app-input type="text" id="city" label="Città" formControlName="city" [formControl]="f.city"/>
-        <app-input type="text" id="province" label="Provincia" formControlName="province" [formControl]="f.province"/>
-        <app-input type="text" id="region" label="Regione" formControlName="region" [formControl]="f.region"/>
-        <app-input type="text" id="domain" label="Dominio" formControlName="domain" [formControl]="f.domain"/>
+      <div class="flex flex-col gap-4">
+        <div class="flex w-full flex-row gap-4 p-2">
+          <div>
+            <div class="flex gap-2 basis-1/6">
+              <app-file-upload
+                class="h-[300px]"
+                [mainImage]="f.logo.value!"
+                forImageService="MUNICIPAL_UPLOAD_LOGO"
+                [multiple]="false" label="Foto Logo"
+                (onUpload)="onUploadLogoImage($event)"
+                [onlyImages]="true"/>
+            </div>
+          </div>
+          <div>
+            <div class="flex gap-2 basis-1/6">
+              <app-file-upload
+                class="h-[300px]"
+                [mainImage]="f.cover.value!"
+                forImageService="MUNICIPAL_UPLOAD_COVER"
+                [multiple]="false" label="Foto Cover"
+                (onUpload)="onUploadCoverImage($event)"
+                [onlyImages]="true"/>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex gap-2 basis-1/6">
+              <app-file-upload
+                class="h-[300px]"
+                [mainImage]="f.icon.value!"
+                forImageService="MUNICIPAL_UPLOAD_ICON"
+                [multiple]="false" label="Foto Icona"
+                (onUpload)="onUploadIconImage($event)"
+                [onlyImages]="true"/>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3 items-center">
+          <app-input type="text" id="city" label="Città" formControlName="city" [formControl]="f.city"/>
+          <app-input type="text" id="province" label="Provincia" formControlName="province" [formControl]="f.province"/>
+        </div>
+        <div class="flex gap-3 items-center">
+          <app-input type="text" id="region" label="Regione" formControlName="region" [formControl]="f.region"/>
+          <app-input type="text" id="domain" label="Dominio" formControlName="domain" [formControl]="f.domain"/>
+        </div>
+        <app-input type="text" id="description" label="Descrizione" formControlName="description"
+                   [formControl]="f.description"/>
       </div>
     </form>
   `
@@ -44,7 +88,11 @@ export default class EditMunicipalsComponent implements OnInit, OnDestroy {
     city: [ '', Validators.required ],
     province: [ '', Validators.required ],
     region: [ '' ],
-    domain: [ '' ]
+    domain: [ '' ],
+    description: [ '' ],
+    logo: this.fb.control(''),
+    icon: this.fb.control(''),
+    cover: this.fb.control(''),
   });
   id = toSignal(this.store.select(selectCustomRouteParam('id')))
 
@@ -57,7 +105,7 @@ export default class EditMunicipalsComponent implements OnInit, OnDestroy {
       startWith(this.initFormValue),
       pairwise(),
       map(([ _, newState ]) => {
-        if (!Object.values(this.initFormValue).length && !this.isNewMunicipal) {
+        if ( !Object.values(this.initFormValue).length && !this.isNewMunicipal ) {
           return {};
         }
 
@@ -81,14 +129,14 @@ export default class EditMunicipalsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    if (!this.isNewMunicipal) {
+    if ( !this.isNewMunicipal ) {
       this.store.dispatch(MunicipalActions.getMunicipal({ id: this.id() }))
     }
 
     this.active$.pipe(
       filter(() => this.id() !== 'new')
     ).subscribe((value: PartialMunicipal | any) => {
-      if (!value) {
+      if ( !value ) {
         return
       }
 
@@ -101,6 +149,20 @@ export default class EditMunicipalsComponent implements OnInit, OnDestroy {
 
     this.editMunicipalChanges()
 
+  }
+
+  onUploadLogoImage(images: string[]) {
+    this.municipalForm.patchValue({ logo: images[0] });
+
+  }
+
+  onUploadIconImage(images: string[]) {
+    this.municipalForm.patchValue({ icon: images[0] });
+
+  }
+
+  onUploadCoverImage(images: string[]) {
+    this.municipalForm.patchValue({ cover: images[0] });
   }
 
   ngOnDestroy() {

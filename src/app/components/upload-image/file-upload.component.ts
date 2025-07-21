@@ -29,6 +29,7 @@ import { NOTIFICATION_LISTENER_TYPE } from "../../models/Notification";
 import { User } from "../../models/User";
 import { ImageType } from "../image-list/image-list.component";
 import { FileService } from "./services/file.service";
+import { Municipal } from "../../models/Municipals";
 
 @Component({
   selector: 'app-file-upload',
@@ -225,6 +226,12 @@ export class FileUploadComponent implements OnChanges {
               return this.imageService.updateEventsGalleryImages(formData, this.id());
             case 'EVENTS_UPLOAD_COVER':
               return this.imageService.updateEventsCoverImage(formData, this.id());
+            case 'MUNICIPAL_UPLOAD_LOGO':
+              return this.imageService.uploadMunicipalsLogoImage(formData, this.id());
+            case 'MUNICIPAL_UPLOAD_COVER':
+              return this.imageService.uploadMunicipalsCoverImage(formData, this.id());
+            case 'MUNICIPAL_UPLOAD_ICON':
+              return this.imageService.uploadMunicipalsIconImage(formData, this.id());
           }
         }
 
@@ -268,6 +275,16 @@ export class FileUploadComponent implements OnChanges {
         case 'EVENTS_UPLOAD_COVER':
           const eventCover = `${ (res as unknown as Event).cover }?cb=${ Date.now() }`;
           this.onUpload.emit([ eventCover ]);
+          break;
+        case 'MUNICIPAL_UPLOAD_LOGO':
+          this.onUpload.emit([ (res as unknown as Activity).logo ]);
+          break;
+        case 'MUNICIPAL_UPLOAD_COVER':
+          const municipalCover = `${ (res as unknown as Municipal).cover }?cb=${ Date.now() }`;
+          this.onUpload.emit([ municipalCover ]);
+          break;
+        case 'MUNICIPAL_UPLOAD_ICON':
+          this.onUpload.emit([ (res as unknown as Municipal).icon ]);
           break;
       }
 

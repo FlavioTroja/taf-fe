@@ -67,6 +67,10 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
       <div>{{ row.domain }}</div>
     </ng-template>
 
+    <ng-template #descriptionRow let-row>
+      <div>{{ row.description }}</div>
+    </ng-template>
+
     <ng-template #skeleton>
       <app-table-skeleton [columns]="columns"/>
     </ng-template>
@@ -78,6 +82,7 @@ export default class ActivitiesComponent implements AfterViewInit {
   @ViewChild("provinceRow") provinceRow: TemplateRef<any> | undefined;
   @ViewChild("regionRow") regionRow: TemplateRef<any> | undefined;
   @ViewChild("domainRow") domainRow: TemplateRef<any> | undefined;
+  @ViewChild("descriptionRow") descriptionRow: TemplateRef<any> | undefined;
 
   store: Store<AppState> = inject(Store);
   municipalPaginate$ = this.store.select(getMunicipalsPaginate);
@@ -145,6 +150,13 @@ export default class ActivitiesComponent implements AfterViewInit {
           header: 'Dominio',
           width: "15rem",
           template: this.domainRow,
+          sortable: true
+        },
+        {
+          columnDef: 'description',
+          header: 'Descrizione',
+          width: "15rem",
+          template: this.descriptionRow,
           sortable: true
         },
       ];
