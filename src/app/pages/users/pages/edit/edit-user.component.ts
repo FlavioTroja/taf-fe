@@ -36,11 +36,12 @@ interface ChangePasswordForm {
     <form [formGroup]="userForm" autocomplete="off">
       <div class="grid gap-3">
 
-        <div class="flex flex-row gap-4 p-2" [ngClass]="{ 'bg-white rounded-md default-shadow' : viewOnly() }">
-          <div class="flex flex-col basis-1/6">
+        <div class="flex flex-row gap-4" [ngClass]="{ 'bg-white rounded-md default-shadow' : viewOnly() }">
+          <div class="flex flex-col">
             <app-file-upload [ngClass]="{'pointer-events-none' : viewOnly() }"
                              forImageService="USER"
-                             [mainImage]="f.photo.getRawValue()"
+                             [username]="userForm.getRawValue().name || 'Image'"
+                             [mainImage]="f.photo.getRawValue() || 'img'"
                              [multiple]="false" label="Foto profilo"
                              (onUpload)="onUploadMainImage($event)" (onDeleteMainImage)="removeProfilePic()"
                              [onlyImages]="true"/>
@@ -51,14 +52,14 @@ interface ChangePasswordForm {
               <div class="text-2xl pb-2"> {{ userForm.getRawValue().surname }}</div>
               <div class="text-lg pb-2"> {{ userForm.getRawValue().birthDate }}</div>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-4">
               <div *ngFor="let role of roles$ | async"
                    class="whitespace-nowrap bg-gray-100 text-sm px-2 py-1 rounded">{{ role === Roles.ROLE_ADMIN ? 'ADMIN' : 'USER' }}
               </div>
             </div>
           </div>
         </div>
-        <div *ngIf="!viewOnly()" class="grid gap-3" [ngClass]="isNewUser ? ('grid-cols-2') : ('grid-cols-3')">
+        <div *ngIf="!viewOnly()" class="grid gap-4" [ngClass]="isNewUser ? ('grid-cols-2') : ('grid-cols-3')">
           <div class="flex flex-row relative">
             <app-input [formControl]="f.name" formControlName="name" label="Nome" id="user-name"
                        type="text" class="w-full" [style.box-shadow]=""/>
@@ -91,7 +92,7 @@ interface ChangePasswordForm {
             <mat-datepicker #datePicker></mat-datepicker>
           </div>
 
-          <!--          <div class="flex flex-row gap-2 w-full">
+          <!--          <div class="flex flex-row gap-4 w-full">
                       <div *ngIf='isNewUser' class="relative flex flex-col w-full">
                         <app-input [type]="showPassword ? 'text' : 'password'" [formControl]="f.password"
                                    autocomplete="new-password" formControlName="password" label="password"
@@ -251,7 +252,7 @@ export default class EditUserComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    if (!this.isNewUser) {
+    if ( !this.isNewUser ) {
       this.store.dispatch(
         UserActions.getUser({ id: this.id() })
       );
@@ -259,7 +260,7 @@ export default class EditUserComponent implements OnInit, OnDestroy {
 
     this.active$
       .subscribe((value: PartialUser | any) => {
-        if (!value) {
+        if ( !value ) {
           return;
         }
 
@@ -288,7 +289,7 @@ export default class EditUserComponent implements OnInit, OnDestroy {
     this.userForm.valueChanges.pipe(
       pairwise(),
       map(([ _, newState ]) => {
-        if (!Object.values(this.initFormValue).length && !this.isNewUser) {
+        if ( !Object.values(this.initFormValue).length && !this.isNewUser ) {
           return {};
         }
         const diff = {

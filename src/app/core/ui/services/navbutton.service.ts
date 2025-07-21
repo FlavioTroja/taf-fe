@@ -50,6 +50,10 @@ export class NavbuttonService {
       callback: () => this.store.dispatch(RouterActions.go({ path: [ `users/${ this.id() }` ] }))
     },
     {
+      actionName: NAVBAR_ACTION.MUNICIPAL_NAVIGATE_ON_MODIFY,
+      callback: () => this.store.dispatch(RouterActions.go({ path: [ `municipals/${ this.id() }` ] }))
+    },
+    {
       actionName: NAVBAR_ACTION.ACTIVITY_NAVIGATE_ON_MODIFY,
       callback: () => this.store.dispatch(RouterActions.go({ path: [ `activities/${ this.id() }` ] }))
     },

@@ -29,11 +29,12 @@ import { PartialMunicipal } from "../../../../models/Municipals";
 import { Sort, Table, TableButton } from "../../../../models/Table";
 import * as MunicipalsActions from "../../store/actions/municipals.actions";
 import { getMunicipalsPaginate } from "../../store/selectors/municipals.selectors";
+import { ShowImageComponent } from "../../../../components/show-image/show-image.component";
 
 @Component({
   selector: 'app-municipals',
   standalone: true,
-  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent ],
+  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent, ShowImageComponent ],
   template: `
     <div class="grid gap-3">
       <app-search [search]="search"/>
@@ -50,6 +51,13 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
       </div>
     </div>
 
+    <ng-template #coverRow let-row>
+      <app-show-image (click)="goToEditOrView(row.id)"
+                      classes="w-16 h-16 cursor-pointer"
+                      [objectName2]="row.city"
+                      [imageUrl]="row.cover || ''">
+      </app-show-image>
+    </ng-template>
 
     <ng-template #cityRow let-row>
       <div>{{ row.city }}</div>
@@ -67,10 +75,6 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
       <div>{{ row.domain }}</div>
     </ng-template>
 
-    <ng-template #descriptionRow let-row>
-      <div>{{ row.description }}</div>
-    </ng-template>
-
     <ng-template #skeleton>
       <app-table-skeleton [columns]="columns"/>
     </ng-template>
@@ -78,11 +82,11 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
   styles: [ `` ]
 })
 export default class ActivitiesComponent implements AfterViewInit {
+  @ViewChild("coverRow") coverRow: TemplateRef<any> | undefined;
   @ViewChild("cityRow") cityRow: TemplateRef<any> | undefined;
   @ViewChild("provinceRow") provinceRow: TemplateRef<any> | undefined;
   @ViewChild("regionRow") regionRow: TemplateRef<any> | undefined;
   @ViewChild("domainRow") domainRow: TemplateRef<any> | undefined;
-  @ViewChild("descriptionRow") descriptionRow: TemplateRef<any> | undefined;
 
   store: Store<AppState> = inject(Store);
   municipalPaginate$ = this.store.select(getMunicipalsPaginate);
@@ -98,7 +102,16 @@ export default class ActivitiesComponent implements AfterViewInit {
       bgColor: "orange",
       callback: elem => this.store.dispatch(RouterActions.go({ path: [ `municipals/${ elem.id }` ] }))
     },
+    {
+      iconName: "visibility",
+      bgColor: "sky",
+      callback: elem => this.store.dispatch(RouterActions.go({ path: [ `municipals/${ elem.id }/view` ] }))
+    }
   ];
+
+  goToEditOrView(id: string) {
+    this.store.dispatch(RouterActions.go({ path: [ `municipals/${ id }` ] }))
+  }
 
   paginator: WritableSignal<Table> = signal({
     pageIndex: 0,
@@ -124,6 +137,12 @@ export default class ActivitiesComponent implements AfterViewInit {
 
     Promise.resolve(null).then(() => {
       this.columns = [
+        {
+          columnDef: 'cover',
+          header: 'Cover',
+          width: "5rem",
+          template: this.coverRow,
+        },
         {
           columnDef: 'city',
           header: 'Città',
@@ -152,13 +171,6 @@ export default class ActivitiesComponent implements AfterViewInit {
           template: this.domainRow,
           sortable: true
         },
-        {
-          columnDef: 'description',
-          header: 'Descrizione',
-          width: "15rem",
-          template: this.descriptionRow,
-          sortable: true
-        },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
     })
@@ -176,7 +188,7 @@ export default class ActivitiesComponent implements AfterViewInit {
         `,
         buttons: [
           { iconName: "delete", label: "Elimina", bgColor: "remove", onClick: () => dialogRef.close(true) },
-          { iconName: "clear", label: "Annulla", onClick: () => dialogRef.close(false) }
+          { iconName: "clear", label: "Annulla", onClick: () => dialogRef.close(false) },
         ]
       }
     });

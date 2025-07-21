@@ -18,15 +18,16 @@ import { ACTIVITY_TYPES, createActivityPayload, PartialActivity } from "../../..
 import { Roles } from "../../../../models/User";
 import * as ActivityActions from "../../store/actions/activities.actions";
 import { getActiveActivity } from "../../store/selectors/activities.selectors";
+import { AutofocusDirective } from "../../../../shared/directives/autofocus.directive";
 
 @Component({
   selector: 'app-edit-activities',
   standalone: true,
-  imports: [ CommonModule, ReactiveFormsModule, InputComponent, MatIconModule, MatSelectModule, FileUploadComponent, MatDialogModule, GoogleMapsModule ],
+  imports: [ CommonModule, ReactiveFormsModule, InputComponent, MatIconModule, MatSelectModule, FileUploadComponent, MatDialogModule, GoogleMapsModule, AutofocusDirective ],
   template: `
     <form [formGroup]="activityForm" autocomplete="off">
       <div class="flex flex-wrap gap-4">
-        <div class="flex w-full flex-row gap-4 p-2">
+        <div class="flex w-full flex-row gap-4">
           <div class="flex gap-2">
             <app-file-upload
               [images]="f.photos.getRawValue() ?? []"
@@ -35,9 +36,8 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
               [onlyImages]="true"/>
           </div>
           <div>
-            <div class="flex gap-2 basis-1/6">
+            <div class="flex gap-2">
               <app-file-upload
-                class="h-[300px]"
                 [mainImage]="f.logo.value!"
                 forImageService="ACTIVITY_UPLOAD_LOGO"
                 [multiple]="false" label="Foto Logo"
@@ -47,9 +47,8 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
           </div>
 
           <div>
-            <div class="flex gap-2 basis-1/6">
+            <div class="flex gap-2">
               <app-file-upload
-                class="h-[300px]"
                 [mainImage]="f.cover.value!"
                 forImageService="ACTIVITY_UPLOAD_COVER"
                 [multiple]="false" label="Foto Cover"
@@ -58,7 +57,8 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
             </div>
           </div>
         </div>
-        <app-input type="text" id="name" label="Nome" formControlName="name" [formControl]="f.name"/>
+        <app-input class="basis-[408px]" type="text" id="name" label="Nome" formControlName="name"
+                   [formControl]="f.name"/>
         <app-input type="text" id="address" label="Indirizzo" formControlName="address" [formControl]="f.address"/>
         <app-input type="text" id="phone" label="Telefono" formControlName="phone" [formControl]="f.phone"/>
         <div class="flex w-full gap-2 items-end">
@@ -86,28 +86,37 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
             </div>
           </div>
         </div>
+        <div class="flex flex-col basis-full">
+          <label for="activity-description" class="text-md justify-left block px-3 font-medium text-gray-900">
+            Descrizione
+          </label>
+          <textarea
+            class="focus:outline-none p-3 rounded-md w-full border-input h-32"
+            id="activity-description"
+            formControlName="description">
+          </textarea>
+        </div>
         <div class="flex gap-4 h-[450px] basis-full">
           <div class="flex flex-col h-full gap-1">
-            <div>Coordinate dell'attività</div>
+            <div class="px-3">Coordinate dell'attività</div>
             <google-map
               class="overflow-clip bg-foreground p-0.5 rounded-md"
               [height]="'400px'"
               [width]="'600px'"
               [center]="center"
-              [zoom]="zoom"
+              [zoom]="15"
               (mapClick)="onMapClick($event)">
               <map-marker
                 [position]="marker.position">
               </map-marker>
             </google-map>
           </div>
-          <div class="flex flex-col h-full gap-2">
-            <div class="flex gap-2">
+          <div class="flex flex-col w-full h-full gap-4">
+            <div class="flex gap-4">
 
-              <app-input type="text" id="website" label="Sito" formControlName="website" [formControl]="f.website"/>
-              <app-input type="text" id="description" label="Descrizione" formControlName="description"
-                         [formControl]="f.description"/>
-              <div class="basis-1/4">
+              <app-input class="basis-2/3" type="text" id="website" label="Sito" formControlName="website"
+                         [formControl]="f.website"/>
+              <div class="basis-1/3">
                 <label class="text-md justify-left block px-3 py-0 font-medium">Tipo</label>
                 <mat-select
                   class="focus:outline-none p-3 border-input rounded-md w-full !font-bold bg-foreground"
@@ -123,7 +132,7 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
             </div>
             <div class="flex w-full basis-full flex-col gap-2">
               <div class="flex items-center justify-between">
-                <div>Tags:</div>
+                <div class="px-3">Tags</div>
                 <div>
                   <button type="submit"
                           [disabled]="viewOnly()"
@@ -138,6 +147,7 @@ import { getActiveActivity } from "../../store/selectors/activities.selectors";
               <div class="flex flex-col basis-1/2 gap-2 p-1 overflow-y-scroll h-full">
                 <div *ngFor="let a of f.tags.controls; index as i" class="relative tag">
                   <app-input
+                    [appAutofocus]="i === f.tags.length - 1"
                     type="text"
                     id="tags"
                     label=""

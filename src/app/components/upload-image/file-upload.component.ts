@@ -37,7 +37,7 @@ import { Municipal } from "../../models/Municipals";
   imports: [ CommonModule, MatIconModule ],
   template: `
     <div class="flex items-start gap-2">
-      <div *ngIf="images.length" class="columns-1 !max-h-[300px] gap-1 flex flex-col self-start column-container">
+      <div *ngIf="images.length" class="columns-1 !max-h-[340px] gap-1 flex flex-col self-start column-container">
         <div class="w-1/12" *ngFor="let image of galleryImages, let i = index">
           <div [ngClass]="{'selected-image': image.selected}" (click)="showMainImage(image)"
                class="square justify-around bg-white p-2 border border-gray-200 rounded-lg text-center shadow cursor-pointer aspect-square h-full hover:bg-gray-100">
@@ -47,10 +47,10 @@ import { Municipal } from "../../models/Municipals";
         </div>
       </div>
       <div
-        [ngClass]="{'disabled' : isNew}"
-        class="relative h-[300px] image-div flex flex-col justify-around bg-white p-2 border border-gray-200 rounded-lg text-center shadow cursor-pointer aspect-square hover:bg-gray-100 bg-cover bg-no-repeat bg-center"
+        [ngClass]="{'disabled' : isNew, 'justify-around': !viewOnly(), 'justify-center': viewOnly()}"
+        class="relative h-[340px] image-div flex flex-col bg-white p-2 border border-gray-200 rounded-lg text-center shadow cursor-pointer aspect-square hover:bg-gray-100 bg-cover bg-no-repeat bg-center"
         (click)="clickFileInput($event)"
-        [style.background-image]="mainImage ? 'url('+ 'https://autismfriendly.overzoom.it/media/' + mainImage +')' : 'unset'">
+        [style.background-image]="mainImage ? username ? 'url(' + 'https://eu.ui-avatars.com/api/?name=' + username + '&size=48' +')' : 'url('+ 'https://autismfriendly.overzoom.it/media/' + mainImage +')' : 'unset'">
         <div></div>
         <input type="file"
                #input
@@ -61,15 +61,16 @@ import { Municipal } from "../../models/Municipals";
                accept=".gif,.jpg,.jpeg,.png,.pdf">
 
         <div class="font-bold">
-          <mat-icon *ngIf="!mainImage" class="material-symbols-rounded scale-[3.5]"
-                    [ngClass]="{'invisible' : !!mainImage}">{{ !viewOnly() ? 'add' : 'visibility' }}
+          <mat-icon *ngIf="!mainImage && !viewOnly()" class="material-symbols-rounded scale-[3.5]"
+                    [ngClass]="{'invisible' : !!mainImage}">add
           </mat-icon>
 
           <div class="on-hover-images h-full flex items-center justify-center">
             <div *ngIf="mainImage"
                  [style.visibility]="isImageHover ? 'visible' : 'hidden'"
                  class="absolute top-0 left-0 w-full h-full flex flex-col gap-16 justify-center items-center bg-white-transparent">
-              <mat-icon (click)="viewMainImage($event, mainImage)" class="material-symbols-rounded blue bigger-icon">
+              <mat-icon *ngIf="!username" (click)="viewMainImage($event, mainImage)"
+                        class="material-symbols-rounded blue bigger-icon">
                 visibility
               </mat-icon>
               <mat-icon *ngIf="images.length && !viewOnly()" [ngClass]="{'pointer-events-none': viewOnly()}"
@@ -118,6 +119,7 @@ export class FileUploadComponent implements OnChanges {
   @Input({ required: false }) images: string[] = [];
   @Input({ required: false }) onlyImages: boolean = false;
   @Input({ required: false }) forImageService: string = '';
+  @Input({ required: false }) username: string = '';
 
   @Output() onUpload = new EventEmitter<string[]>();
   @Output() onDeleteMainImage = new EventEmitter<string[]>();
