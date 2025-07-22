@@ -13,12 +13,10 @@ export class AutofocusDirective implements OnChanges {
   ngOnChanges() {
     if ( this.enabled ) {
       setTimeout(() => {
-        // cerco l'input interno
         const nativeInput = this.host.nativeElement.querySelector('input');
         if ( nativeInput ) {
           nativeInput.focus();
         } else {
-          // fallback: provo comunque sul host
           this.host.nativeElement.focus?.();
         }
       });

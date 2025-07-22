@@ -123,7 +123,7 @@ import { getActiveEvent } from "../../store/selectors/events.selectors";
               <app-input type="datetime-local" id="endDateTime" label="Data di fine evento"
                          [formControl]="f.endDateTime"></app-input>
             </div>
-            <div class="flex flex-col w-full lg:w-1/2 px-1">
+            <div class="flex flex-col w-full lg:w-1/2">
               <label class="text-md justify-left block px-3 py-0 font-medium">Attività associata</label>
               <input
                 [ngStyle]="viewOnly() ? {'cursor': 'pointer'} : {}"
@@ -161,7 +161,7 @@ import { getActiveEvent } from "../../store/selectors/events.selectors";
                 </button>
               </div>
             </div>
-            <div class="flex flex-col gap-4 w-full p-1 overflow-y-scroll h-96">
+            <div class="flex flex-col gap-2 w-full p-1 overflow-y-scroll h-96">
               <div *ngFor="let a of f.tags.controls; index as i" class="relative tag">
                 <app-input
                   type="text"

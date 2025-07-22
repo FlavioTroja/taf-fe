@@ -64,7 +64,7 @@ import { AutofocusDirective } from "../../../../shared/directives/autofocus.dire
         <div class="flex w-full gap-2 items-end">
           <app-input type="time" id="newTime" label="Orari di Apertura" *ngIf="!viewOnly()"
                      [formControl]="f.newTime" formControlName="newTime"/>
-          <div class="flex gap-2 text-1xl font-extrabold uppercase">
+          <div class="flex gap-2 text-1xl">
             <button type="button" *ngIf="!viewOnly()"
                     [ngClass]="{ 'disabled': !f.newTime.value }"
                     class="focus:outline-none p-2 mb-[6px] rounded-full w-full border-input bg-foreground flex items-center"
@@ -72,7 +72,7 @@ import { AutofocusDirective } from "../../../../shared/directives/autofocus.dire
               <mat-icon class="align-to-center icon-size material-symbols-rounded">add</mat-icon>
             </button>
             <div class="flex gap-2 items-center">
-              <div *ngIf="viewOnly()">Orari di Apertura:</div>
+              <div *ngIf="viewOnly()" class="px-3">Orari di Apertura</div>
               <div *ngFor="let ctrl of f.openingHours.controls; index as i;"
                    [ngClass]="{'tag': !viewOnly() }"
                    class="whitespace-nowrap bg-gray-200 text-sm flex items-center self-center px-2 py-1 rounded">
