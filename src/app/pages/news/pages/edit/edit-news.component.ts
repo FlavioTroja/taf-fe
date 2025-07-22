@@ -163,7 +163,7 @@ export default class EditNewsComponent implements OnInit, OnDestroy {
           tags: newState.tags ? newState.tags : undefined,
         };
 
-        console.log({ newState, diff, payload: createNewsPayload(diff) })
+        // console.log({ newState, diff, payload: createNewsPayload(diff) })
 
         return createNewsPayload(diff);
       }),

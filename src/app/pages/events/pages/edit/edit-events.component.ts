@@ -274,7 +274,7 @@ export default class EditEventsComponent implements OnInit, OnDestroy {
           tags: newState.tags ?? undefined,
         };
 
-        console.log({ newState, diff, payload: createEventPayload(diff) })
+        // console.log({ newState, diff, payload: createEventPayload(diff) })
 
         return createEventPayload(diff);
       }),

@@ -162,7 +162,6 @@ export default class RegisterComponent {
     // this.loading.set(true);
 
     const payload = this.registerFormGroup.getRawValue() as RegisterPayload;
-    console.log(payload)
     this.store.dispatch(AuthActions.register({ payload }));
 
   }

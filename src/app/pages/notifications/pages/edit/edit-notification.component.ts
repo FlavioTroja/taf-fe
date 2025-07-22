@@ -138,7 +138,7 @@ export default class EditSentNotificationComponent implements OnInit, OnDestroy 
           municipalityId: this.municipalityId(),
         };
 
-        console.log({ newState, diff, payload: createNotificationPayload(diff) })
+        // console.log({ newState, diff, payload: createNotificationPayload(diff) })
 
         return createNotificationPayload(diff);
       }),

@@ -256,7 +256,7 @@ export default class EditActivitiesComponent implements OnInit, OnDestroy {
           tags: newState.tags ? newState.tags : undefined,
         };
 
-        console.log({ newState, diff, payload: createActivityPayload(diff) })
+        // console.log({ newState, diff, payload: createActivityPayload(diff) })
 
         return createActivityPayload(diff);
       }),
@@ -315,7 +315,7 @@ export default class EditActivitiesComponent implements OnInit, OnDestroy {
 
         this.marker = { position: this.center };
 
-        console.log(this.initFormValue);
+        // console.log(this.initFormValue);
 
         this.activityForm.patchValue({
           ...value,
