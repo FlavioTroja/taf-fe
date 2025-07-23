@@ -10,6 +10,7 @@ import { InputComponent } from "../../../components/input/input.component";
 import * as AuthActions from "../../../core/auth/store/auth.actions";
 import { getAccessToken, getAuthError, getAuthLoading } from "../../../core/auth/store/auth.selectors";
 import { LoginPayload } from "../../../models/Auth";
+import { getDomainImages } from "../../../core/profile/store/profile.selectors";
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ import { LoginPayload } from "../../../models/Auth";
   imports: [ CommonModule, FormsModule, MatIconModule, ReactiveFormsModule, InputComponent, RouterLink ],
   template: `
     <div class="m-auto max-w-[20em] min-w-[10em] flex flex flex-wrap items-start justify-between md:max-w-screen-xl">
-      <img src="/../assets/images/logo.png" class="h-14" alt="Logo"/>
+      <img [src]="'https://autismfriendly.overzoom.it/media/' + profileImages()?.logo" class="h-14" alt="Logo"/>
     </div>
 
     <div class="m-auto max-w-[20em] min-w-[10em] flex flex-col gap-4 py-28 items-center">
@@ -89,6 +90,8 @@ export default class LoginComponent {
   error = this.store.selectSignal(getAuthError);
   token = this.store.selectSignal(getAccessToken);
   isLoading = this.store.select(getAuthLoading);
+
+  profileImages = this.store.selectSignal(getDomainImages);
 
   loginFormGroup = this.fb.group({
     usernameOrEmail: [ "", Validators.required ],

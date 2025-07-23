@@ -45,6 +45,22 @@ export const routes: Routes = [
       ],
       backAction: "/municipals",
     }
+  },
+  {
+    path: ':id/view',
+    loadComponent: () => import('./pages/edit/edit-municipals.component'),
+    data: {
+      viewOnly: true,
+      title: {
+        default: "Visualizza Comune",
+      },
+      buttons: [
+        { label: "Modifica", iconName: "edit", action: NAVBAR_ACTION.MUNICIPAL_NAVIGATE_ON_MODIFY },
+        // { label: "", iconName: "search", action: NAVBAR_ACTION.USERS_EDIT },
+        // { label: "", iconName: "home", action: NAVBAR_ACTION.USERS_DELETE }
+      ],
+      backAction: "/municipals",
+    }
   }
 ]
 

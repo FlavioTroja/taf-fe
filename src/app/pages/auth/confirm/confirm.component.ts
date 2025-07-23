@@ -10,6 +10,7 @@ import { ConfirmPayload } from "../../../models/Auth";
 import { selectRouteQueryParamParam } from "../../../core/router/store/router.selectors";
 import { RouterLink } from "@angular/router";
 import { getAuthError, getAuthLoading } from "../../../core/auth/store/auth.selectors";
+import { getDomainImages } from "../../../core/profile/store/profile.selectors";
 
 @Component({
   selector: 'app-confirm',
@@ -17,7 +18,7 @@ import { getAuthError, getAuthLoading } from "../../../core/auth/store/auth.sele
   imports: [ CommonModule, FormsModule, InputComponent, ReactiveFormsModule, MatIconModule, RouterLink ],
   template: `
     <div class="m-auto max-w-[20em] min-w-[10em] flex flex flex-wrap items-start justify-between md:max-w-screen-xl">
-      <img src="/../assets/images/logo.png" class="h-14" alt="Logo"/>
+      <img [src]="'https://autismfriendly.overzoom.it/media/' + profileImages()?.logo" class="h-14" alt="Logo"/>
     </div>
 
     <div class="m-auto max-w-[30em] min-w-[10em] flex flex-col gap-4 py-28 items-center">
@@ -76,6 +77,7 @@ export default class ConfirmComponent {
   queryParams = this.store.selectSignal(selectRouteQueryParamParam());
   isFromRegister = computed(() => this.queryParams()?.['isFromRegister'] === 'true');
 
+  profileImages = this.store.selectSignal(getDomainImages);
 
   confirmFormGroup = this.fb.group({
     email: [ '', [ Validators.required, Validators.email ] ],

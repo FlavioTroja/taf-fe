@@ -31,11 +31,12 @@ import { getActivityTypeName, PartialActivity } from "../../../../models/Activit
 import { Sort, Table, TableButton } from "../../../../models/Table";
 import * as ActivitiesActions from "../../store/actions/activities.actions";
 import { getActivitiesPaginate } from "../../store/selectors/activities.selectors";
+import { ShowImageComponent } from "../../../../components/show-image/show-image.component";
 
 @Component({
   selector: 'app-activities',
   standalone: true,
-  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent, TagListComponent ],
+  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent, TagListComponent, ShowImageComponent ],
   template: `
     <div class="grid gap-3">
       <app-search [search]="search"/>
@@ -52,6 +53,13 @@ import { getActivitiesPaginate } from "../../store/selectors/activities.selector
       </div>
     </div>
 
+    <ng-template #coverRow let-row>
+      <app-show-image (click)="goToEditOrView(row.id)"
+                      [objectName2]="row.name"
+                      classes="w-16 h-16 cursor-pointer"
+                      [imageUrl]="row.cover || ''">
+      </app-show-image>
+    </ng-template>
 
     <ng-template #nameRow let-row>
       <div>{{ row.name }}</div>
@@ -93,6 +101,7 @@ import { getActivitiesPaginate } from "../../store/selectors/activities.selector
   styles: [ `` ]
 })
 export default class ActivitiesComponent implements AfterViewInit {
+  @ViewChild("coverRow") coverRow: TemplateRef<any> | undefined;
   @ViewChild("nameRow") nameRow: TemplateRef<any> | undefined;
   @ViewChild("addressRow") addressRow: TemplateRef<any> | undefined;
   @ViewChild("phoneRow") phoneRow: TemplateRef<any> | undefined;
@@ -122,6 +131,10 @@ export default class ActivitiesComponent implements AfterViewInit {
     }
   ];
 
+  goToEditOrView(id: string) {
+    this.store.dispatch(RouterActions.go({ path: [ `activities/${ id }` ] }))
+  }
+
   paginator: WritableSignal<Table> = signal({
     pageIndex: 0,
     pageSize: 10
@@ -146,6 +159,12 @@ export default class ActivitiesComponent implements AfterViewInit {
 
     Promise.resolve(null).then(() => {
       this.columns = [
+        {
+          columnDef: 'cover',
+          header: 'Cover',
+          width: "5rem",
+          template: this.coverRow,
+        },
         {
           columnDef: 'name',
           header: 'Nome',

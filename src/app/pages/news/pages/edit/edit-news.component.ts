@@ -20,11 +20,12 @@ import { getRouterData, selectCustomRouteParam } from "../../../../core/router/s
 import { createNewsPayload, PartialNews } from "../../../../models/News";
 import * as NewsActions from "../../store/actions/news.actions";
 import { getActiveNews } from "../../store/selectors/news.selectors";
+import { AutofocusDirective } from "../../../../shared/directives/autofocus.directive";
 
 @Component({
   selector: 'app-edit-news',
   standalone: true,
-  imports: [ CommonModule, ReactiveFormsModule, InputComponent, MatIconModule, MatDatepickerModule, MatFormFieldModule, MatDialogModule, MatNativeDateModule, MatOptionModule, MatSelectModule, MatAutocompleteModule, FileUploadComponent ],
+  imports: [ CommonModule, ReactiveFormsModule, InputComponent, MatIconModule, MatDatepickerModule, MatFormFieldModule, MatDialogModule, MatNativeDateModule, MatOptionModule, MatSelectModule, MatAutocompleteModule, FileUploadComponent, AutofocusDirective ],
   template: `
     <form [formGroup]="newsForm" autocomplete="off">
       <div class="flex flex-col gap-4">
@@ -42,40 +43,52 @@ import { getActiveNews } from "../../store/selectors/news.selectors";
             [onlyImages]="true"/>
         </div>
         <div class="flex items-center gap-4">
-          <app-input type="text" id="title" label="Titolo" [formControl]="f.title"/>
-          <app-input type="text" id="content" label="Contenuto" [formControl]="f.content"/>
+          <app-input class="basis-1/2" type="text" id="title" label="Titolo" [formControl]="f.title"/>
           <app-input type="text" id="author" label="Autore" [formControl]="f.author"/>
           <div class="flex flex-col basis-1/4 relative">
             <app-input type="datetime-local" id="publicationDate" label="Data di Pubblicazione"
                        [formControl]="f.publicationDate"></app-input>
           </div>
         </div>
-        <div class="flex w-full flex-col gap-2">
-          <div class="flex items-center justify-between w-1/2">
-            <div>Tags:</div>
-            <div>
-              <button type="submit"
-                      [disabled]="viewOnly()"
-                      (click)="addTag()"
-                      [ngClass]="{ 'disabled': viewOnly() }"
-                      class="focus:outline-none p-2 rounded-full w-full border-input bg-foreground flex items-center"
-              >
-                <mat-icon class="align-to-center icon-size material-symbols-rounded">add</mat-icon>
-              </button>
-            </div>
+        <div class="flex w-full gap-4">
+          <div class="flex flex-col basis-1/2">
+            <label for="news-content" class="text-md justify-left block px-3 font-medium text-gray-900">
+              Contenuto
+            </label>
+            <textarea
+              class="focus:outline-none p-3 rounded-md w-full border-input h-32"
+              id="news-content"
+              formControlName="content">
+                </textarea>
           </div>
-          <div class="flex flex-col gap-2 w-1/2 p-1 overflow-y-scroll h-96">
-            <div *ngFor="let a of f.tags.controls; index as i" class="relative tag">
-              <app-input
-                type="text"
-                id="tags"
-                label=""
-                [formControl]="a"
-              />
-              <button type="button" *ngIf="!viewOnly()" class="close-icon hidden absolute top-1/4 right-1"
-                      (click)="removeTag(i)">
-                <mat-icon class="align-to-center icon-size material-symbols-rounded">close</mat-icon>
-              </button>
+          <div class="flex basis-1/2 flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <div class="px-3">Tags:</div>
+              <div>
+                <button type="submit"
+                        [disabled]="viewOnly()"
+                        (click)="addTag()"
+                        [ngClass]="{ 'disabled': viewOnly() }"
+                        class="focus:outline-none p-2 rounded-full w-full border-input bg-foreground flex items-center"
+                >
+                  <mat-icon class="align-to-center icon-size material-symbols-rounded">add</mat-icon>
+                </button>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2 p-1 overflow-y-scroll h-96">
+              <div *ngFor="let a of f.tags.controls; index as i" class="relative tag">
+                <app-input
+                  [appAutofocus]="i === f.tags.length - 1"
+                  type="text"
+                  id="tags"
+                  label=""
+                  [formControl]="a"
+                />
+                <button type="button" *ngIf="!viewOnly()" class="close-icon hidden absolute top-1/4 right-1"
+                        (click)="removeTag(i)">
+                  <mat-icon class="align-to-center icon-size material-symbols-rounded">close</mat-icon>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -141,7 +154,7 @@ export default class EditNewsComponent implements OnInit, OnDestroy {
       startWith(this.initFormValue),
       pairwise(),
       map(([ _, newState ]) => {
-        if (!Object.values(this.initFormValue).length && !this.isNewNews) {
+        if ( !Object.values(this.initFormValue).length && !this.isNewNews ) {
           return {};
         }
         const diff = {
@@ -150,7 +163,7 @@ export default class EditNewsComponent implements OnInit, OnDestroy {
           tags: newState.tags ? newState.tags : undefined,
         };
 
-        console.log({ newState, diff, payload: createNewsPayload(diff) })
+        // console.log({ newState, diff, payload: createNewsPayload(diff) })
 
         return createNewsPayload(diff);
       }),
@@ -167,7 +180,7 @@ export default class EditNewsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    if (!this.isNewNews) {
+    if ( !this.isNewNews ) {
       this.store.dispatch(NewsActions.getNews({ id: this.id() }));
     }
 
@@ -184,7 +197,7 @@ export default class EditNewsComponent implements OnInit, OnDestroy {
         ...value, cover: (value?.cover ? value?.cover + `?cd=${ Date.now() }` : undefined)
       }, { emitEvent: false });
 
-      if (value?.tags) {
+      if ( value?.tags ) {
         const newTags = this.fb.array(
           value!.tags.map(tg =>
             this.fb.control(

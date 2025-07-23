@@ -33,11 +33,12 @@ import { Roles } from "../../../../models/User";
 import * as NewsActions from "../../store/actions/news.actions";
 import { getNewsPaginate } from "../../store/selectors/news.selectors";
 import { SortSearch } from "../../../../../global";
+import { ShowImageComponent } from "../../../../components/show-image/show-image.component";
 
 @Component({
   selector: 'app-edits',
   standalone: true,
-  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent, TagListComponent ],
+  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent, TagListComponent, ShowImageComponent ],
   template: `
     <div class="grid gap-3">
       <app-search [search]="search"/>
@@ -54,6 +55,13 @@ import { SortSearch } from "../../../../../global";
       </div>
     </div>
 
+    <ng-template #coverRow let-row>
+      <app-show-image (click)="goToEditOrView(row.id)"
+                      [objectName2]="row.title"
+                      classes="w-16 h-16 cursor-pointer"
+                      [imageUrl]="row.cover || ''">
+      </app-show-image>
+    </ng-template>
 
     <ng-template #titleRow let-row>
       <div>{{ row.title }}</div>
@@ -75,7 +83,6 @@ import { SortSearch } from "../../../../../global";
       <app-tag-list [row]="row.tags" [index]="i"/>
     </ng-template>
 
-
     <ng-template #skeleton>
       <app-table-skeleton [columns]="columns"/>
     </ng-template>
@@ -83,6 +90,7 @@ import { SortSearch } from "../../../../../global";
   styles: [ `` ]
 })
 export default class NewsComponent implements AfterViewInit {
+  @ViewChild("coverRow") coverRow: TemplateRef<any> | undefined;
   @ViewChild("titleRow") titleRow: TemplateRef<any> | undefined;
   @ViewChild("contentRow") contentRow: TemplateRef<any> | undefined;
   @ViewChild("authorRow") authorRow: TemplateRef<any> | undefined;
@@ -110,6 +118,10 @@ export default class NewsComponent implements AfterViewInit {
     }
   ];
 
+  goToEditOrView(id: string) {
+    this.store.dispatch(RouterActions.go({ path: [ `news/${ id }` ] }))
+  }
+
   paginator: WritableSignal<Table> = signal({
     pageIndex: 0,
     pageSize: 10
@@ -136,6 +148,12 @@ export default class NewsComponent implements AfterViewInit {
 
     Promise.resolve(null).then(() => {
       this.columns = [
+        {
+          columnDef: 'cover',
+          header: 'Cover',
+          width: "5rem",
+          template: this.coverRow,
+        },
         {
           columnDef: 'title',
           header: 'Titolo',

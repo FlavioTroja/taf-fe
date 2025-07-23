@@ -47,13 +47,12 @@ import { getActiveEvent } from "../../store/selectors/events.selectors";
             [onlyImages]="true"/>
         </div>
         <div class="flex flex-col items-center gap-4">
-          <div class="flex items-center gap-2">
+          <div class="flex self-start items-center gap-4">
             <app-input type="text" id="title" label="Titolo" [formControl]="f.title"/>
-            <app-input type="text" id="description" label="Descrizione" [formControl]="f.description"/>
             <app-input type="text" id="location" label="Luogo" [formControl]="f.location"/>
             <app-input type="text" id="organizer" label="Organizzatore" [formControl]="f.organizer"/>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex self-start items-center gap-4">
             <app-input type="email" id="contactEmail" label="Email" [formControl]="f.contactEmail"/>
             <app-input type="text" id="contactPhone" label="Telefono" [formControl]="f.contactPhone"/>
             <app-input type="number" id="maxParticipants" label="Numero massimo partecipanti"
@@ -62,7 +61,18 @@ import { getActiveEvent } from "../../store/selectors/events.selectors";
                        [formControl]="f.currentParticipants"/>
           </div>
 
-          <div class="flex items-center justify-center w-full gap-2">
+          <div class="flex flex-col w-full basis-full">
+            <label for="activity-description" class="text-md justify-left block px-3 font-medium text-gray-900">
+              Descrizione
+            </label>
+            <textarea
+              class="focus:outline-none p-3 rounded-md w-full border-input h-32"
+              id="activity-description"
+              formControlName="description">
+          </textarea>
+          </div>
+
+          <div class="flex items-center justify-center w-full gap-4">
             <div class="flex basis-1/4 self-end">
               <div class="bg-foreground rounded-md p-3 w-full h-12 flex flex-row border-input justify-between">
                 <div class="font-bold self-center text-lg">
@@ -103,7 +113,7 @@ import { getActiveEvent } from "../../store/selectors/events.selectors";
               </mat-select>
             </div>
           </div>
-          <div class="flex items-center gap-2 basis-full">
+          <div class="flex items-center gap-4 basis-full">
             <div class="flex flex-col basis-1/4 relative">
               <app-input type="datetime-local" id="startDateTime" label="Data di inizio evento"
                          [formControl]="f.startDateTime"></app-input>
@@ -113,7 +123,7 @@ import { getActiveEvent } from "../../store/selectors/events.selectors";
               <app-input type="datetime-local" id="endDateTime" label="Data di fine evento"
                          [formControl]="f.endDateTime"></app-input>
             </div>
-            <div class="flex flex-col w-full lg:w-1/2 px-1">
+            <div class="flex flex-col w-full lg:w-1/2">
               <label class="text-md justify-left block px-3 py-0 font-medium">Attività associata</label>
               <input
                 [ngStyle]="viewOnly() ? {'cursor': 'pointer'} : {}"
@@ -137,7 +147,7 @@ import { getActiveEvent } from "../../store/selectors/events.selectors";
               </mat-autocomplete>
             </div>
           </div>
-          <div class="flex w-1/2 self-center flex-col gap-2">
+          <div class="flex w-1/2 self-center flex-col gap-4">
             <div class="flex items-center justify-between w-full">
               <div>Tags:</div>
               <div>
@@ -255,7 +265,7 @@ export default class EditEventsComponent implements OnInit, OnDestroy {
       startWith(this.initFormValue),
       pairwise(),
       map(([ _, newState ]) => {
-        if (!Object.values(this.initFormValue).length && !this.isNewEvent) {
+        if ( !Object.values(this.initFormValue).length && !this.isNewEvent ) {
           return {};
         }
         const diff = {
@@ -264,7 +274,7 @@ export default class EditEventsComponent implements OnInit, OnDestroy {
           tags: newState.tags ?? undefined,
         };
 
-        console.log({ newState, diff, payload: createEventPayload(diff) })
+        // console.log({ newState, diff, payload: createEventPayload(diff) })
 
         return createEventPayload(diff);
       }),
@@ -280,7 +290,7 @@ export default class EditEventsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    if (!this.isNewEvent) {
+    if ( !this.isNewEvent ) {
       this.store.dispatch(EventsActions.getEvent({ id: this.id() }));
     }
 
@@ -300,7 +310,7 @@ export default class EditEventsComponent implements OnInit, OnDestroy {
         activity: value?.activity ?? null,
       }, { emitEvent: false });
 
-      if (value?.tags) {
+      if ( value?.tags ) {
         const newTags = this.fb.array(
           value!.tags.map(tg =>
             this.fb.control(
@@ -320,7 +330,7 @@ export default class EditEventsComponent implements OnInit, OnDestroy {
       )
       .subscribe((value) => {
 
-        if (typeof value === 'string') {
+        if ( typeof value === 'string' ) {
           this.store.dispatch(loadActivities({
             query: {
               page: 0,

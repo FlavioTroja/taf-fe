@@ -15,16 +15,21 @@ import { Component, Input } from '@angular/core';
 export class ShowImageComponent {
   @Input({ required: false }) imageUrl: string = "";
   @Input({ required: false }) objectName: string = "";
+  @Input({ required: false }) objectName2: string = "";
   @Input({ required: false }) classes: string = "";
 
   date = Date.now();
 
   get getImage() {
-    if (this.imageUrl) {
+    if ( this.imageUrl ) {
       const date = Date.now()
       return 'https://autismfriendly.overzoom.it/media/' + this.imageUrl;
     }
-    return `https://eu.ui-avatars.com/api/?name=${ this.objectName?.slice(0, 2) }&size=48`;
+    if ( this.objectName ) {
+      return `https://eu.ui-avatars.com/api/?name=${ this.objectName?.slice(0, 2) }&size=48`;
+    } else {
+      return `https://eu.ui-avatars.com/api/?name=${ this.objectName2.trim() || 'Image' }&size=48`;
+    }
   }
 
 }
