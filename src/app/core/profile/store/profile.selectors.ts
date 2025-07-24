@@ -11,6 +11,11 @@ export const getProfileUser = createSelector(
   (state: ProfileState) => state.user,
 );
 
+export const getDomainImages = createSelector(
+  getProfile,
+  (state: ProfileState) => state?.domainImages
+)
+
 export const getProfileUsername = createSelector(
   getProfile,
   (state: ProfileState) => state.user.name
@@ -25,6 +30,11 @@ export const getProfileUserRoleNames = createSelector(
   getProfile,
   (state: ProfileState) => state.user?.roles?.map(r => r === Roles.ROLE_USER ? 'USER' : 'ADMIN') || []
 );
+
+export const getProfileMunicipalityId = createSelector(
+  getProfile,
+  (state: ProfileState) => state?.municipalityId
+)
 
 export const disabledByRolesSelector = (disabledRoles: Roles[]) =>
   createSelector(

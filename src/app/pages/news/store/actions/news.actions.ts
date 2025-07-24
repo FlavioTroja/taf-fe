@@ -1,4 +1,5 @@
 import { createAction, props } from "@ngrx/store";
+import { QuerySearch } from "../../../../../global";
 import { News, PartialNews } from "../../../../models/News";
 import { HttpError } from "../../../../models/Notification";
 import { PaginateDatasource } from "../../../../models/Table";
@@ -8,11 +9,11 @@ export const deleteNewsFailed = createAction("[News] Delete News Failed]", props
   error: HttpError
 }>());
 
-export const loadNews = createAction("[News] Load News");
-export const loadNewsSuccess = createAction("[News] Load News Success", props<{
+export const loadPaginateNews = createAction("[News] Load News", props<{ query: QuerySearch }>());
+export const loadPaginateNewsSuccess = createAction("[News] Load News Success", props<{
   news: PaginateDatasource<News>
 }>())
-export const loadNewsFailed = createAction("[News] Load News Failed", props<{
+export const loadPaginateNewsFailed = createAction("[News] Load News Failed", props<{
   error: HttpError
 }>())
 
@@ -44,6 +45,8 @@ export const editNewsSuccess = createAction("[News] Edit News Success", props<{
 export const editNewsFailed = createAction("[News] Edit News Failed", props<{
   error: HttpError
 }>())
+
+export const clearNewsActive = createAction("[News] Clear Active changes");
 
 
 

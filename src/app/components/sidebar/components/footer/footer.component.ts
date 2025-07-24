@@ -28,6 +28,15 @@ import { uiToggleSidebarCollapsed } from "../../../../core/ui/store/ui.actions";
           </div>
         </div>
       </div>
+      <div class="relative cursor-pointer" (click)="goToNotifications()">
+        <mat-icon
+          class="material-symbols-rounded opacity-50 hover:opacity-100 duration-700 ease-in-out"
+        >notifications
+        </mat-icon>
+        <!--        <div class="flex absolute top-0 right-0 icon-error text-2xs text-white text-center rounded-full px-1 py-px">
+                  {{ 12 }}
+                </div>-->
+      </div>
       <mat-icon
         class="icon-size material-symbols-rounded-filled cursor-pointer opacity-50 hover:opacity-100 duration-700 ease-in-out"
         (click)="toggle()" [ngClass]="{
@@ -53,11 +62,15 @@ export class FooterComponent {
     if (!this.profile()) {
       return "";
     }
-    return this.profile()!.photo ? this.profile()!.photo! : `https://eu.ui-avatars.com/api/?name=${ this.profile()?.name }&rounded=true&size=48`;
+    return this.profile()!.photo ? 'https://autismfriendly.overzoom.it/media/' + this.profile()!.photo! : `https://eu.ui-avatars.com/api/?name=${ this.profile()?.name }&rounded=true&size=48`;
   }
 
   goToSettings() {
     this.store.dispatch(RouterActions.go({ path: [ "/settings" ] }));
+  }
+
+  goToNotifications() {
+    this.store.dispatch(RouterActions.go({ path: [ "/notifications/sent" ] }));
   }
 
   logout() {

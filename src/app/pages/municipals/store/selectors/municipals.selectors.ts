@@ -13,5 +13,5 @@ export const getActiveMunicipal = createSelector(
 
 export const getActiveMunicipalChanges = createSelector(
   selectMunicipalsManager,
-  (state?: MunicipalsManagementState) => state?.active?.changes
+  (state?: MunicipalsManagementState) => state?.active?.changes ?? {}
 )

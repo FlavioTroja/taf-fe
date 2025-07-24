@@ -1,6 +1,8 @@
 // For material modal
 @use '@angular/material' as mat;
+
 @include mat.core();
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 @tailwind base;
 @tailwind components;
@@ -116,7 +118,7 @@
   :root {
     --primary-color: 50, 58, 70;
     --foreground-color: 255, 255, 255;
-    --background-color: 242,242,242;
+    --background-color: 242, 242, 242;
 
     --taf-accent: 83, 171, 222;
     --taf-accent-light: 230, 243, 250;
@@ -172,6 +174,7 @@ body {
 
 .default-shadow-hover {
   @extend .default-shadow;
+
   &:hover {
     box-shadow: 0px 6px 12px #00000052;
     transform: scale(1.025);
@@ -180,6 +183,7 @@ body {
 
 .default-hover-animation {
   @extend .default-shadow;
+
   &:hover {
     transform: scale(1.025);
   }
@@ -191,6 +195,7 @@ body {
 
 .border-input {
   box-shadow: 0px 3px 6px #00000029;
+
   &:focus {
     box-shadow: 0px 0px 6px #4584A3;
   }
@@ -198,6 +203,7 @@ body {
 
 .border-input-error {
   box-shadow: 0px 0px 6px #FFCCCC;
+
   &:focus {
     box-shadow: 0px 0px 12px #FFCCCC;
     border: 1px solid #990000;
@@ -354,7 +360,7 @@ select {
   background: #E6F3FA;
 }
 
-.black{
+.black {
   color: black;
 }
 
@@ -500,7 +506,7 @@ select {
   }
 }
 
-.checkbox input{
+.checkbox input {
   height: 0;
   width: 0;
 }
@@ -514,7 +520,7 @@ select {
   user-select: none;
 }
 
-.checkbox .checkmark:after  ~ .checkmark:after {
+.checkbox .checkmark:after ~ .checkmark:after {
   top: -5px;
   width: 5px;
   height: 10px;
@@ -553,7 +559,7 @@ select {
   display: none;
 }
 
-.checkbox-payments input{
+.checkbox-payments input {
   height: 0;
   width: 0;
 }
@@ -567,7 +573,7 @@ select {
   user-select: none;
 }
 
-.checkbox-payments .checkmark-payments:after  ~ .checkmark-payments:after {
+.checkbox-payments .checkmark-payments:after ~ .checkmark-payments:after {
   top: -10px;
   width: 10px;
   height: 20px;
@@ -691,6 +697,7 @@ select {
 }
 
 .border-accent {
+  border-width: 2px;
   border-color: rgb(var(--taf-accent));
 }
 

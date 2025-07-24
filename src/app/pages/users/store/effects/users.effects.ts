@@ -10,7 +10,7 @@ import { NOTIFICATION_LISTENER_TYPE } from "../../../../models/Notification";
 import { User } from "../../../../models/User";
 import { UsersService } from "../../services/users.service";
 import * as UsersActions from "../actions/users.actions";
-import { getActiveUserChanges, getNewPassword } from "../selectors/users.selectors";
+import { getActiveUserChanges } from "../selectors/users.selectors";
 
 @Injectable({
   providedIn: 'root'
@@ -56,21 +56,21 @@ export class UsersEffects {
     ofType(UsersActions.deleteUser),
     exhaustMap(({ id }) => this.usersService.deleteUser(id)
       .pipe(
-        map((user) => UsersActions.loadUsers({ query: { page: 0, limit: 10 } })),
+        map((user) => UsersActions.loadPaginateUsers({ query: { page: 0, limit: 10 } })),
         catchError((err) => of(UsersActions.deleteUserFailed(err)))
       ))
   ));
 
   loadUserEffect$ = createEffect(() => this.actions$.pipe(
-    ofType(UsersActions.loadUsers),
+    ofType(UsersActions.loadPaginateUsers),
     exhaustMap(({ query }) => this.usersService.loadUsers(query)
       .pipe(
         concatMap((users) => [
-          UsersActions.loadUsersSuccess({ users }),
+          UsersActions.loadPaginateUsersSuccess({ users }),
           UsersActions.clearUserActive()
         ]),
         catchError((err) => {
-          return of(UsersActions.loadUsersFailed(err));
+          return of(UsersActions.loadPaginateUsersFailed(err));
         })
       ))
   ));
@@ -82,7 +82,7 @@ export class UsersEffects {
       this.store.select(selectCustomRouteParam("id"))
     ]),
     exhaustMap(([ _, changes, id ]) => {
-      if (id === 'new') {
+      if ( id === 'new' ) {
         return of(UsersActions.addUser({
           user: {
             ...changes,
@@ -100,33 +100,9 @@ export class UsersEffects {
     })
   ));
 
-  changeCurrentUserPasswordEffect$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(UsersActions.changeUserPassword),
-      concatLatestFrom(() => [
-        this.store.select(getNewPassword)
-      ]),
-      exhaustMap(([ { id }, newPassword ]) => {
-        return this.usersService.changeUserPassword(id, { newPassword: (newPassword as string) })
-          .pipe(
-            concatMap(() => [
-              UIActions.setUiNotification({
-                notification: {
-                  type: NOTIFICATION_LISTENER_TYPE.SUCCESS,
-                  message: "Password modificata con successo"
-                }
-              }),
-              UsersActions.changeUserPasswordSuccess()
-            ]),
-            catchError((err) => of(UsersActions.changeUserPasswordFailed(err)))
-          )
-      })
-    )
-  });
-
   manageNotificationUsersErrorEffect$ = createEffect(() => this.actions$.pipe(
     ofType(...[
-      UsersActions.loadUsersFailed,
+      UsersActions.loadPaginateUsersFailed,
       UsersActions.getUserFailed,
       UsersActions.addUserFailed,
       UsersActions.editUserFailed,
@@ -136,7 +112,7 @@ export class UsersEffects {
       UIActions.setUiNotification({
         notification: {
           type: NOTIFICATION_LISTENER_TYPE.ERROR,
-          message: err.error.reason?.message || ""
+          message: err.error.error.error.error || ""
         }
       })
     ])

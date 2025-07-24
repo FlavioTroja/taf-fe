@@ -9,13 +9,16 @@ export interface QuerySearch {
   page: number,
   limit: number,
   search?: string,
-  filters?: object,
+  filters?: {
+    municipalityId?: string,
+    senderId?: string,
+    recipientId?: string,
+  },
   sort?: SortSearch
 }
 
 export interface SortSearch {
-  name?: "asc" | "desc",
-  surname?: "asc" | "desc",
+  [field: string]: 'asc' | 'desc';
 }
 
 export interface QueryOptions {

@@ -13,5 +13,5 @@ export const getActiveActivity = createSelector(
 
 export const getActiveActivityChanges = createSelector(
   selectActivitiesManager,
-  (state?: ActivitiesManagementState) => state?.active?.changes
+  (state?: ActivitiesManagementState) => state?.active?.changes ?? {}
 )

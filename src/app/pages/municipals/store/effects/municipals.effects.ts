@@ -3,6 +3,7 @@ import { Actions, concatLatestFrom, createEffect, ofType } from "@ngrx/effects";
 import { Store } from "@ngrx/store";
 import { catchError, concatMap, exhaustMap, map, of } from "rxjs";
 import { AppState } from "../../../../app.config";
+import { getProfileMunicipalityId } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
 import { selectCustomRouteParam } from "../../../../core/router/store/router.selectors";
 import * as UIActions from "../../../../core/ui/store/ui.actions";
@@ -43,7 +44,7 @@ export class MunicipalsEffects {
       this.store.select(selectCustomRouteParam("id"))
     ]),
     exhaustMap(([ _, changes, id ]) => {
-      if (id === 'new') {
+      if ( id === 'new' ) {
         return of(MunicipalsActions.addMunicipal({
           municipal: {
             ...changes,
@@ -63,23 +64,33 @@ export class MunicipalsEffects {
 
   deleteMunicipalEffect$ = createEffect(() => this.actions$.pipe(
     ofType(MunicipalsActions.deleteMunicipal),
-    exhaustMap(({ id }) => this.municipalsService.deleteMunicipal(id)
+    concatLatestFrom(() => [
+      this.store.select(getProfileMunicipalityId),
+    ]),
+    exhaustMap(([ { id }, municipalityId ]) => this.municipalsService.deleteMunicipal(id)
       .pipe(
-        map(() => MunicipalsActions.loadMunicipals()),
+        map(() => MunicipalsActions.loadMunicipalsPaginate({
+          query: {
+            page: 0,
+            limit: 10,
+          }
+        })),
         catchError((err) => of(MunicipalsActions.deleteMunicipalFailed(err)))
       ))
   ))
 
-  loadMunicipalsEffect$ = createEffect(() => this.actions$.pipe(
-    ofType(MunicipalsActions.loadMunicipals),
-    exhaustMap(() => this.municipalsService.loadMunicipals()
+  loadMunicipalsPaginateEffect$ = createEffect(() => this.actions$.pipe(
+    ofType(MunicipalsActions.loadMunicipalsPaginate),
+    exhaustMap(({ query }) => this.municipalsService.loadPaginateMunicipals(query)
       .pipe(
         concatMap((municipals) => [
-          MunicipalsActions.loadMunicipalsSuccess({ municipals })
+          MunicipalsActions.loadMunicipalsPaginateSuccess({ municipals }),
+          MunicipalsActions.clearMunicipalActive()
         ]),
-        catchError((error) => of(MunicipalsActions.loadMunicipalsFailed({ error })))
+        catchError((error) => of(MunicipalsActions.loadMunicipalsPaginateFailed({ error })))
       ))
   ))
+
 
   getMunicipalEffect$ = createEffect(() => this.actions$.pipe(
     ofType(MunicipalsActions.getMunicipal),
@@ -94,7 +105,7 @@ export class MunicipalsEffects {
 
   manageNotificationMunicipalErrorEffect$ = createEffect(() => this.actions$.pipe(
     ofType(...[
-      MunicipalsActions.loadMunicipalsFailed,
+      MunicipalsActions.loadMunicipalsPaginateFailed,
       MunicipalsActions.getMunicipalFailed,
       MunicipalsActions.addMunicipalFailed,
       MunicipalsActions.editMunicipalFailed
@@ -103,7 +114,7 @@ export class MunicipalsEffects {
       UIActions.setUiNotification({
         notification: {
           type: NOTIFICATION_LISTENER_TYPE.ERROR,
-          message: err.error.reason?.message || ""
+          message: err.error.error.error.error || ""
         }
       })
     ])

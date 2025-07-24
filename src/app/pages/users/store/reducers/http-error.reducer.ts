@@ -1,14 +1,14 @@
 import { Action, createReducer, on } from "@ngrx/store";
-import * as UsersAction from "../actions/users.actions";
 import { HttpError } from "../../../../models/Notification";
+import * as UsersAction from "../actions/users.actions";
 
 const initialState: Partial<HttpError> = {};
 
 const httpErrorReducer = createReducer(
   initialState,
-  on(UsersAction.clearUserHttpError, (state, { }) => ({})),
+  on(UsersAction.clearUserHttpError, (state, {}) => ({})),
 
-  on(UsersAction.loadUsersFailed, (state, { error }) => ({
+  on(UsersAction.loadPaginateUsersFailed, (state, { error }) => ({
     ...error
   })),
   on(UsersAction.getUserFailed, (state, { error }) => ({

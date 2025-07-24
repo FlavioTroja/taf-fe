@@ -1,11 +1,13 @@
-import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { PartialUser } from "../../../models/User";
-import { environment } from "../../../../environments/environment";
+import { inject, Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
+import { environment } from "../../../../environments/environment";
 import { AppState } from "../../../app.config";
+import { Municipal } from "../../../models/Municipals";
+import { PartialUser } from "../../../models/User";
 
 const BASE_URL = environment.BASE_URL;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -14,10 +16,15 @@ export class ProfileService {
   store: Store<AppState> = inject(Store);
 
   load() {
-    return this.http.get<PartialUser>(`${BASE_URL}/auth/profile`);
+    return this.http.get<PartialUser>(`${ BASE_URL }/auth/profile`);
   }
 
   edit(user: PartialUser) {
-    return this.http.patch<PartialUser>( `${BASE_URL}/auth/me`, user);
+    return this.http.patch<PartialUser>(`${ BASE_URL }/auth/me`, user);
   }
+
+  findByDomain(domain: string) {
+    return this.http.get<Municipal>(`${ BASE_URL }/public/municipals/${ domain }`);
+  }
+
 }

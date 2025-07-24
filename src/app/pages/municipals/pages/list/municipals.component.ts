@@ -1,5 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, signal, TemplateRef, ViewChild, WritableSignal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  effect,
+  inject,
+  Signal,
+  signal,
+  TemplateRef,
+  ViewChild,
+  WritableSignal
+} from '@angular/core';
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl } from "@angular/forms";
 import { MatDialog, MatDialogModule } from "@angular/material/dialog";
@@ -7,6 +18,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
 import { distinctUntilChanged } from "rxjs";
 import { debounceTime } from "rxjs/operators";
+import { QuerySearch, SortSearch } from "../../../../../global";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
@@ -16,13 +28,13 @@ import * as RouterActions from "../../../../core/router/store/router.actions";
 import { PartialMunicipal } from "../../../../models/Municipals";
 import { Sort, Table, TableButton } from "../../../../models/Table";
 import * as MunicipalsActions from "../../store/actions/municipals.actions";
-import { loadMunicipals } from "../../store/actions/municipals.actions";
 import { getMunicipalsPaginate } from "../../store/selectors/municipals.selectors";
+import { ShowImageComponent } from "../../../../components/show-image/show-image.component";
 
 @Component({
   selector: 'app-municipals',
   standalone: true,
-  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent ],
+  imports: [ CommonModule, MatIconModule, TableComponent, TableSkeletonComponent, MatDialogModule, SearchComponent, ShowImageComponent ],
   template: `
     <div class="grid gap-3">
       <app-search [search]="search"/>
@@ -39,6 +51,13 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
       </div>
     </div>
 
+    <ng-template #coverRow let-row>
+      <app-show-image (click)="goToEditOrView(row.id)"
+                      classes="w-16 h-16 cursor-pointer"
+                      [objectName2]="row.city"
+                      [imageUrl]="row.cover || ''">
+      </app-show-image>
+    </ng-template>
 
     <ng-template #cityRow let-row>
       <div>{{ row.city }}</div>
@@ -52,6 +71,10 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
       <div>{{ row.region }}</div>
     </ng-template>
 
+    <ng-template #domainRow let-row>
+      <div>{{ row.domain }}</div>
+    </ng-template>
+
     <ng-template #skeleton>
       <app-table-skeleton [columns]="columns"/>
     </ng-template>
@@ -59,9 +82,11 @@ import { getMunicipalsPaginate } from "../../store/selectors/municipals.selector
   styles: [ `` ]
 })
 export default class ActivitiesComponent implements AfterViewInit {
+  @ViewChild("coverRow") coverRow: TemplateRef<any> | undefined;
   @ViewChild("cityRow") cityRow: TemplateRef<any> | undefined;
   @ViewChild("provinceRow") provinceRow: TemplateRef<any> | undefined;
   @ViewChild("regionRow") regionRow: TemplateRef<any> | undefined;
+  @ViewChild("domainRow") domainRow: TemplateRef<any> | undefined;
 
   store: Store<AppState> = inject(Store);
   municipalPaginate$ = this.store.select(getMunicipalsPaginate);
@@ -77,14 +102,30 @@ export default class ActivitiesComponent implements AfterViewInit {
       bgColor: "orange",
       callback: elem => this.store.dispatch(RouterActions.go({ path: [ `municipals/${ elem.id }` ] }))
     },
+    {
+      iconName: "visibility",
+      bgColor: "sky",
+      callback: elem => this.store.dispatch(RouterActions.go({ path: [ `municipals/${ elem.id }/view` ] }))
+    }
   ];
+
+  goToEditOrView(id: string) {
+    this.store.dispatch(RouterActions.go({ path: [ `municipals/${ id }` ] }))
+  }
 
   paginator: WritableSignal<Table> = signal({
     pageIndex: 0,
     pageSize: 10
   });
 
-  sorter: WritableSignal<Sort[]> = signal([ { active: "createdAt", direction: "desc" } ]);
+  sorter: WritableSignal<Sort[]> = signal([ { active: "city", direction: "asc" } ]);
+
+  sorterPayload: Signal<SortSearch> = computed(() =>
+    this.sorter().reduce<SortSearch>((acc, { active, direction }) => {
+      acc[active] = direction;
+      return acc;
+    }, {})
+  );
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
@@ -97,22 +138,38 @@ export default class ActivitiesComponent implements AfterViewInit {
     Promise.resolve(null).then(() => {
       this.columns = [
         {
+          columnDef: 'cover',
+          header: 'Cover',
+          width: "5rem",
+          template: this.coverRow,
+        },
+        {
           columnDef: 'city',
           header: 'Città',
           width: "15rem",
           template: this.cityRow,
+          sortable: true
         },
         {
           columnDef: 'province',
           header: 'Provincia',
           width: "5rem",
           template: this.provinceRow,
+          sortable: true
         },
         {
           columnDef: 'region',
           header: 'Regione',
           width: "15rem",
           template: this.regionRow,
+          sortable: true
+        },
+        {
+          columnDef: 'domain',
+          header: 'Dominio',
+          width: "15rem",
+          template: this.domainRow,
+          sortable: true
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
@@ -131,13 +188,13 @@ export default class ActivitiesComponent implements AfterViewInit {
         `,
         buttons: [
           { iconName: "delete", label: "Elimina", bgColor: "remove", onClick: () => dialogRef.close(true) },
-          { iconName: "clear", label: "Annulla", onClick: () => dialogRef.close(false) }
+          { iconName: "clear", label: "Annulla", onClick: () => dialogRef.close(false) },
         ]
       }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (!result) {
+      if ( !result ) {
         return;
       }
       this.deleteMunicipal(municipal);
@@ -145,8 +202,22 @@ export default class ActivitiesComponent implements AfterViewInit {
   }
 
   constructor() {
-    this.store.dispatch(loadMunicipals())
+    effect(() => {
+      const query: QuerySearch = {
+        page: this.paginator().pageIndex,
+        limit: this.paginator().pageSize,
+        search: this.searchText()!,
+        sort: this.sorterPayload()
+      }
 
+      this.store.dispatch(
+        MunicipalsActions.loadMunicipalsPaginate({ query })
+      );
+    }, { allowSignalWrites: true })
+
+    this.store.dispatch(
+      MunicipalsActions.loadMunicipalsPaginate({ query: { page: 0, limit: 10 } })
+    );
   }
 
   private deleteMunicipal(row: PartialMunicipal) {

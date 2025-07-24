@@ -6,20 +6,18 @@ import { RouteElementComponent } from "../route-element/route-element.component"
 import { getRouterUrl } from "../../../../core/router/store/router.selectors";
 import { Store } from "@ngrx/store";
 import { AppState } from "../../../../app.config";
-import { HideByCodeSelectorDirective } from "../../../../shared/directives/hide-by-code-selector.directive";
 
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [ CommonModule, IfForbiddenDirective, RouteElementComponent, HideByCodeSelectorDirective ],
+  imports: [ CommonModule, IfForbiddenDirective, RouteElementComponent ],
   template: `
     <ng-template ngFor let-item="$implicit" [ngForOf]="sidebarRoutes"
                  *ngIf="(activeRoute$ | async) as activeRoute">
-        <app-route-element *fbHideByCodeSelector="item.roleSelector || ''" [route]="item" [activeRoute]="activeRoute"/>
+      <app-route-element *fbIfForbidden="item.provideRoles" [route]="item" [activeRoute]="activeRoute"/>
     </ng-template>
   `,
-  styles: [
-  ]
+  styles: []
 })
 export class MenuComponent {
   store: Store<AppState> = inject(Store);

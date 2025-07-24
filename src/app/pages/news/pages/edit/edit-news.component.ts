@@ -1,73 +1,109 @@
 import { CommonModule } from "@angular/common";
-import { Component, inject, OnInit } from "@angular/core";
+import { Component, inject, OnDestroy, OnInit, Signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { MatNativeDateModule } from "@angular/material/core";
+import { MatAutocompleteModule } from "@angular/material/autocomplete";
+import { MatNativeDateModule, MatOptionModule } from "@angular/material/core";
 import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatDialogModule } from "@angular/material/dialog";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
+import { MatSelectModule } from "@angular/material/select";
 import { Store } from "@ngrx/store";
-import { DateTime } from "luxon";
-import { filter, map, pairwise, Subject, takeUntil } from "rxjs";
+import { filter, map, pairwise, startWith, Subject, takeUntil } from "rxjs";
 import { difference } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { InputComponent } from "../../../../components/input/input.component";
-import { selectCustomRouteParam } from "../../../../core/router/store/router.selectors";
-import { PartialNews } from "../../../../models/News";
+import { FileUploadComponent } from "../../../../components/upload-image/file-upload.component";
+import { getProfileMunicipalityId } from "../../../../core/profile/store/profile.selectors";
+import { getRouterData, selectCustomRouteParam } from "../../../../core/router/store/router.selectors";
+import { createNewsPayload, PartialNews } from "../../../../models/News";
 import * as NewsActions from "../../store/actions/news.actions";
 import { getActiveNews } from "../../store/selectors/news.selectors";
+import { AutofocusDirective } from "../../../../shared/directives/autofocus.directive";
 
 @Component({
   selector: 'app-edit-news',
   standalone: true,
-  imports: [ CommonModule, ReactiveFormsModule, InputComponent, MatIconModule, MatDatepickerModule, MatFormFieldModule, MatNativeDateModule ],
+  imports: [ CommonModule, ReactiveFormsModule, InputComponent, MatIconModule, MatDatepickerModule, MatFormFieldModule, MatDialogModule, MatNativeDateModule, MatOptionModule, MatSelectModule, MatAutocompleteModule, FileUploadComponent, AutofocusDirective ],
   template: `
     <form [formGroup]="newsForm" autocomplete="off">
-      <div class="flex flex-wrap gap-4">
-        <app-input type="text" id="title" label="Titolo" formControlName="title" [formControl]="f.title"/>
-        <app-input type="text" id="content" label="Contenuto" formControlName="content" [formControl]="f.content"/>
-        <app-input type="text" id="author" label="Autore" formControlName="author" [formControl]="f.author"/>
-        <div class="flex flex-col basis-1/4 relative">
-          <mat-label>Data di nascita</mat-label>
-          <input matInput [matDatepicker]="datePicker"
-                 formControlName="publicationDate"
-                 placeholder="gg/mm/yyyy"
-                 class="focus:outline-none p-3 rounded-md w-full border-input">
-          <mat-datepicker-toggle class="absolute end-0.5 top-6" matIconSuffix [for]="datePicker">
-            <mat-icon class="material-symbols-rounded">event</mat-icon>
-          </mat-datepicker-toggle>
-          <mat-datepicker #datePicker></mat-datepicker>
+      <div class="flex flex-col gap-4">
+        <div class="flex basis-full items-center shrink-0 gap-4">
+          <app-file-upload
+            forImageService="NEWS_UPLOAD_GALLERY"
+            [images]="f.photos.getRawValue() ?? []"
+            [multiple]="false" label="Galleria"
+            (onUpload)="onUploadGalleryImages($event)" (onDeleteMainImage)="removeGalleryImage($event)"
+            [onlyImages]="true"/>
+          <app-file-upload
+            forImageService="NEWS_UPLOAD_COVER"
+            [mainImage]="f.cover.value!" [multiple]="false" label="Foto Cover"
+            (onUpload)="onUploadCoverImage($event)"
+            [onlyImages]="true"/>
         </div>
-        <div class="flex w-full gap-2 items-end">
-          <app-input type="text" id="tags" label="Tags" formControlName="newTag"
-                     [formControl]="f.newTag"/>
-          <div class="flex gap-2 text-1xl font-extrabold uppercase">
-            <button type="button"
-                    [ngClass]="{ 'disabled': f.tags.invalid }"
-                    class="focus:outline-none p-2 mb-[6px] rounded-full w-full border-input bg-foreground flex items-center"
-                    (click)="addTag()">
-              <mat-icon class="align-to-center icon-size material-symbols-rounded">add</mat-icon>
-            </button>
-            <div class="flex gap-2 items-center">
-              <div *ngFor="let tag of f.tags.value; index as i;"
-                   class="whitespace-nowrap tag bg-gray-200 text-sm flex items-center self-center px-2 py-1 rounded">
-                <div class="!font-normal">{{ tag }}</div>
-                <mat-icon
-                  (click)="deleteTag(i)"
-                  class="align-to-center !hidden close-icon !text-[16px] !w-[16px] !h-[16px] material-symbols-rounded">
-                  close
-                </mat-icon>
+        <div class="flex items-center gap-4">
+          <app-input class="basis-1/2" type="text" id="title" label="Titolo" [formControl]="f.title"/>
+          <app-input type="text" id="author" label="Autore" [formControl]="f.author"/>
+          <div class="flex flex-col basis-1/4 relative">
+            <app-input type="datetime-local" id="publicationDate" label="Data di Pubblicazione"
+                       [formControl]="f.publicationDate"></app-input>
+          </div>
+        </div>
+        <div class="flex w-full gap-4">
+          <div class="flex flex-col basis-1/2">
+            <label for="news-content" class="text-md justify-left block px-3 font-medium text-gray-900">
+              Contenuto
+            </label>
+            <textarea
+              class="focus:outline-none p-3 rounded-md w-full border-input h-32"
+              id="news-content"
+              formControlName="content">
+                </textarea>
+          </div>
+          <div class="flex basis-1/2 flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <div class="px-3">Tags:</div>
+              <div>
+                <button type="submit"
+                        [disabled]="viewOnly()"
+                        (click)="addTag()"
+                        [ngClass]="{ 'disabled': viewOnly() }"
+                        class="focus:outline-none p-2 rounded-full w-full border-input bg-foreground flex items-center"
+                >
+                  <mat-icon class="align-to-center icon-size material-symbols-rounded">add</mat-icon>
+                </button>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2 p-1 overflow-y-scroll h-96">
+              <div *ngFor="let a of f.tags.controls; index as i" class="relative tag">
+                <app-input
+                  [appAutofocus]="i === f.tags.length - 1"
+                  type="text"
+                  id="tags"
+                  label=""
+                  [formControl]="a"
+                />
+                <button type="button" *ngIf="!viewOnly()" class="close-icon hidden absolute top-1/4 right-1"
+                        (click)="removeTag(i)">
+                  <mat-icon class="align-to-center icon-size material-symbols-rounded">close</mat-icon>
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </form>
-  `
+  `,
+  styles: [ `
+    .tag:hover .close-icon {
+      display: block !important;
+    }
+  ` ]
 })
-export default class EditNewsComponent implements OnInit {
+export default class EditNewsComponent implements OnInit, OnDestroy {
   fb = inject(FormBuilder);
-  store: Store<AppState> = inject(Store)
+  store: Store<AppState> = inject(Store);
 
   get f() {
     return this.newsForm.controls;
@@ -75,19 +111,39 @@ export default class EditNewsComponent implements OnInit {
 
   subject = new Subject();
 
-  active$ = this.store.select(getActiveNews)
+  active$ = this.store.select(getActiveNews);
+
+  id = toSignal(this.store.select(selectCustomRouteParam('id')));
+  viewOnly: Signal<boolean> = toSignal(this.store.select(getRouterData).pipe(
+    map(data => data!["viewOnly"] ?? false)
+  ));
+  municipalityId = this.store.selectSignal(getProfileMunicipalityId);
 
   initFormValue: PartialNews = {}
   newsForm = this.fb.group({
-    title: [ '', Validators.required ],
-    content: [ '' ],
-    author: [ '' ],
-    newTag: [ '' ],
-    publicationDate: [ null ],
-    tags: [ [ '' ] ]
+    title: this.fb.control({ value: '', disabled: this.viewOnly() }, Validators.required),
+    content: this.fb.control({
+      value: '',
+      disabled: this.viewOnly()
+    }, [ Validators.minLength(1), Validators.required ]),
+    author: this.fb.control({ value: '', disabled: this.viewOnly() }),
+    photos: this.fb.control<string[]>({ value: [], disabled: this.viewOnly() }),
+    cover: this.fb.control({ value: '', disabled: this.viewOnly() }),
+    tags: this.fb.array<string>([]),
+    publicationDate: this.fb.control({ value: '', disabled: this.viewOnly() })
   });
 
-  id = toSignal(this.store.select(selectCustomRouteParam('id')))
+  onUploadGalleryImages(images: string[]) {
+    this.newsForm.patchValue({ photos: images });
+  }
+
+  removeGalleryImage(photos: string[]) {
+    this.newsForm.patchValue({ photos });
+  }
+
+  onUploadCoverImage(cover: string[]) {
+    this.newsForm.patchValue({ cover: cover[0] })
+  }
 
   get isNewNews() {
     return this.id() === "new";
@@ -95,21 +151,24 @@ export default class EditNewsComponent implements OnInit {
 
   editNewsChanges() {
     this.newsForm.valueChanges.pipe(
+      startWith(this.initFormValue),
       pairwise(),
       map(([ _, newState ]) => {
-        if (!Object.values(this.initFormValue).length && !this.isNewNews) {
+        if ( !Object.values(this.initFormValue).length && !this.isNewNews ) {
           return {};
         }
         const diff = {
           ...difference(this.initFormValue, newState),
-          publicationDate: typeof newState.publicationDate! === "string" ? newState.publicationDate! : DateTime.fromJSDate(newState.publicationDate!).toISODate(),
-
+          municipalityId: this.municipalityId(),
+          tags: newState.tags ? newState.tags : undefined,
         };
-        return diff;
+
+        // console.log({ newState, diff, payload: createNewsPayload(diff) })
+
+        return createNewsPayload(diff);
       }),
       map((changes: any) => Object.keys(changes).length !== 0 && !this.newsForm.invalid ? {
         ...changes,
-        id: this.id()
       } : {}),
       takeUntil(this.subject),
       // tap(changes => console.log(changes)),
@@ -121,39 +180,49 @@ export default class EditNewsComponent implements OnInit {
 
   ngOnInit() {
 
-    if (!this.isNewNews) {
-      this.store.dispatch(NewsActions.getNews({ id: this.id() }))
+    if ( !this.isNewNews ) {
+      this.store.dispatch(NewsActions.getNews({ id: this.id() }));
     }
 
     this.active$.pipe(
-      filter(() => this.id() !== 'new')
-    ).subscribe((value: PartialNews | any) => {
-      if (!value) {
-        return
-      }
+      filter(() => this.id() !== 'new'),
+    ).subscribe((value) => {
 
-      console.log('rere', value)
-      this.initFormValue = value as PartialNews;
+      this.initFormValue = {
+        ...value,
+        cover: (value?.cover ? value?.cover + `?cd=${ Date.now() }` : undefined)
+      } as PartialNews;
 
       this.newsForm.patchValue({
-        ...value,
-      });
+        ...value, cover: (value?.cover ? value?.cover + `?cd=${ Date.now() }` : undefined)
+      }, { emitEvent: false });
+
+      if ( value?.tags ) {
+        const newTags = this.fb.array(
+          value!.tags.map(tg =>
+            this.fb.control(
+              { value: tg, disabled: this.viewOnly() },
+              Validators.required
+            )
+          )
+        );
+
+        this.newsForm.setControl('tags', newTags, { emitEvent: false });
+      }
     })
-
-    this.editNewsChanges()
-
+    this.editNewsChanges();
   }
 
   addTag() {
-    const current: string[] = this.f.tags.value ?? [];
-    if (this.f.newTag.value) {
-      this.f.tags.setValue([ ...current, this.f.newTag.value ]);
-    }
+    this.f.tags.push(this.fb.control({ value: '', disabled: this.viewOnly() }, Validators.required))
   }
 
-  deleteTag(index: number) {
-    this.f.tags.patchValue(this.f.tags.value?.filter((o, i) => i !== index) ?? [])
+  removeTag(index: number) {
+    this.f.tags.removeAt(index);
   }
 
-
+  ngOnDestroy() {
+    this.newsForm.reset();
+    this.store.dispatch(NewsActions.clearNewsActive());
+  }
 }

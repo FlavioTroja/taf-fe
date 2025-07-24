@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
   effect,
   inject,
+  Signal,
   signal,
   TemplateRef,
   ViewChild,
@@ -16,13 +18,13 @@ import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { QuerySearch, SortSearch } from "../../../../../global";
-import { createSortArray } from "../../../../../utils/utils";
 import { AppState } from "../../../../app.config";
 import { ModalComponent, ModalDialogData } from "../../../../components/modal/modal.component";
 import { SearchComponent } from "../../../../components/search/search.component";
 import { ShowImageComponent } from "../../../../components/show-image/show-image.component";
 import { TableSkeletonComponent } from "../../../../components/skeleton/table-skeleton.component";
 import { TableComponent } from "../../../../components/table/table.component";
+import { getProfileMunicipalityId } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
 import { Sort, Table, TableButton } from "../../../../models/Table";
 import { PartialUser, Roles } from "../../../../models/User";
@@ -51,7 +53,7 @@ import { getUsersPaginate } from "../../store/selectors/users.selectors";
 
 
     <ng-template #imageRow let-row>
-      <app-show-image classes="w-16 h-16" [imageUrl]="row.avatarUrl || ''" [objectName]="row.name"/>
+      <app-show-image classes="w-16 h-16" [imageUrl]="row.photo || ''" [objectName]="row.name"/>
     </ng-template>
 
     <ng-template #nameRow let-row>
@@ -82,9 +84,9 @@ import { getUsersPaginate } from "../../store/selectors/users.selectors";
 
     <ng-template #rolesRow let-row>
       <div class="flex flex-wrap gap-1">
-        <div class="gap-1" *ngFor="let role of row.roles">
+        <div *ngFor="let role of row.roles">
           <span
-            class="whitespace-nowrap bg-gray-100 text-sm me-2 px-2.5 py-0.5 rounded">{{ role === Roles.ROLE_ADMIN ? 'ADMIN' : 'USER' }}</span>
+            class="whitespace-nowrap bg-gray-100 text-sm px-2.5 py-0.5 rounded">{{ role === Roles.ROLE_ADMIN ? 'ADMIN' : 'USER' }}</span>
         </div>
       </div>
     </ng-template>
@@ -127,13 +129,22 @@ export default class UsersComponent implements AfterViewInit {
     pageSize: 10
   });
 
-  sorter: WritableSignal<Sort[]> = signal([ { active: "name", direction: "desc" } ]);
+  sorter: WritableSignal<Sort[]> = signal([ { active: "name", direction: "asc" } ]);
+
+  sorterPayload: Signal<SortSearch> = computed(() =>
+    this.sorter().reduce<SortSearch>((acc, { active, direction }) => {
+      acc[active] = direction;
+      return acc;
+    }, {})
+  );
 
   search = new FormControl("");
   searchText = toSignal(this.search.valueChanges.pipe(
     debounceTime(500),
     distinctUntilChanged(),
   ));
+
+  municipalityId = this.store.selectSignal(getProfileMunicipalityId);
 
   ngAfterViewInit() {
     Promise.resolve(null).then(() => {
@@ -171,7 +182,7 @@ export default class UsersComponent implements AfterViewInit {
           header: 'Ruoli',
           template: this.rolesRow,
           width: "12rem",
-          sortable: false
+          sortable: true
         },
       ];
       this.displayedColumns = [ ...this.columns.map(c => c.columnDef), "actions" ];
@@ -196,7 +207,7 @@ export default class UsersComponent implements AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (!result) {
+      if ( !result ) {
         return;
       }
       this.deleteUser(user);
@@ -206,15 +217,23 @@ export default class UsersComponent implements AfterViewInit {
   constructor() {
     // Questo effect viene triggerato ogni qual volta un dei signal presenti all'interno cambia di valore
     effect(() => {
+
+      const municipalityId = this.municipalityId()
+
+      if ( !municipalityId ) {
+        return
+      }
+
       const query: QuerySearch = {
         page: this.paginator().pageIndex,
         limit: this.paginator().pageSize,
         search: this.searchText()!,
-        sort: createSortArray(this.sorter()) as SortSearch
+        filters: { municipalityId },
+        sort: this.sorterPayload()
       }
 
       this.store.dispatch(
-        UserActions.loadUsers({ query })
+        UserActions.loadPaginateUsers({ query })
       );
     }, { allowSignalWrites: true })
   }

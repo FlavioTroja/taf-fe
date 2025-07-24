@@ -1,20 +1,28 @@
+import { Action, createReducer, on } from "@ngrx/store";
 import { PartialUser } from "../../../models/User";
-import { createReducer, on, Action } from "@ngrx/store";
-import * as ProfileActions from "./profile.actions";
 import * as AuthActions from "../../auth/store/auth.actions";
+import * as ProfileActions from "./profile.actions";
 
 export interface ProfileState {
-    user: PartialUser,
-  error: boolean
+  user: PartialUser,
+  error: boolean,
+  municipalityId?: string
+  domainImages?: {
+    logo?: string;
+    icon?: string;
+  }
 }
+
 export const initialState: ProfileState = {
   user: {} as PartialUser,
-  error: false
+  error: false,
+  domainImages: {}
 }
 
 const profileReducer = createReducer(
   initialState,
   on(ProfileActions.loadProfileSuccess, (state, { user }) => ({
+    ...state,
     user: { ...user },
     error: false
   })),
@@ -23,6 +31,7 @@ const profileReducer = createReducer(
     error: true
   })),
   on(ProfileActions.editProfileSuccess, (state, { user }) => ({
+    ...state,
     user: { ...user },
     error: false
   })),
@@ -31,8 +40,17 @@ const profileReducer = createReducer(
     error: false
   })),
   on(AuthActions.logoutSuccess, (state) => ({
+    ...state,
     user: {} as PartialUser,
     error: false
+  })),
+  on(ProfileActions.getByDomainSuccess, (state, { municipalityId }) => ({
+    ...state,
+    municipalityId
+  })),
+  on(ProfileActions.setDomainImages, (state, { domainImages }) => ({
+    ...state,
+    domainImages
   }))
 );
 

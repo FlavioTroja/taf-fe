@@ -22,24 +22,24 @@ import { TableButtonComponent } from "./components/button/button.component";
             </th>
 
             <ng-container *ngIf="column.cell">
-              <td mat-cell *matCellDef="let row" [ngStyle]="{
+              <td mat-cell *matCellDef="let row; let i = index" [ngStyle]="{
                 'width': column.width
                 }">{{ column.cell(row) }}
               </td>
             </ng-container>
 
             <ng-container *ngIf="column.template">
-              <td mat-cell *matCellDef="let row" [ngStyle]="{
+              <td mat-cell *matCellDef="let row; let i = index" [ngStyle]="{
                 'width': column.width
                 }">
-                <ng-template *ngTemplateOutlet="column.template!; context: {$implicit: row}"></ng-template>
+                <ng-template *ngTemplateOutlet="column.template!; context: {$implicit: row, index: i}"></ng-template>
               </td>
             </ng-container>
           </ng-container>
 
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let row">
+            <td mat-cell *matCellDef="let row; let i = index">
 
               <div class="flex flex-row-reverse gap-2 space-x-1 space-x-reverse">
                 <ng-template ngFor let-item="$implicit" [ngForOf]="buttons">
@@ -51,10 +51,12 @@ import { TableButtonComponent } from "./components/button/button.component";
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-header"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr mat-row *matRowDef="let row; let i = index; columns: displayedColumns;"></tr>
 
           <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell text-center italic" colspan="4">Nessun risultato trovato!</td>
+            <td class="mat-cell text-center italic" [attr.colspan]="displayedColumns.length">
+              Nessun risultato trovato!
+            </td>
           </tr>
         </table>
         <app-pagination [paginator]="paginator()"

@@ -2,6 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from "../../../../environments/environment";
+import { QuerySearch } from "../../../../global";
 import { Municipal, PartialMunicipal } from "../../../models/Municipals";
 import { PaginateDatasource } from "../../../models/Table";
 
@@ -29,8 +30,8 @@ export class MunicipalsService {
     return this.http.delete<Municipal>(`${ BASE_URL }/municipals/${ id }`)
   }
 
-  loadMunicipals() {
-    return this.http.get<PaginateDatasource<Municipal>>(`${ BASE_URL }/municipals`);
+  loadPaginateMunicipals(query: QuerySearch) {
+    return this.http.post<PaginateDatasource<Municipal>>(`${ BASE_URL }/municipals/search`, query);
   }
 
   getActiveMunicipal(id: string) {

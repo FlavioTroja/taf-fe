@@ -14,6 +14,10 @@ const activeActivityReducer = createReducer(
   on(ActivitiesActions.activityActiveChanges, (state, { changes }) => ({
     ...state,
     changes: { ...changes }
+  })),
+  on(ActivitiesActions.clearActivityActive, (state) => ({
+    changes: undefined,
+    current: undefined
   }))
 )
 
