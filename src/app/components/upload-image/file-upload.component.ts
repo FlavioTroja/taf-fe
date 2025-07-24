@@ -86,7 +86,7 @@ import { Municipal } from "../../models/Municipals";
             </div>
           </div>
         </div>
-        <p *ngIf="!mainImage" class="font-normal drop-shadow">{{ label }}</p>
+        <p *ngIf="!mainImage" [ngClass]="{ 'text-xl': viewOnly() }" class="font-normal drop-shadow">{{ label }}</p>
       </div>
     </div>
 
