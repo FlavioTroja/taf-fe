@@ -23,12 +23,20 @@ export interface Activity {
 export type PartialActivity = Partial<Activity>;
 
 export enum ActivitiesType {
-  CIBO = "FOOD",
-  CULTURA = "CULTURE",
+  RISTORAZIONE = "FOOD",
+  "BAR/CAFFETTERIA" = "BAR",
+  BENESSERE = "WELLNESS",
+  FORMAZIONE = "EDUCATION",
+  NEGOZI = "RETAIL",
+  SERVIZI = "SERVICES",
   NATURE = "NATURE",
-  SPORT = "SPORT",
+  "SPORT/TEMPO LIBERO" = "SPORT",
+  "ARTE/TEMPO LIBERO" = "ART",
   SHOPPING = "SHOPPING",
-  NIGHTLIFE = "NIGHTLIFE",
+  "FARMACIA/SALUTE" = "PHARMACY",
+  "ALLOGGIO/RICETTIVO" = "ACCOMODATION",
+  "LUDOTECA/GIOCO" = "PLAYGROUND",
+  "VITA NOTTURNA" = "NIGHTLIFE",
   ALTRO = "OTHER"
 }
 
@@ -58,9 +66,9 @@ export const ACTIVITY_TYPES = Object.entries(ActivitiesType).map(([ name, value 
   value: value,
   label: name
     .toLowerCase()
-    .split('_')
+    .split('/')
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
+    .join('/')
 }));
 
 export const getActivityTypeName = (value: ActivitiesType) => {
