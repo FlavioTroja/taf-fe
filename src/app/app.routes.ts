@@ -38,6 +38,12 @@ export const routes: Routes = [
     loadComponent: () => import("./pages/auth/confirm/confirm.component")
   },
   {
+    path: "privacy-policy",
+    pathMatch: "full",
+    loadComponent: () =>
+      import("./pages/privacy-policy/privacy-policy.component").then(m => m.default)
+  },
+  {
     path: "",
     pathMatch: "full",
     redirectTo: "home"
