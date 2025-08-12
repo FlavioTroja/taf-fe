@@ -3,12 +3,12 @@ import { Component, inject, Input } from '@angular/core';
 import { toSignal } from "@angular/core/rxjs-interop";
 import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
+import { environment } from "../../../../../environments/environment";
 import { AppState } from "../../../../app.config";
 import * as AuthActions from "../../../../core/auth/store/auth.actions";
 import { getProfileUser } from "../../../../core/profile/store/profile.selectors";
 import * as RouterActions from "../../../../core/router/store/router.actions";
 import { uiToggleSidebarCollapsed } from "../../../../core/ui/store/ui.actions";
-
 @Component({
   selector: 'app-footer',
   standalone: true,
@@ -62,7 +62,7 @@ export class FooterComponent {
     if (!this.profile()) {
       return "";
     }
-    return this.profile()!.photo ? 'https://autismfriendly.overzoom.it/media/' + this.profile()!.photo! : `https://eu.ui-avatars.com/api/?name=${ this.profile()?.name }&rounded=true&size=48`;
+    return this.profile()!.photo ? `${environment.BASE_URL}/media/${ this.profile()!.photo! }` : `https://eu.ui-avatars.com/api/?name=${ this.profile()?.name }&rounded=true&size=48`;
   }
 
   goToSettings() {

@@ -142,8 +142,42 @@
 }
 
 // CSS Scrollbar
-::-webkit-scrollbar, {
+::-webkit-scrollbar {
   display: none;
+}
+
+/* Layout base per pagine a tutta altezza con footer sticky */
+.page-layout {
+  min-height: 100vh;   /* fallback vecchi browser */
+  min-height: 100svh;  /* iOS/Chrome mobile: small viewport */
+  min-height: 100dvh;  /* viewport dinamico moderno */
+  display: flex;
+  flex-direction: column;
+}
+
+.page-layout > footer {
+  margin-top: auto;    /* spinge il footer in fondo */
+}
+
+* {
+  box-sizing: border-box; /* evita calcoli strani con width/padding */
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* consigliato: baseline per evitare sorprese */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+body {
+  margin: 0;
 }
 
 // Touch screen events
@@ -220,7 +254,7 @@ body {
   border-radius: 5px !important;
 }
 
-fill-width {
+.fill-width {
   width: -moz-available;
   width: -webkit-stretch;
   width: stretch;

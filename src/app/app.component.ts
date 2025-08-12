@@ -1,22 +1,23 @@
-import { Component, effect, HostListener, inject, Renderer2, ViewEncapsulation } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, effect, HostListener, inject, Renderer2, ViewEncapsulation } from '@angular/core';
+import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from "./components/navbar/navbar.component";
-import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { Store } from "@ngrx/store";
+import { Subject } from "rxjs";
+import { environment } from '../environments/environment';
 import { AppState } from "./app.config";
+import { GradientBlurComponent } from "./components/gradient-blur/gradient-blur.component";
+import { ModalComponent, ModalDialogData } from "./components/modal/modal.component";
+import { NavbarComponent } from "./components/navbar/navbar.component";
+import { MobileNavbarComponent } from "./components/sidebar/mobile-navbar.component";
+import { SidebarComponent } from "./components/sidebar/sidebar.component";
+import { ToastNotificationComponent } from "./components/toast-notification/toast-notification.component";
+import { getDomainImages } from "./core/profile/store/profile.selectors";
 import * as RouterActions from "./core/router/store/router.actions";
 import { NavbuttonService } from "./core/ui/services/navbutton.service";
-import { ToastNotificationComponent } from "./components/toast-notification/toast-notification.component";
-import { NavBarButtonDialog } from "./models/NavBar";
-import { MatDialog, MatDialogModule } from "@angular/material/dialog";
-import { ModalComponent, ModalDialogData } from "./components/modal/modal.component";
-import { Subject } from "rxjs";
-import { GradientBlurComponent } from "./components/gradient-blur/gradient-blur.component";
-import { ModalButton } from "./models/Button";
-import { MobileNavbarComponent } from "./components/sidebar/mobile-navbar.component";
 import { uiSetSidebarCollapseState } from "./core/ui/store/ui.actions";
-import { getDomainImages } from "./core/profile/store/profile.selectors";
+import { ModalButton } from "./models/Button";
+import { NavBarButtonDialog } from "./models/NavBar";
 
 @Component({
   selector: 'app-root',
@@ -92,11 +93,11 @@ export class AppComponent {
 
       const link: HTMLLinkElement | null = this.document.querySelector("link[rel*='icon']");
       if ( link ) {
-        this.renderer.setAttribute(link, 'href', 'https://autismfriendly.overzoom.it/media/' + domainImages.icon || '');
+        this.renderer.setAttribute(link, 'href', `${environment.BASE_URL}/media/${domainImages.icon || ''}`);
       } else {
         const newLink = this.renderer.createElement('link');
         this.renderer.setAttribute(newLink, 'rel', 'icon');
-        this.renderer.setAttribute(newLink, 'href', 'https://autismfriendly.overzoom.it/media/' + domainImages.icon || '');
+        this.renderer.setAttribute(newLink, 'href', 'media/' + domainImages.icon || '');
         this.renderer.appendChild(this.document.head, newLink);
       }
 

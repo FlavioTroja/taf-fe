@@ -2,15 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { MatIconModule } from "@angular/material/icon";
+import { RouterLink } from "@angular/router";
 import { Store } from "@ngrx/store";
+import { environment } from '../../../../environments/environment';
 import { AppState } from "../../../app.config";
 import { InputComponent } from "../../../components/input/input.component";
 import * as AuthActions from "../../../core/auth/store/auth.actions";
-import { ConfirmPayload } from "../../../models/Auth";
-import { selectRouteQueryParamParam } from "../../../core/router/store/router.selectors";
-import { RouterLink } from "@angular/router";
 import { getAuthError, getAuthLoading } from "../../../core/auth/store/auth.selectors";
 import { getDomainImages } from "../../../core/profile/store/profile.selectors";
+import { selectRouteQueryParamParam } from "../../../core/router/store/router.selectors";
+import { ConfirmPayload } from "../../../models/Auth";
 
 @Component({
   selector: 'app-confirm',
@@ -18,7 +19,7 @@ import { getDomainImages } from "../../../core/profile/store/profile.selectors";
   imports: [ CommonModule, FormsModule, InputComponent, ReactiveFormsModule, MatIconModule, RouterLink ],
   template: `
     <div class="m-auto max-w-[20em] min-w-[10em] flex flex flex-wrap items-start justify-between md:max-w-screen-xl">
-      <img [src]="'https://autismfriendly.overzoom.it/media/' + profileImages()?.logo" class="h-14" alt="Logo"/>
+      <img [src]="'${environment.BASE_URL}/media/' + profileImages()?.logo" class="h-14" alt="Logo"/>
     </div>
 
     <div class="m-auto max-w-[30em] min-w-[10em] flex flex-col gap-4 py-28 items-center">

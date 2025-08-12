@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-show-image',
@@ -23,7 +24,7 @@ export class ShowImageComponent {
   get getImage() {
     if ( this.imageUrl ) {
       const date = Date.now()
-      return 'https://autismfriendly.overzoom.it/media/' + this.imageUrl;
+      return `${environment.BASE_URL}/media/${ this.imageUrl }`;
     }
     if ( this.objectName ) {
       return `https://eu.ui-avatars.com/api/?name=${ this.objectName?.slice(0, 2) }&size=48`;

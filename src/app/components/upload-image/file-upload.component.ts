@@ -19,17 +19,18 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { Store } from "@ngrx/store";
 import { concatMap, map, mergeMap, of, Subject, takeUntil } from "rxjs";
+import { environment } from '../../../environments/environment';
 import { AppState } from "../../app.config";
 import { getRouterData, selectCustomRouteParam } from "../../core/router/store/router.selectors";
 import * as UIActions from "../../core/ui/store/ui.actions";
 import { Activity } from "../../models/Activities";
 import { Event } from "../../models/Event";
+import { Municipal } from "../../models/Municipals";
 import { News } from "../../models/News";
 import { NOTIFICATION_LISTENER_TYPE } from "../../models/Notification";
 import { User } from "../../models/User";
 import { ImageType } from "../image-list/image-list.component";
 import { FileService } from "./services/file.service";
-import { Municipal } from "../../models/Municipals";
 
 @Component({
   selector: 'app-file-upload',
@@ -41,7 +42,7 @@ import { Municipal } from "../../models/Municipals";
         <div class="w-1/12" *ngFor="let image of galleryImages, let i = index">
           <div [ngClass]="{'selected-image': image.selected}" (click)="showMainImage(image)"
                class="square justify-around bg-white p-2 border border-gray-200 rounded-lg text-center shadow cursor-pointer aspect-square h-full hover:bg-gray-100">
-            <img class="aspect-square object-cover" src="{{ 'https://autismfriendly.overzoom.it/media/' + image.src}}"
+            <img class="aspect-square object-cover" src="{{ '${environment.BASE_URL}/media/' + image.src}}"
                  alt="">
           </div>
         </div>
@@ -50,7 +51,7 @@ import { Municipal } from "../../models/Municipals";
         [ngClass]="{'disabled' : isNew, 'justify-around': !viewOnly(), 'justify-center': viewOnly()}"
         class="relative h-[340px] image-div flex flex-col bg-white p-2 border border-gray-200 rounded-lg text-center shadow cursor-pointer aspect-square hover:bg-gray-100 bg-cover bg-no-repeat bg-center"
         (click)="clickFileInput($event)"
-        [style.background-image]="mainImage ? username ? 'url(' + 'https://eu.ui-avatars.com/api/?name=' + username + '&size=48' +')' : 'url('+ 'https://autismfriendly.overzoom.it/media/' + mainImage +')' : 'unset'">
+        [style.background-image]="mainImage ? username ? 'url(' + 'https://eu.ui-avatars.com/api/?name=' + username + '&size=48' +')' : 'url('+ 'media/' + mainImage +')' : 'unset'">
         <div></div>
         <input type="file"
                #input
@@ -301,7 +302,7 @@ export class FileUploadComponent implements OnChanges {
     this.dialog.open(this.showImagePreview, {
       backdropClass: "blur-filter",
       data: <{ url: string }>{
-        url: 'https://autismfriendly.overzoom.it/media/' + url
+        url: 'media/' + url
       }
     });
   }

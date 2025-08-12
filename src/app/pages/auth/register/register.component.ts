@@ -12,12 +12,13 @@ import {
 import { MatIconModule } from "@angular/material/icon";
 import { RouterLink } from "@angular/router";
 import { Store } from "@ngrx/store";
+import { environment } from '../../../../environments/environment';
 import { AppState } from "../../../app.config";
 import { InputComponent } from "../../../components/input/input.component";
 import * as AuthActions from "../../../core/auth/store/auth.actions";
 import { getAccessToken, getAuthError, getAuthLoading } from "../../../core/auth/store/auth.selectors";
-import { RegisterPayload } from "../../../models/Auth";
 import { getDomainImages } from "../../../core/profile/store/profile.selectors";
+import { RegisterPayload } from "../../../models/Auth";
 
 @Component({
   selector: 'app-register',
@@ -25,7 +26,7 @@ import { getDomainImages } from "../../../core/profile/store/profile.selectors";
   imports: [ CommonModule, FormsModule, MatIconModule, ReactiveFormsModule, InputComponent, RouterLink ],
   template: `
     <div class="m-auto max-w-[30em] min-w-[10em] flex flex flex-wrap items-start justify-between md:max-w-screen-xl">
-      <img [src]="'https://autismfriendly.overzoom.it/media/' + profileImages()?.logo" class="h-14" alt="Logo"/>
+      <img [src]="'${environment.BASE_URL}/media/' + profileImages()?.logo" class="h-14" alt="Logo"/>
     </div>
 
     <div class="m-auto max-w-[30em] min-w-[10em] flex flex-col gap-4 py-28 items-center">

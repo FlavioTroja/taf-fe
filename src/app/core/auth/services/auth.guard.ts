@@ -1,9 +1,9 @@
 import { inject, Injectable } from "@angular/core";
+import { Store } from "@ngrx/store";
 import { map, Observable, tap } from "rxjs";
 import { AppState } from "../../../app.config";
-import { Store } from "@ngrx/store";
-import { getAccessToken } from "../store/auth.selectors";
 import * as RouterActions from "../../router/store/router.actions";
+import { getAccessToken } from "../store/auth.selectors";
 
 @Injectable({
   providedIn: 'root'
