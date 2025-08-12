@@ -2,9 +2,9 @@ import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { ApplicationConfig, DEFAULT_CURRENCY_CODE } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router'; // ⬅️ aggiunto
 import { provideEffects } from "@ngrx/effects";
-import { provideRouterStore, routerReducer, RouterReducerState, RouterState } from "@ngrx/router-store";
+import { RouterReducerState, RouterState, provideRouterStore, routerReducer } from "@ngrx/router-store";
 import { provideStore } from "@ngrx/store";
 import { provideStoreDevtools } from "@ngrx/store-devtools";
 
@@ -18,7 +18,7 @@ import { ProfileEffects } from "./core/profile/store/profile.effects";
 import { ProfileState, reducer as profileReducer } from "./core/profile/store/profile.reducer";
 import { RouterEffects } from "./core/router/store/router.effects";
 import { SidebarEffects } from "./core/ui/store/ui.effects";
-import { reducer as sidebarReducer, UIState } from "./core/ui/store/ui.reducer";
+import { UIState, reducer as sidebarReducer } from "./core/ui/store/ui.reducer";
 
 export interface AppState {
   auth: AuthState,
@@ -30,9 +30,15 @@ export interface AppState {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // provideRouter(routes, withDebugTracing()),
     provideAnimations(),
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        anchorScrolling: 'enabled',
+        scrollPositionRestoration: 'enabled',
+        // scrollOffset: [0, 80], // <-- opzionale se hai un header fisso
+      })
+    ),
     provideHttpClient(withInterceptors([ AuthInterceptor ])),
     provideStore({
       auth: authReducer,
@@ -48,19 +54,9 @@ export const appConfig: ApplicationConfig = {
         strictStateSerializability: true
       }
     }),
-    provideStoreDevtools({
-      maxAge: 250
-    }),
-    provideRouterStore({
-      routerState: RouterState.Minimal
-    }),
-    provideEffects([
-      RouterEffects,
-      ProfileEffects,
-      AuthEffects,
-      SidebarEffects,
-      HideEffects,
-    ]),
+    provideStoreDevtools({ maxAge: 250 }),
+    provideRouterStore({ routerState: RouterState.Minimal }),
+    provideEffects([ RouterEffects, ProfileEffects, AuthEffects, SidebarEffects, HideEffects ]),
     { provide: MAT_DATE_LOCALE, useValue: 'it-IT' },
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR' }
   ]

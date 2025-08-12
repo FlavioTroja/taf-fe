@@ -36,17 +36,17 @@ import { RouterLink } from '@angular/router';
           <aside class="md:sticky md:top-6 md:self-start bg-foreground rounded-2xl p-4 main-shadow">
             <div class="text-sm font-semibold mb-2">Indice</div>
             <nav class="text-sm space-y-1">
-              <a class="block hover:underline" href="#titolare">1. Titolare del Trattamento</a>
-              <a class="block hover:underline" href="#tipi-dati">2. Tipologia di dati trattati</a>
-              <a class="block hover:underline" href="#finalita">3. Finalità e base giuridica</a>
-              <a class="block hover:underline" href="#modalita">4. Modalità del trattamento e sicurezza</a>
-              <a class="block hover:underline" href="#comunicazione">5. Ambito di comunicazione e diffusione</a>
-              <a class="block hover:underline" href="#luogo">6. Luogo di trattamento e trasferimento dati</a>
-              <a class="block hover:underline" href="#conservazione">7. Periodo di conservazione</a>
-              <a class="block hover:underline" href="#diritti">8. Diritti degli interessati</a>
-              <a class="block hover:underline" href="#notifiche">9. Notifiche e comunicazioni</a>
-              <a class="block hover:underline" href="#cookie">10. Cookie e tracciamento</a>
-              <a class="block hover:underline" href="#modifiche">11. Modifiche all’informativa</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="titolare">1. Titolare del Trattamento</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="tipi-dati">2. Tipologia di dati trattati</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="finalita">3. Finalità e base giuridica</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="modalita">4. Modalità del trattamento e sicurezza</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="comunicazione">5. Ambito di comunicazione e diffusione</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="luogo">6. Luogo di trattamento e trasferimento dati</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="conservazione">7. Periodo di conservazione</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="diritti">8. Diritti degli interessati</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="notifiche">9. Notifiche e comunicazioni</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="cookie">10. Cookie e tracciamento</a>
+              <a class="block hover:underline" [routerLink]="['/privacy-policy']" fragment="modifiche">11. Modifiche all’informativa</a>
             </nav>
           </aside>
 
@@ -196,7 +196,7 @@ import { RouterLink } from '@angular/router';
 
             <div class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
               <a class="underline text-accent hover:text-cyan-950" routerLink="/">Torna alla home</a>
-              <a class="underline text-accent hover:text-cyan-950" href="#top">Torna su ↑</a>
+              <a class="underline text-accent hover:text-cyan-950" [routerLink]="['/privacy-policy']" fragment="top">Torna su ↑</a>
             </div>
           </article>
         </div>
