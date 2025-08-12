@@ -25,10 +25,17 @@ import { HideByCodeSelectorDirective } from "../../../../shared/directives/hide-
         <div class="flex flex-col justify-between basis-1/6">
           <div>
             <button
-              class="flex gap-1 items-center text-sm font-bold bg-foreground rounded-md px-4 py-1 default-shadow-hover cursor-pointer"
+              class="inline-flex gap-1 items-center text-sm font-bold bg-foreground rounded-md px-4 py-1 default-shadow-hover"
               (click)="navigateToEdit(profile?.id)">
-              <mat-icon class="icon-size material-symbols-rounded-filled cursor-pointer">edit</mat-icon>
+              <mat-icon class="material-symbols-rounded-filled">edit</mat-icon>
               Modifica
+            </button>
+
+            <button
+              class="inline-flex gap-1 items-center text-sm font-bold rounded-md px-4 py-1 default-shadow-hover red-buttons ml-2"
+              (click)="navigateToDelete()">
+              <mat-icon class="material-symbols-rounded-filled">delete</mat-icon>
+              Elimina
             </button>
             <div class="text-4xl pt-6 pb-4"> {{ profile.name }}</div>
             <div class="text-2xl"> {{ profile.surname }}</div>
@@ -62,4 +69,8 @@ export default class ViewSettingsComponent {
   navigateToUsers() {
     this.store.dispatch(RouterActions.go({ path: [ `users` ] }));
   }
+
+  navigateToDelete() {
+  this.store.dispatch(RouterActions.go({ path: [ 'delete-account' ] }));
+}
 }

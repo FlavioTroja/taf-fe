@@ -38,6 +38,13 @@ export const routes: Routes = [
     loadComponent: () => import("./pages/auth/confirm/confirm.component")
   },
   {
+    path: 'delete-account',
+    canActivate: [AuthGuard],
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./pages/delete-account/delete-account.component').then(m => m.default)
+  },
+  {
     path: "privacy-policy",
     pathMatch: "full",
     loadComponent: () =>
